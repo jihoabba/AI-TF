@@ -142,7 +142,7 @@
   .section-count { font-size: 12px; color: rgba(0,0,0,0.28); }
 
   /* ── Cards grid ── */
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 
   .card {
     background: var(--surface);
@@ -159,8 +159,19 @@
     flex-direction: column;
     opacity: 0;
     animation: fadeUp 0.4s ease forwards;
+    position: relative;
   }
-  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: rgba(0,113,227,0.2); }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .card[data-type="report"]::before  { background: var(--accent); }
+  .card[data-type="meeting"]::before { background: var(--green); }
+  .card[data-type="idea"]::before    { background: var(--orange); }
+
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: rgba(0,113,227,0.18); }
 
   .card:nth-child(1) { animation-delay: 0.35s; }
   .card:nth-child(2) { animation-delay: 0.40s; }
@@ -168,37 +179,8 @@
   .card:nth-child(4) { animation-delay: 0.50s; }
   .card:nth-child(5) { animation-delay: 0.55s; }
 
-  /* Slide thumbnail (iframe) */
-  .card-thumb {
-    height: 180px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--divider);
-    display: flex; align-items: center; justify-content: center;
-    position: relative; overflow: hidden;
-  }
-  .card-thumb iframe {
-    width: 1280px; height: 720px;
-    transform-origin: top left;
-    pointer-events: none; border: none;
-  }
-  .card-thumb .thumb-overlay { position: absolute; inset: 0; background: transparent; z-index: 2; }
-
-  /* Meeting / Mockup flat thumbnail */
-  .card-thumb-flat {
-    height: 180px;
-    border-bottom: 1px solid var(--divider);
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 12px;
-    position: relative; overflow: hidden;
-  }
-  .card-thumb-flat.meeting-bg { background: linear-gradient(135deg, rgba(29,131,72,0.06) 0%, rgba(29,131,72,0.02) 100%); }
-  .card-thumb-flat.idea-bg    { background: linear-gradient(135deg, rgba(185,80,0,0.06) 0%, rgba(185,80,0,0.02) 100%); }
-
-  .flat-icon { font-size: 36px; opacity: 0.55; }
-  .flat-meta { font-size: 12px; font-weight: 500; color: var(--text-secondary); opacity: 0.7; letter-spacing: 0.04em; }
-
   /* Card body */
-  .card-body { padding: 20px 24px 24px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .card-body { padding: 20px 22px 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
 
   .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
   .tag { padding: 3px 9px; border-radius: 100px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; }
@@ -329,16 +311,6 @@
   <div class="cards" id="gridReports"></div>
 </main>
 
-<!-- Section: IDEA -->
-<main class="section" id="section-ideas">
-  <div class="section-header">
-    <div class="section-dot dot-idea"></div>
-    <span class="section-title">IDEA</span>
-    <span class="section-count" id="countIdeas"></span>
-  </div>
-  <div class="cards" id="gridIdeas"></div>
-</main>
-
 <!-- Section: 회의록 -->
 <main class="section" id="section-meetings">
   <div class="section-header">
@@ -347,6 +319,16 @@
     <span class="section-count" id="countMeetings"></span>
   </div>
   <div class="cards" id="gridMeetings"></div>
+</main>
+
+<!-- Section: IDEA -->
+<main class="section" id="section-ideas">
+  <div class="section-header">
+    <div class="section-dot dot-idea"></div>
+    <span class="section-title">IDEA</span>
+    <span class="section-count" id="countIdeas"></span>
+  </div>
+  <div class="cards" id="gridIdeas"></div>
 </main>
 
 <!-- Footer -->
@@ -383,38 +365,7 @@
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }
 
-  function renderThumb(doc) {
-    if (doc.type === 'meeting') {
-      const names = doc.attendees.join(' · ');
-      return `
-        <div class="card-thumb-flat meeting-bg">
-          <div class="flat-icon">📋</div>
-          <div class="flat-meta">#${doc.meetingNum} &nbsp;·&nbsp; ${names}</div>
-        </div>`;
-    }
-    if (doc.type === 'idea') {
-      return `
-        <div class="card-thumb-flat idea-bg">
-          <div class="flat-icon">💡</div>
-          <div class="flat-meta">${doc.status || 'Draft'}</div>
-        </div>`;
-    }
-    // report: iframe preview
-    const scale = 340 / 1280;
-    return `
-      <div class="card-thumb">
-        <iframe
-          src="${doc.file}"
-          scrolling="no"
-          style="transform: scale(${scale}); width: 1280px; height: 720px;"
-          loading="lazy"
-          title="${doc.title} 미리보기"
-        ></iframe>
-        <div class="thumb-overlay"></div>
-      </div>`;
-  }
-
-  function renderFooterMeta(doc) {
+  function footerMeta(doc) {
     if (doc.type === 'meeting') return `${fmtDate(doc.date)} · ${doc.attendees.length}인 참석`;
     if (doc.type === 'idea')    return `${fmtDate(doc.date)} · ${doc.status || 'Draft'}`;
     return `${fmtDate(doc.date)} · ${doc.slides}장`;
@@ -427,14 +378,13 @@
     }).join('');
     const newBadge = isThisMonth(doc.date) ? `<span class="tag tag-new">NEW</span>` : '';
     return `
-      <a class="card" href="${doc.file}" target="_blank" data-title="${doc.title}" data-desc="${doc.desc}" data-type="${doc.type}">
-        ${renderThumb(doc)}
+      <a class="card" href="${doc.file}" target="_blank" data-type="${doc.type}">
         <div class="card-body">
           <div class="card-tags">${tags}${newBadge}</div>
           <div class="card-title">${doc.title}</div>
           <div class="card-desc">${doc.desc}</div>
           <div class="card-footer">
-            <span class="card-date">${renderFooterMeta(doc)}</span>
+            <span class="card-date">${footerMeta(doc)}</span>
             <span class="card-cta">열기 →</span>
           </div>
         </div>
@@ -479,7 +429,7 @@
   const searchSection = document.getElementById('searchSection');
   const searchGrid    = document.getElementById('searchGrid');
   const searchCount   = document.getElementById('searchCount');
-  const sectionEls    = ['section-reports', 'section-ideas', 'section-meetings'].map(id => document.getElementById(id));
+  const sectionEls    = ['section-reports', 'section-meetings', 'section-ideas'].map(id => document.getElementById(id));
 
   searchInput.addEventListener('input', function () {
     const q = this.value.trim().toLowerCase();
