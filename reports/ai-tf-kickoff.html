@@ -562,6 +562,31 @@
     background: rgba(0,0,0,0.06);
   }
 
+  .fullscreen-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--divider);
+    background: rgba(0,0,0,0.04);
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .fullscreen-btn:hover, .fullscreen-btn:active {
+    border-color: rgba(0,0,0,0.3);
+    color: var(--text);
+    background: rgba(0,0,0,0.06);
+  }
+
   @media (max-width: 768px) {
     .nav { bottom: 20px; right: 20px; gap: 16px; }
     .nav-btn { width: 48px; height: 48px; min-width: 48px; min-height: 48px; font-size: 20px; }
@@ -908,7 +933,7 @@
 
   <!-- SLIDE 1: Title -->
   <section class="slide slide-1 active" data-slide="1">
-    <div class="corner-line">LINE FRIENDS</div>
+    <div class="corner-line">LINE FRIENDS<br><span style="font-size:11px;letter-spacing:0.22em;font-weight:700;color:var(--accent);">SQUARE</span></div>
     <div class="eyebrow">AI Transformation Task Force</div>
     <h1>일하는 방식을<br><span>다시 설계</span>합니다</h1>
     <div class="meta">
@@ -1253,6 +1278,7 @@
 </div><!-- /.scale-wrapper -->
 
 <div class="nav">
+  <button class="fullscreen-btn" id="fsBtn" onclick="toggleFullscreen()" title="전체 화면">⛶</button>
   <button class="nav-btn" onclick="navigate(-1)">‹</button>
   <span class="nav-counter" id="counter">1 / 10</span>
   <button class="nav-btn" onclick="navigate(1)">›</button>
@@ -1311,6 +1337,30 @@
   }, { passive: true });
 
   document.getElementById('progress').style.width = `${(1 / total) * 100}%`;
+
+  // ── Fullscreen ──
+  function toggleFullscreen() {
+    const btn = document.getElementById('fsBtn');
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      btn.textContent = '⛶';
+      btn.title = '전체 화면 종료';
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  document.addEventListener('fullscreenchange', () => {
+    const btn = document.getElementById('fsBtn');
+    if (document.fullscreenElement) {
+      btn.textContent = '✕';
+      btn.title = '전체 화면 종료';
+    } else {
+      btn.textContent = '⛶';
+      btn.title = '전체 화면';
+    }
+    scaleSlides();
+  });
 </script>
 
 </body>
