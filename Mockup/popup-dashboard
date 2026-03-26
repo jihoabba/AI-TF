@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Dashboard — LINE FRIENDS SQUARE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Pretendard:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface-2: #fafafa;
+    --text: #1d1d1f;
+    --text-2: rgba(0,0,0,0.5);
+    --text-3: rgba(0,0,0,0.3);
+    --accent: #0071e3;
+    --accent-soft: rgba(0,113,227,0.08);
+    --green: #1a7f4b;
+    --green-soft: rgba(26,127,75,0.08);
+    --red: #c0392b;
+    --red-soft: rgba(192,57,43,0.08);
+    --orange: #b95000;
+    --orange-soft: rgba(185,80,0,0.08);
+    --divider: rgba(0,0,0,0.07);
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.09);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  html, body {
+    background: var(--bg);
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* ── Top Nav ── */
+  .topnav {
+    height: 52px;
+    background: rgba(245,245,247,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-brand {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+
+  .nav-sep { width: 1px; height: 12px; background: var(--divider); }
+
+  .nav-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-badge {
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--green-soft);
+    color: var(--green);
+  }
+
+  .nav-date {
+    font-size: 12px;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── Layout ── */
+  .page { max-width: 1280px; margin: 0 auto; padding: 32px; }
+
+  /* ── Page Header ── */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    animation: fadeUp 0.4s ease forwards;
+  }
+
+  .page-header-left {}
+
+  .breadcrumb {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .page-h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .page-sub {
+    font-size: 14px;
+    color: var(--text-2);
+    font-weight: 400;
+  }
+
+  .page-header-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .btn-ghost {
+    background: var(--surface);
+    color: var(--text-2);
+    border: 1px solid var(--divider);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn:hover { opacity: 0.85; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── KPI Row ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.4s ease 0.05s both;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .kpi-card.total::before  { background: var(--accent); }
+  .kpi-card.online::before { background: #5856d6; }
+  .kpi-card.kakao::before  { background: #f7c948; }
+  .kpi-card.offline::before{ background: var(--green); }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .kpi-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .kpi-card.total  .kpi-dot { background: var(--accent); }
+  .kpi-card.online .kpi-dot { background: #5856d6; }
+  .kpi-card.kakao  .kpi-dot { background: #f7c948; }
+  .kpi-card.offline .kpi-dot{ background: var(--green); }
+
+  .kpi-main {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .kpi-sub {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 12px;
+  }
+
+  .kpi-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--divider);
+  }
+
+  .sellthru-bar-wrap {
+    flex: 1;
+    margin-right: 12px;
+  }
+
+  .sellthru-label {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .sellthru-bar {
+    height: 4px;
+    background: var(--divider);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .sellthru-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .kpi-card.total  .sellthru-fill { background: var(--accent); }
+  .kpi-card.online .sellthru-fill { background: #5856d6; }
+  .kpi-card.kakao  .sellthru-fill { background: #f7c948; }
+  .kpi-card.offline .sellthru-fill{ background: var(--green); }
+
+  .sellthru-pct {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .kpi-card.total  .sellthru-pct { color: var(--accent); }
+  .kpi-card.online .sellthru-pct { color: #5856d6; }
+  .kpi-card.kakao  .sellthru-pct { color: var(--orange); }
+  .kpi-card.offline .sellthru-pct{ color: var(--green); }
+
+  /* ── Grid ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.4s ease 0.1s both;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.4s ease 0.15s both;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .card-meta {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .card-body { padding: 20px 22px; }
+
+  /* ── Daily Table ── */
+  .daily-table { width: 100%; border-collapse: collapse; }
+
+  .daily-table thead th {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 0 0 10px;
+    text-align: right;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .daily-table thead th:first-child { text-align: left; }
+
+  .daily-table tbody tr {
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    transition: background 0.1s;
+  }
+
+  .daily-table tbody tr:hover { background: var(--bg); }
+  .daily-table tbody tr:last-child { border-bottom: none; }
+
+  .daily-table tbody td {
+    padding: 9px 0;
+    font-size: 13px;
+    color: var(--text-2);
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .daily-table tbody td:first-child {
+    text-align: left;
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .daily-table .today-row td {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .daily-table .today-row td:first-child::after {
+    content: ' TODAY';
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    opacity: 0.7;
+    margin-left: 4px;
+  }
+
+  /* ── Channel breakdown ── */
+  .channel-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .channel-item {}
+
+  .channel-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+
+  .channel-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .channel-amt {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-2);
+  }
+
+  .channel-bar-wrap {
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .channel-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .channel-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+
+  .channel-unit {
+    font-size: 11px;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .channel-sellthru {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── Product table ── */
+  .prod-table { width: 100%; border-collapse: collapse; }
+
+  .prod-table thead th {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 0 8px 10px 0;
+    text-align: right;
+    border-bottom: 1px solid var(--divider);
+    white-space: nowrap;
+  }
+
+  .prod-table thead th:first-child { text-align: left; padding-left: 0; }
+
+  .prod-table tbody tr {
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    transition: background 0.1s;
+  }
+
+  .prod-table tbody tr:hover { background: var(--bg); }
+  .prod-table tbody tr:last-child { border-bottom: none; }
+
+  .prod-table tbody td {
+    padding: 9px 8px 9px 0;
+    font-size: 13px;
+    color: var(--text-2);
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .prod-table tbody td:first-child {
+    text-align: left;
+    font-family: 'Pretendard', sans-serif;
+    color: var(--text);
+    font-size: 13px;
+    padding-left: 0;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sellthru-chip {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .high { background: var(--green-soft); color: var(--green); }
+  .mid  { background: var(--orange-soft); color: var(--orange); }
+  .low  { background: var(--red-soft); color: var(--red); }
+
+  /* ── Insight card ── */
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: fadeUp 0.4s ease 0.2s both;
+  }
+
+  .insight-header {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .insight-icon {
+    width: 28px; height: 28px;
+    background: var(--accent-soft);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .insight-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .insight-meta {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-left: auto;
+  }
+
+  .insight-body { padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; }
+
+  .insight-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    border: 1px solid var(--divider);
+  }
+
+  .insight-bullet {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .insight-bullet.warn  { background: var(--orange-soft); }
+  .insight-bullet.good  { background: var(--green-soft); }
+  .insight-bullet.info  { background: var(--accent-soft); }
+
+  .insight-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .insight-text strong { font-weight: 700; color: var(--text); }
+  .insight-text .up   { color: var(--green); font-weight: 600; }
+  .insight-text .down { color: var(--red); font-weight: 600; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .page { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="topnav">
+  <div class="nav-left">
+    <span class="nav-brand">LINE FRIENDS SQUARE</span>
+    <div class="nav-sep"></div>
+    <span class="nav-title">Sales Dashboard</span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge">Live</span>
+    <span class="nav-date">2026.03.25 기준</span>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="breadcrumb">
+        <span>팝업</span> › <span>ZNF</span> › <span style="color:var(--text-2)">3rd 팝업</span>
+      </div>
+      <h1 class="page-h1">ZNF BASIC 3rd</h1>
+      <p class="page-sub">오프라인 3/12–3/19 &nbsp;·&nbsp; 온라인 3/24 &nbsp;·&nbsp; OTB 88,248EA</p>
+    </div>
+    <div class="page-header-right">
+      <button class="btn btn-ghost">← 이전 팝업</button>
+      <button class="btn btn-primary">리포트 내보내기</button>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi-card total">
+      <div class="kpi-label"><span class="kpi-dot"></span>전체</div>
+      <div class="kpi-main">1,247M</div>
+      <div class="kpi-sub">38,845 EA</div>
+      <div class="kpi-footer">
+        <div class="sellthru-bar-wrap">
+          <div class="sellthru-label">
+            <span>Sellthru</span>
+          </div>
+          <div class="sellthru-bar"><div class="sellthru-fill" style="width:44%"></div></div>
+        </div>
+        <div class="sellthru-pct">44%</div>
+      </div>
+    </div>
+    <div class="kpi-card online">
+      <div class="kpi-label"><span class="kpi-dot"></span>통합몰</div>
+      <div class="kpi-main">83.9M</div>
+      <div class="kpi-sub">2,101 EA</div>
+      <div class="kpi-footer">
+        <div class="sellthru-bar-wrap">
+          <div class="sellthru-label"><span>Sellthru</span></div>
+          <div class="sellthru-bar"><div class="sellthru-fill" style="width:28%"></div></div>
+        </div>
+        <div class="sellthru-pct">28%</div>
+      </div>
+    </div>
+    <div class="kpi-card kakao">
+      <div class="kpi-label"><span class="kpi-dot"></span>카카오</div>
+      <div class="kpi-main">40.3M</div>
+      <div class="kpi-sub">785 EA</div>
+      <div class="kpi-footer">
+        <div class="sellthru-bar-wrap">
+          <div class="sellthru-label"><span>Sellthru</span></div>
+          <div class="sellthru-bar"><div class="sellthru-fill" style="width:13%"></div></div>
+        </div>
+        <div class="sellthru-pct">13%</div>
+      </div>
+    </div>
+    <div class="kpi-card offline">
+      <div class="kpi-label"><span class="kpi-dot"></span>오프라인</div>
+      <div class="kpi-main">1,122M</div>
+      <div class="kpi-sub">35,959 EA</div>
+      <div class="kpi-footer">
+        <div class="sellthru-bar-wrap">
+          <div class="sellthru-label"><span>Sellthru</span></div>
+          <div class="sellthru-bar"><div class="sellthru-fill" style="width:48%"></div></div>
+        </div>
+        <div class="sellthru-pct">48%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Daily + Channel -->
+  <div class="grid-2">
+
+    <!-- Daily Sales -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">일별 매출 추이</span>
+        <span class="card-meta">3/12 – 3/25</span>
+      </div>
+      <div class="card-body">
+        <table class="daily-table">
+          <thead>
+            <tr>
+              <th>날짜</th>
+              <th>전체</th>
+              <th>오프라인</th>
+              <th>온라인</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>3/12</td><td>405,138,043</td><td>405,138,043</td><td>—</td></tr>
+            <tr><td>3/13</td><td>261,902,489</td><td>261,902,489</td><td>—</td></tr>
+            <tr><td>3/14</td><td>132,121,198</td><td>132,121,198</td><td>—</td></tr>
+            <tr><td>3/15</td><td>101,318,163</td><td>101,318,163</td><td>—</td></tr>
+            <tr><td>3/16</td><td>59,416,597</td><td>59,416,597</td><td>—</td></tr>
+            <tr><td>3/17</td><td>35,565,544</td><td>35,565,544</td><td>—</td></tr>
+            <tr><td>3/18</td><td>39,598,372</td><td>39,598,372</td><td>—</td></tr>
+            <tr><td>3/19</td><td>30,159,705</td><td>30,159,705</td><td>—</td></tr>
+            <tr><td>3/20</td><td>16,428,180</td><td>16,428,180</td><td>—</td></tr>
+            <tr><td>3/21</td><td>7,890,203</td><td>7,890,203</td><td>—</td></tr>
+            <tr><td>3/22</td><td>10,980,583</td><td>10,980,583</td><td>—</td></tr>
+            <tr><td>3/23</td><td>8,820,359</td><td>8,820,359</td><td>—</td></tr>
+            <tr class="today-row"><td>3/24</td><td>118,493,679</td><td>8,579,637</td><td>109,914,042</td></tr>
+            <tr><td>3/25</td><td>18,692,918</td><td>4,414,380</td><td>14,278,538</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Channel Breakdown -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">채널별 현황</span>
+        <span class="card-meta">OTB 대비</span>
+      </div>
+      <div class="card-body">
+        <div class="channel-list">
+
+          <div class="channel-item">
+            <div class="channel-top">
+              <span class="channel-name">🏬 오프라인 DTC</span>
+              <span class="channel-amt">1,122M</span>
+            </div>
+            <div class="channel-bar-wrap">
+              <div class="channel-bar" style="width:90%; background:var(--green)"></div>
+            </div>
+            <div class="channel-footer">
+              <span class="channel-unit">35,959 EA / OTB 74,625</span>
+              <span class="channel-sellthru" style="color:var(--green)">Sellthru 48%</span>
+            </div>
+          </div>
+
+          <div class="channel-item">
+            <div class="channel-top">
+              <span class="channel-name">🛍 통합몰</span>
+              <span class="channel-amt">83.9M</span>
+            </div>
+            <div class="channel-bar-wrap">
+              <div class="channel-bar" style="width:28%; background:#5856d6"></div>
+            </div>
+            <div class="channel-footer">
+              <span class="channel-unit">2,101 EA / OTB 7,486</span>
+              <span class="channel-sellthru" style="color:#5856d6">Sellthru 28%</span>
+            </div>
+          </div>
+
+          <div class="channel-item">
+            <div class="channel-top">
+              <span class="channel-name">💛 카카오톡선물하기</span>
+              <span class="channel-amt">40.3M</span>
+            </div>
+            <div class="channel-bar-wrap">
+              <div class="channel-bar" style="width:13%; background:#f7c948"></div>
+            </div>
+            <div class="channel-footer">
+              <span class="channel-unit">785 EA / OTB 6,137</span>
+              <span class="channel-sellthru" style="color:var(--orange)">Sellthru 13%</span>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--divider); padding-top:16px; margin-top:4px;">
+            <div class="channel-top">
+              <span style="font-size:12px;font-weight:700;color:var(--text-3)">총 OTB</span>
+              <span style="font-size:13px;font-family:'DM Mono',monospace;color:var(--text-2)">2,553,203,636</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-3);text-align:right;margin-top:2px;">잔여 물량 49% 소진 완료</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Product + Insight -->
+  <div class="grid-3">
+
+    <!-- Product Table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">품목별 매출 현황</span>
+        <span class="card-meta">DTC Total 기준</span>
+      </div>
+      <div class="card-body">
+        <table class="prod-table">
+          <thead>
+            <tr>
+              <th>품목</th>
+              <th>OTB</th>
+              <th>판매 EA</th>
+              <th>매출</th>
+              <th>Sellthru</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>랜덤 인형 키링</td>
+              <td>10,214</td><td>10,078</td><td>439.9M</td>
+              <td><span class="sellthru-chip high">99%</span></td>
+            </tr>
+            <tr>
+              <td>빅 인형</td>
+              <td>2,222</td><td>2,122</td><td>117.2M</td>
+              <td><span class="sellthru-chip high">95%</span></td>
+            </tr>
+            <tr>
+              <td>쿠션</td>
+              <td>6,390</td><td>1,489</td><td>92.3M</td>
+              <td><span class="sellthru-chip low">23%</span></td>
+            </tr>
+            <tr>
+              <td>다할 인형</td>
+              <td>600</td><td>600</td><td>22.2M</td>
+              <td><span class="sellthru-chip high">100%</span></td>
+            </tr>
+            <tr>
+              <td>사각 파우치</td>
+              <td>4,140</td><td>3,867</td><td>76.9M</td>
+              <td><span class="sellthru-chip high">93%</span></td>
+            </tr>
+            <tr>
+              <td>마라백</td>
+              <td>2,580</td><td>1,308</td><td>57.5M</td>
+              <td><span class="sellthru-chip mid">51%</span></td>
+            </tr>
+            <tr>
+              <td>마트로시카</td>
+              <td>4,600</td><td>1,075</td><td>37.6M</td>
+              <td><span class="sellthru-chip low">23%</span></td>
+            </tr>
+            <tr>
+              <td>랜덤 피규어</td>
+              <td>18,500</td><td>6,043</td><td>54.3M</td>
+              <td><span class="sellthru-chip low">33%</span></td>
+            </tr>
+            <tr>
+              <td>론</td>
+              <td>18,500</td><td>6,365</td><td>52.8M</td>
+              <td><span class="sellthru-chip low">34%</span></td>
+            </tr>
+            <tr style="background:var(--red-soft)">
+              <td>아트 피규어</td>
+              <td>570</td><td>567</td><td>45.4M</td>
+              <td><span class="sellthru-chip high">99%</span></td>
+            </tr>
+            <tr>
+              <td>파자마</td>
+              <td>395</td><td>166</td><td>39.1M</td>
+              <td><span class="sellthru-chip low">42%</span></td>
+            </tr>
+            <tr>
+              <td>핀 뱃지 세트</td>
+              <td>1,500</td><td>539</td><td>8.9M</td>
+              <td><span class="sellthru-chip low">36%</span></td>
+            </tr>
+            <tr>
+              <td>수면 안대</td>
+              <td>2,700</td><td>352</td><td>21.9M</td>
+              <td><span class="sellthru-chip low">13%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Insight -->
+    <div class="insight-card">
+      <div class="insight-header">
+        <div class="insight-icon">✦</div>
+        <span class="insight-title">AI 인사이트</span>
+        <span class="insight-meta">Claude 분석</span>
+      </div>
+      <div class="insight-body">
+
+        <div class="insight-item">
+          <div class="insight-bullet good">↑</div>
+          <div class="insight-text">
+            <strong>랜덤 인형 키링·다할 인형</strong> Sellthru 99–100%. 사실상 완판. 다음 팝업 OTB 상향 검토 필요.
+          </div>
+        </div>
+
+        <div class="insight-item">
+          <div class="insight-bullet warn">!</div>
+          <div class="insight-text">
+            <strong>핀 뱃지 세트·수면 안대</strong> Sellthru 13–36% 부진. 온라인 잔량 적어 <strong>물류 재고 이관</strong> 검토 필요 (담당자 확인 완료).
+          </div>
+        </div>
+
+        <div class="insight-item">
+          <div class="insight-bullet warn">!</div>
+          <div class="insight-text">
+            <strong>쿠션·마트로시카</strong> Sellthru 23%로 저조. 온라인 3/24 런칭 이후 추이 모니터링 필요.
+          </div>
+        </div>
+
+        <div class="insight-item">
+          <div class="insight-bullet info">↗</div>
+          <div class="insight-text">
+            온라인 3/24 런칭일 <strong class="up">118M</strong> 매출 발생. 오프라인 종료 후에도 온라인 채널이 매출 견인 중.
+          </div>
+        </div>
+
+        <div class="insight-item">
+          <div class="insight-bullet info">📦</div>
+          <div class="insight-text">
+            전체 OTB 대비 소진율 <strong>44%</strong>. 잔여 물량 56% — 온라인 셀스루 개선 없으면 재고 리스크 있음.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
