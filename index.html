@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI TF — LINE FRIENDS</title>
+<title>AI TF — LINE FRIENDS SQUARE</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -13,16 +13,14 @@
     --text: #1d1d1f;
     --text-secondary: rgba(0,0,0,0.5);
     --accent: #0071e3;
-    --accent-hover: #0077ed;
+    --green: #1d8348;
+    --orange: #b95000;
     --divider: rgba(0,0,0,0.08);
     --divider-strong: rgba(0,0,0,0.14);
     --shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
     --shadow-hover: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
     --radius: 18px;
-    --radius-sm: 10px;
-    --green: #1d8348;
     --green-bg: rgba(29,131,72,0.08);
-    --orange: #b95000;
     --orange-bg: rgba(185,80,0,0.08);
     --blue-bg: rgba(0,113,227,0.07);
   }
@@ -52,225 +50,99 @@
     justify-content: space-between;
   }
 
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .header-logo {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-
-  .header-sep {
-    width: 1px;
-    height: 14px;
-    background: var(--divider-strong);
-  }
-
-  .header-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: -0.01em;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); }
+  .header-sep { width: 1px; height: 14px; background: var(--divider-strong); }
+  .header-title { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
 
   .badge-live {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    display: flex; align-items: center; gap: 5px;
     padding: 4px 10px;
     background: var(--green-bg);
     border-radius: 100px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--green);
-    letter-spacing: 0.04em;
+    font-size: 11px; font-weight: 600; color: var(--green); letter-spacing: 0.04em;
   }
-
   .badge-live::before {
     content: '';
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--green);
     animation: pulse 2s ease-in-out infinite;
   }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
   /* ── Hero ── */
-  .hero {
-    padding: 72px 48px 48px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
+  .hero { padding: 72px 48px 40px; max-width: 1200px; margin: 0 auto; }
 
   .hero-eyebrow {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 16px;
-    opacity: 0;
-    animation: fadeUp 0.5s ease forwards 0.1s;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.1s;
   }
-
   .hero-title {
-    font-size: 52px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.05;
-    color: var(--text);
-    margin-bottom: 16px;
-    opacity: 0;
-    animation: fadeUp 0.5s ease forwards 0.15s;
+    font-size: 52px; font-weight: 700; letter-spacing: -0.03em;
+    line-height: 1.05; color: var(--text); margin-bottom: 16px;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.15s;
   }
-
   .hero-title span { color: var(--accent); }
-
   .hero-sub {
-    font-size: 18px;
-    font-weight: 300;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    max-width: 560px;
-    opacity: 0;
-    animation: fadeUp 0.5s ease forwards 0.2s;
+    font-size: 18px; font-weight: 300; color: var(--text-secondary);
+    line-height: 1.5; max-width: 560px;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.2s;
   }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
   /* ── Stats bar ── */
   .stats-bar {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 48px 48px;
-    display: flex;
-    gap: 12px;
-    opacity: 0;
-    animation: fadeUp 0.5s ease forwards 0.25s;
+    max-width: 1200px; margin: 0 auto; padding: 0 48px 44px;
+    display: flex; gap: 12px; flex-wrap: wrap;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.25s;
   }
-
   .stat-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: flex; align-items: center; gap: 8px;
     padding: 10px 18px;
-    background: var(--surface);
-    border: 1px solid var(--divider);
-    border-radius: 100px;
-    box-shadow: var(--shadow);
+    background: var(--surface); border: 1px solid var(--divider);
+    border-radius: 100px; box-shadow: var(--shadow);
   }
-
-  .stat-pill .num {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.02em;
-  }
-
-  .stat-pill .lbl {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
+  .stat-pill .num { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+  .stat-pill .lbl { font-size: 13px; color: var(--text-secondary); }
+  .stat-pill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-report  { background: var(--accent); }
+  .dot-mockup  { background: var(--orange); }
+  .dot-meeting { background: var(--green); }
 
   /* ── Search ── */
   .search-wrap {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 48px 32px;
-    opacity: 0;
-    animation: fadeUp 0.5s ease forwards 0.3s;
+    max-width: 1200px; margin: 0 auto; padding: 0 48px 36px;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.3s;
   }
-
-  .search-box {
-    position: relative;
-    max-width: 480px;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    font-size: 14px;
-    pointer-events: none;
-  }
-
+  .search-box { position: relative; max-width: 480px; }
+  .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 14px; pointer-events: none; }
   .search-input {
-    width: 100%;
-    height: 44px;
-    padding: 0 16px 0 42px;
-    border: 1px solid var(--divider-strong);
-    border-radius: 100px;
-    background: var(--surface);
-    font-size: 14px;
-    color: var(--text);
-    font-family: inherit;
-    outline: none;
-    transition: all 0.2s;
-    box-shadow: var(--shadow);
+    width: 100%; height: 44px; padding: 0 16px 0 42px;
+    border: 1px solid var(--divider-strong); border-radius: 100px;
+    background: var(--surface); font-size: 14px; color: var(--text);
+    font-family: inherit; outline: none; transition: all 0.2s; box-shadow: var(--shadow);
   }
-
   .search-input::placeholder { color: var(--text-secondary); }
-
-  .search-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
-  }
+  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.12); }
 
   /* ── Section ── */
-  .section {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 48px 80px;
-  }
+  .section { max-width: 1200px; margin: 0 auto; padding: 0 48px 64px; }
 
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+
+  .section-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
   .section-title {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
+    font-size: 13px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text-secondary);
   }
-
-  .section-count {
-    font-size: 12px;
-    color: rgba(0,0,0,0.3);
-  }
+  .section-count { font-size: 12px; color: rgba(0,0,0,0.28); }
 
   /* ── Cards grid ── */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 16px;
-  }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
 
   .card {
     background: var(--surface);
@@ -288,176 +160,86 @@
     opacity: 0;
     animation: fadeUp 0.4s ease forwards;
   }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: rgba(0,113,227,0.2); }
 
-  .card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-hover);
-    border-color: rgba(0,113,227,0.2);
-  }
-
-  /* Staggered animation */
   .card:nth-child(1) { animation-delay: 0.35s; }
-  .card:nth-child(2) { animation-delay: 0.4s; }
+  .card:nth-child(2) { animation-delay: 0.40s; }
   .card:nth-child(3) { animation-delay: 0.45s; }
-  .card:nth-child(4) { animation-delay: 0.5s; }
+  .card:nth-child(4) { animation-delay: 0.50s; }
   .card:nth-child(5) { animation-delay: 0.55s; }
-  .card:nth-child(6) { animation-delay: 0.6s; }
 
+  /* Slide thumbnail (iframe) */
   .card-thumb {
     height: 180px;
     background: var(--bg);
     border-bottom: 1px solid var(--divider);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
   }
-
   .card-thumb iframe {
-    width: 1280px;
-    height: 720px;
+    width: 1280px; height: 720px;
     transform-origin: top left;
-    pointer-events: none;
-    border: none;
+    pointer-events: none; border: none;
   }
+  .card-thumb .thumb-overlay { position: absolute; inset: 0; background: transparent; z-index: 2; }
 
-  .card-thumb .thumb-overlay {
-    position: absolute;
-    inset: 0;
-    background: transparent;
-    z-index: 2;
+  /* Meeting / Mockup flat thumbnail */
+  .card-thumb-flat {
+    height: 180px;
+    border-bottom: 1px solid var(--divider);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 12px;
+    position: relative; overflow: hidden;
   }
+  .card-thumb-flat.meeting-bg { background: linear-gradient(135deg, rgba(29,131,72,0.06) 0%, rgba(29,131,72,0.02) 100%); }
+  .card-thumb-flat.mockup-bg  { background: linear-gradient(135deg, rgba(185,80,0,0.06) 0%, rgba(185,80,0,0.02) 100%); }
 
-  .card-thumb .thumb-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
+  .flat-icon { font-size: 36px; opacity: 0.55; }
+  .flat-meta { font-size: 12px; font-weight: 500; color: var(--text-secondary); opacity: 0.7; letter-spacing: 0.04em; }
 
-  .thumb-icon {
-    font-size: 32px;
-    opacity: 0.25;
-  }
+  /* Card body */
+  .card-body { padding: 20px 24px 24px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
 
-  .thumb-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    opacity: 0.5;
-  }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .tag { padding: 3px 9px; border-radius: 100px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; }
+  .tag-report  { background: var(--blue-bg);   color: var(--accent); }
+  .tag-mockup  { background: var(--orange-bg); color: var(--orange); }
+  .tag-meeting { background: var(--green-bg);  color: var(--green); }
+  .tag-kickoff { background: var(--blue-bg);   color: var(--accent); }
+  .tag-new     { background: rgba(0,113,227,0.1); color: var(--accent); }
+  .tag-draft   { background: var(--orange-bg); color: var(--orange); }
 
-  .card-body {
-    padding: 20px 24px 24px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .card-tags {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 4px;
-  }
-
-  .tag {
-    padding: 3px 9px;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-  }
-
-  .tag-kickoff  { background: var(--blue-bg);   color: var(--accent); }
-  .tag-report   { background: var(--green-bg);   color: var(--green); }
-  .tag-planning { background: var(--orange-bg);  color: var(--orange); }
-  .tag-new      { background: rgba(0,113,227,0.1); color: var(--accent); }
-
-  .card-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.02em;
-    line-height: 1.3;
-  }
-
-  .card-desc {
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    flex: 1;
-  }
+  .card-title { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1.3; }
+  .card-desc  { font-size: 13px; color: var(--text-secondary); line-height: 1.5; flex: 1; }
 
   .card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 14px;
-    border-top: 1px solid var(--divider);
-    margin-top: 4px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 14px; border-top: 1px solid var(--divider); margin-top: 4px;
   }
-
-  .card-date {
-    font-size: 12px;
-    color: rgba(0,0,0,0.3);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .card-cta {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: gap 0.15s;
-  }
-
+  .card-date { font-size: 12px; color: rgba(0,0,0,0.3); font-variant-numeric: tabular-nums; }
+  .card-cta { font-size: 13px; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 4px; transition: gap 0.15s; }
   .card:hover .card-cta { gap: 7px; }
 
-  /* ── Empty state ── */
-  .empty {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 60px 24px;
-    color: var(--text-secondary);
-    font-size: 15px;
-  }
+  /* Empty state */
+  .empty { grid-column: 1 / -1; text-align: center; padding: 48px 24px; color: var(--text-secondary); font-size: 15px; }
+
+  /* Search results view */
+  .search-section { max-width: 1200px; margin: 0 auto; padding: 0 48px 64px; display: none; }
+  .search-section.visible { display: block; }
+
+  /* Hidden */
+  .section.hidden { display: none; }
 
   /* ── Footer ── */
   .footer {
     border-top: 1px solid var(--divider);
     padding: 28px 48px;
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
   }
-
-  .footer-left {
-    font-size: 12px;
-    color: rgba(0,0,0,0.3);
-  }
-
-  .footer-right {
-    font-size: 12px;
-    color: rgba(0,0,0,0.3);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .footer-right a {
-    color: var(--accent);
-    text-decoration: none;
-  }
-
+  .footer-left  { font-size: 12px; color: rgba(0,0,0,0.3); }
+  .footer-right { font-size: 12px; color: rgba(0,0,0,0.3); display: flex; align-items: center; gap: 6px; }
+  .footer-right a { color: var(--accent); text-decoration: none; }
   .footer-right a:hover { text-decoration: underline; }
 
   /* ── Responsive ── */
@@ -466,10 +248,11 @@
     .hero { padding: 48px 24px 32px; }
     .hero-title { font-size: 36px; }
     .hero-sub { font-size: 16px; }
-    .stats-bar { padding: 0 24px 32px; flex-wrap: wrap; }
+    .stats-bar { padding: 0 24px 32px; }
     .search-wrap { padding: 0 24px 24px; }
     .search-box { max-width: 100%; }
     .section { padding: 0 24px 48px; }
+    .search-section { padding: 0 24px 48px; }
     .cards { grid-template-columns: 1fr; }
     .footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
   }
@@ -482,7 +265,7 @@
   <div class="header-left">
     <span class="header-logo">LINE FRIENDS SQUARE</span>
     <div class="header-sep"></div>
-    <span class="header-title">AI TF Archive</span>
+    <span class="header-title">AI TF 아카이브</span>
   </div>
   <div class="header-right">
     <div class="badge-live">2026 Q2 진행중</div>
@@ -492,23 +275,30 @@
 <!-- Hero -->
 <div class="hero">
   <div class="hero-eyebrow">AI Transformation Task Force</div>
-  <h1 class="hero-title">보고서 <span>아카이브</span></h1>
-  <p class="hero-sub">TF 산출물, 발표자료, 결과 보고를 한 곳에서 관리합니다</p>
+  <h1 class="hero-title">산출물 <span>아카이브</span></h1>
+  <p class="hero-sub">보고서, 목업, 회의록을 한 곳에서 관리합니다</p>
 </div>
 
 <!-- Stats -->
-<div class="stats-bar" id="statsBar">
+<div class="stats-bar">
   <div class="stat-pill">
-    <span class="num" id="totalCount">1</span>
+    <span class="num" id="totalCount">—</span>
     <span class="lbl">총 문서</span>
   </div>
   <div class="stat-pill">
-    <span class="num" id="recentCount">1</span>
-    <span class="lbl">이번 달</span>
+    <div class="dot dot-report"></div>
+    <span class="num" id="reportCount">—</span>
+    <span class="lbl">보고서</span>
   </div>
   <div class="stat-pill">
-    <span class="num">Q2</span>
-    <span class="lbl">2026 진행중</span>
+    <div class="dot dot-mockup"></div>
+    <span class="num" id="mockupCount">—</span>
+    <span class="lbl">목업</span>
+  </div>
+  <div class="stat-pill">
+    <div class="dot dot-meeting"></div>
+    <span class="num" id="meetingCount">—</span>
+    <span class="lbl">회의록</span>
   </div>
 </div>
 
@@ -516,25 +306,47 @@
 <div class="search-wrap">
   <div class="search-box">
     <span class="search-icon">🔍</span>
-    <input
-      class="search-input"
-      type="text"
-      id="searchInput"
-      placeholder="문서 검색..."
-      autocomplete="off"
-    >
+    <input class="search-input" type="text" id="searchInput" placeholder="문서 검색..." autocomplete="off">
   </div>
 </div>
 
-<!-- Cards -->
-<main class="section">
+<!-- Search Results (shown only when searching) -->
+<div class="search-section" id="searchSection">
   <div class="section-header">
-    <span class="section-title">전체 문서</span>
-    <span class="section-count" id="visibleCount"></span>
+    <span class="section-title">검색 결과</span>
+    <span class="section-count" id="searchCount"></span>
   </div>
-  <div class="cards" id="cardGrid">
-    <!-- 카드는 JS로 렌더링 -->
+  <div class="cards" id="searchGrid"></div>
+</div>
+
+<!-- Section: 보고 자료 -->
+<main class="section" id="section-reports">
+  <div class="section-header">
+    <div class="section-dot dot-report"></div>
+    <span class="section-title">보고 자료</span>
+    <span class="section-count" id="countReports"></span>
   </div>
+  <div class="cards" id="gridReports"></div>
+</main>
+
+<!-- Section: 목업 -->
+<main class="section" id="section-mockups">
+  <div class="section-header">
+    <div class="section-dot dot-mockup"></div>
+    <span class="section-title">목업</span>
+    <span class="section-count" id="countMockups"></span>
+  </div>
+  <div class="cards" id="gridMockups"></div>
+</main>
+
+<!-- Section: 회의록 -->
+<main class="section" id="section-meetings">
+  <div class="section-header">
+    <div class="section-dot dot-meeting"></div>
+    <span class="section-title">회의록</span>
+    <span class="section-count" id="countMeetings"></span>
+  </div>
+  <div class="cards" id="gridMeetings"></div>
 </main>
 
 <!-- Footer -->
@@ -542,130 +354,192 @@
   <div class="footer-left">LINE FRIENDS SQUARE AI TF &nbsp;·&nbsp; 2026 Q2</div>
   <div class="footer-right">
     GitHub Pages로 배포 &nbsp;·&nbsp;
-    <a href="https://github.com" target="_blank">repo →</a>
+    <a href="https://github.com/jihoabba/AI-TF" target="_blank">repo →</a>
   </div>
 </footer>
 
 <script>
   // ── 문서 데이터 ──
-  // 새 파일 추가할 때 여기에만 추가하면 됨
+  // type: 'report' | 'mockup' | 'meeting'
   const docs = [
+    // ── 보고 자료 ──
     {
+      type: 'report',
       id: 'ai-tf-kickoff',
       title: 'AI TF 킥오프',
-      desc: '전사 AI 역량 강화 TF 출범 보고. 투트랙 전략, 로드맵, 예산 요청 포함.',
+      desc: '전사 AI 역량 강화 TF 출범 보고. 투트랙 전략, 로드맵, KPI, 예산 요청 포함.',
       file: 'reports/ai-tf-kickoff.html',
       date: '2026-03-26',
-      tags: ['kickoff'],
-      tagLabels: { kickoff: 'Kickoff' },
+      tags: ['report', 'kickoff'],
       slides: 10,
     },
-    // 예시: 다음 문서 추가 시 아래처럼
+
+    // ── 목업 ──
+    // 새 목업 추가 시 여기에 등록
     // {
-    //   id: 'monthly-report-apr',
-    //   title: '4월 월간 보고',
-    //   desc: '1호 자동화 결과 및 KPI 현황',
-    //   file: 'reports/monthly-report-apr.html',
-    //   date: '2026-04-30',
-    //   tags: ['report'],
-    //   slides: 8,
+    //   type: 'mockup',
+    //   id: 'b2b-proposal-v1',
+    //   title: 'B2B 제안서 자동화 — v0.1',
+    //   desc: '영업팀 제안서 반복 제작 자동화. 고객사 정보 입력 → 초안 자동 생성.',
+    //   file: 'mockup/b2b-proposal-v1.html',
+    //   date: '2026-04-01',
+    //   tags: ['mockup', 'draft'],
+    //   status: 'Draft',
     // },
+
+    // ── 회의록 ──
+    {
+      type: 'meeting',
+      id: '2026-03-26-1st-dev-meeting',
+      title: '1차 개발 미팅',
+      desc: 'AI TF 오리엔테이션. 방향 정렬, 업무 프로세스 합의. 염동혁 · 최재균 (장혜리 부재).',
+      file: 'meeting-notes/2026-03-26-1st-dev-meeting.html',
+      date: '2026-03-26',
+      tags: ['meeting'],
+      attendees: ['염동혁', '최재균'],
+      meetingNum: '001',
+    },
   ];
 
   // ── 태그 설정 ──
   const TAG_CONFIG = {
-    kickoff:  { label: 'Kickoff',  cls: 'tag-kickoff'  },
-    report:   { label: 'Report',   cls: 'tag-report'   },
-    planning: { label: 'Planning', cls: 'tag-planning' },
+    report:  { label: 'Report',  cls: 'tag-report'  },
+    mockup:  { label: 'Mockup',  cls: 'tag-mockup'  },
+    meeting: { label: 'Meeting', cls: 'tag-meeting'  },
+    kickoff: { label: 'Kickoff', cls: 'tag-kickoff'  },
+    draft:   { label: 'Draft',   cls: 'tag-draft'   },
   };
 
-  // ── 날짜 포맷 ──
   function fmtDate(str) {
     const d = new Date(str);
     return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
-  // ── 이번달 여부 ──
   function isThisMonth(str) {
     const d = new Date(str);
     const now = new Date();
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }
 
-  // ── 카드 렌더 ──
+  function renderThumb(doc) {
+    if (doc.type === 'meeting') {
+      const names = doc.attendees.join(' · ');
+      return `
+        <div class="card-thumb-flat meeting-bg">
+          <div class="flat-icon">📋</div>
+          <div class="flat-meta">#${doc.meetingNum} &nbsp;·&nbsp; ${names}</div>
+        </div>`;
+    }
+    if (doc.type === 'mockup') {
+      return `
+        <div class="card-thumb-flat mockup-bg">
+          <div class="flat-icon">🖼️</div>
+          <div class="flat-meta">${doc.status || 'Draft'}</div>
+        </div>`;
+    }
+    // report: iframe preview
+    const scale = 340 / 1280;
+    return `
+      <div class="card-thumb">
+        <iframe
+          src="${doc.file}"
+          scrolling="no"
+          style="transform: scale(${scale}); width: 1280px; height: 720px;"
+          loading="lazy"
+          title="${doc.title} 미리보기"
+        ></iframe>
+        <div class="thumb-overlay"></div>
+      </div>`;
+  }
+
+  function renderFooterMeta(doc) {
+    if (doc.type === 'meeting') return `${fmtDate(doc.date)} · ${doc.attendees.length}인 참석`;
+    if (doc.type === 'mockup')  return `${fmtDate(doc.date)} · ${doc.status || 'Draft'}`;
+    return `${fmtDate(doc.date)} · ${doc.slides}장`;
+  }
+
   function renderCard(doc) {
     const tags = doc.tags.map(t => {
-      const cfg = TAG_CONFIG[t] || { label: t, cls: 'tag-kickoff' };
+      const cfg = TAG_CONFIG[t] || { label: t, cls: 'tag-report' };
       return `<span class="tag ${cfg.cls}">${cfg.label}</span>`;
     }).join('');
-
-    const isNew = isThisMonth(doc.date);
-    const newBadge = isNew ? `<span class="tag tag-new">NEW</span>` : '';
-
-    // iframe 미리보기 스케일
-    const scale = 340 / 1280;
-
+    const newBadge = isThisMonth(doc.date) ? `<span class="tag tag-new">NEW</span>` : '';
     return `
-      <a class="card" href="${doc.file}" target="_blank" data-title="${doc.title}" data-desc="${doc.desc}" data-tags="${doc.tags.join(' ')}">
-        <div class="card-thumb">
-          <iframe
-            src="${doc.file}"
-            scrolling="no"
-            style="transform: scale(${scale}); width: 1280px; height: 720px;"
-            loading="lazy"
-            title="${doc.title} 미리보기"
-          ></iframe>
-          <div class="thumb-overlay"></div>
-        </div>
+      <a class="card" href="${doc.file}" target="_blank" data-title="${doc.title}" data-desc="${doc.desc}" data-type="${doc.type}">
+        ${renderThumb(doc)}
         <div class="card-body">
-          <div class="card-tags">
-            ${tags}
-            ${newBadge}
-          </div>
+          <div class="card-tags">${tags}${newBadge}</div>
           <div class="card-title">${doc.title}</div>
           <div class="card-desc">${doc.desc}</div>
           <div class="card-footer">
-            <span class="card-date">${fmtDate(doc.date)} · ${doc.slides}장</span>
+            <span class="card-date">${renderFooterMeta(doc)}</span>
             <span class="card-cta">열기 →</span>
           </div>
         </div>
-      </a>
-    `;
+      </a>`;
   }
 
-  // ── 초기 렌더 ──
-  const grid = document.getElementById('cardGrid');
-  const visibleCount = document.getElementById('visibleCount');
-  const totalCount = document.getElementById('totalCount');
-  const recentCount = document.getElementById('recentCount');
-
-  function render(list) {
+  function renderGrid(gridId, list, emptyMsg) {
+    const el = document.getElementById(gridId);
     if (list.length === 0) {
-      grid.innerHTML = `<div class="empty">검색 결과가 없습니다</div>`;
+      el.innerHTML = `<div class="empty">${emptyMsg}</div>`;
     } else {
-      grid.innerHTML = list.map(renderCard).join('');
+      el.innerHTML = list.map(renderCard).join('');
     }
-    visibleCount.textContent = list.length + '건';
+    return list.length;
   }
 
-  // 통계
-  totalCount.textContent = docs.length;
-  recentCount.textContent = docs.filter(d => isThisMonth(d.date)).length;
-
-  // 최신순 정렬
+  // Sort by date descending
   const sorted = [...docs].sort((a, b) => new Date(b.date) - new Date(a.date));
-  render(sorted);
 
-  // ── 검색 ──
-  document.getElementById('searchInput').addEventListener('input', function() {
+  const reports  = sorted.filter(d => d.type === 'report');
+  const mockups  = sorted.filter(d => d.type === 'mockup');
+  const meetings = sorted.filter(d => d.type === 'meeting');
+
+  // Stats
+  document.getElementById('totalCount').textContent   = docs.length;
+  document.getElementById('reportCount').textContent  = reports.length;
+  document.getElementById('mockupCount').textContent  = mockups.length;
+  document.getElementById('meetingCount').textContent = meetings.length;
+
+  // Render sections
+  renderGrid('gridReports',  reports,  '보고서가 아직 없습니다');
+  renderGrid('gridMockups',  mockups,  '목업이 아직 없습니다 — 인터뷰 완료 후 추가 예정');
+  renderGrid('gridMeetings', meetings, '회의록이 아직 없습니다');
+
+  // Section counts
+  document.getElementById('countReports').textContent  = reports.length  + '건';
+  document.getElementById('countMockups').textContent  = mockups.length  + '건';
+  document.getElementById('countMeetings').textContent = meetings.length + '건';
+
+  // ── Search ──
+  const searchInput   = document.getElementById('searchInput');
+  const searchSection = document.getElementById('searchSection');
+  const searchGrid    = document.getElementById('searchGrid');
+  const searchCount   = document.getElementById('searchCount');
+  const sectionEls    = ['section-reports', 'section-mockups', 'section-meetings'].map(id => document.getElementById(id));
+
+  searchInput.addEventListener('input', function () {
     const q = this.value.trim().toLowerCase();
-    if (!q) { render(sorted); return; }
+    if (!q) {
+      searchSection.classList.remove('visible');
+      sectionEls.forEach(el => el.classList.remove('hidden'));
+      return;
+    }
+    sectionEls.forEach(el => el.classList.add('hidden'));
+    searchSection.classList.add('visible');
     const filtered = sorted.filter(d =>
       d.title.toLowerCase().includes(q) ||
       d.desc.toLowerCase().includes(q) ||
-      d.tags.some(t => t.toLowerCase().includes(q))
+      d.tags.some(t => t.toLowerCase().includes(q)) ||
+      (d.attendees || []).some(a => a.toLowerCase().includes(q))
     );
-    render(filtered);
+    searchCount.textContent = filtered.length + '건';
+    if (filtered.length === 0) {
+      searchGrid.innerHTML = `<div class="empty">검색 결과가 없습니다</div>`;
+    } else {
+      searchGrid.innerHTML = filtered.map(renderCard).join('');
+    }
   });
 </script>
 
