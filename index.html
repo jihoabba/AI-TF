@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI TF — LINE FRIENDS</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --text-secondary: rgba(0,0,0,0.5);
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --divider: rgba(0,0,0,0.08);
+    --divider-strong: rgba(0,0,0,0.14);
+    --shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-hover: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+    --radius: 18px;
+    --radius-sm: 10px;
+    --green: #1d8348;
+    --green-bg: rgba(29,131,72,0.08);
+    --orange: #b95000;
+    --orange-bg: rgba(185,80,0,0.08);
+    --blue-bg: rgba(0,113,227,0.07);
+  }
+
+  html {
+    background: var(--bg);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body { min-height: 100vh; }
+
+  /* ── Header ── */
+  .header {
+    background: rgba(245,245,247,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--divider);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 48px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .header-sep {
+    width: 1px;
+    height: 14px;
+    background: var(--divider-strong);
+  }
+
+  .header-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge-live {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: var(--green-bg);
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 0.04em;
+  }
+
+  .badge-live::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 72px 48px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards 0.1s;
+  }
+
+  .hero-title {
+    font-size: 52px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards 0.15s;
+  }
+
+  .hero-title span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 560px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards 0.2s;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px 48px;
+    display: flex;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards 0.25s;
+  }
+
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 100px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-pill .num {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-pill .lbl {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* ── Search ── */
+  .search-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px 32px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards 0.3s;
+  }
+
+  .search-box {
+    position: relative;
+    max-width: 480px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px 0 42px;
+    border: 1px solid var(--divider-strong);
+    border-radius: 100px;
+    background: var(--surface);
+    font-size: 14px;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s;
+    box-shadow: var(--shadow);
+  }
+
+  .search-input::placeholder { color: var(--text-secondary); }
+
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
+  }
+
+  /* ── Section ── */
+  .section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px 80px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .section-count {
+    font-size: 12px;
+    color: rgba(0,0,0,0.3);
+  }
+
+  /* ── Cards grid ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s cubic-bezier(0.4,0,0.2,1),
+                box-shadow 0.2s cubic-bezier(0.4,0,0.2,1),
+                border-color 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    animation: fadeUp 0.4s ease forwards;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(0,113,227,0.2);
+  }
+
+  /* Staggered animation */
+  .card:nth-child(1) { animation-delay: 0.35s; }
+  .card:nth-child(2) { animation-delay: 0.4s; }
+  .card:nth-child(3) { animation-delay: 0.45s; }
+  .card:nth-child(4) { animation-delay: 0.5s; }
+  .card:nth-child(5) { animation-delay: 0.55s; }
+  .card:nth-child(6) { animation-delay: 0.6s; }
+
+  .card-thumb {
+    height: 180px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-thumb iframe {
+    width: 1280px;
+    height: 720px;
+    transform-origin: top left;
+    pointer-events: none;
+    border: none;
+  }
+
+  .card-thumb .thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    z-index: 2;
+  }
+
+  .card-thumb .thumb-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .thumb-icon {
+    font-size: 32px;
+    opacity: 0.25;
+  }
+
+  .thumb-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    opacity: 0.5;
+  }
+
+  .card-body {
+    padding: 20px 24px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+
+  .tag {
+    padding: 3px 9px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .tag-kickoff  { background: var(--blue-bg);   color: var(--accent); }
+  .tag-report   { background: var(--green-bg);   color: var(--green); }
+  .tag-planning { background: var(--orange-bg);  color: var(--orange); }
+  .tag-new      { background: rgba(0,113,227,0.1); color: var(--accent); }
+
+  .card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid var(--divider);
+    margin-top: 4px;
+  }
+
+  .card-date {
+    font-size: 12px;
+    color: rgba(0,0,0,0.3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card-cta {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: gap 0.15s;
+  }
+
+  .card:hover .card-cta { gap: 7px; }
+
+  /* ── Empty state ── */
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-secondary);
+    font-size: 15px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    border-top: 1px solid var(--divider);
+    padding: 28px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-left {
+    font-size: 12px;
+    color: rgba(0,0,0,0.3);
+  }
+
+  .footer-right {
+    font-size: 12px;
+    color: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .footer-right a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .footer-right a:hover { text-decoration: underline; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .header { padding: 0 24px; }
+    .hero { padding: 48px 24px 32px; }
+    .hero-title { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .stats-bar { padding: 0 24px 32px; flex-wrap: wrap; }
+    .search-wrap { padding: 0 24px 24px; }
+    .search-box { max-width: 100%; }
+    .section { padding: 0 24px 48px; }
+    .cards { grid-template-columns: 1fr; }
+    .footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <span class="header-logo">LINE FRIENDS SQUARE</span>
+    <div class="header-sep"></div>
+    <span class="header-title">AI TF Archive</span>
+  </div>
+  <div class="header-right">
+    <div class="badge-live">2026 Q2 진행중</div>
+  </div>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">AI Transformation Task Force</div>
+  <h1 class="hero-title">보고서 <span>아카이브</span></h1>
+  <p class="hero-sub">TF 산출물, 발표자료, 결과 보고를 한 곳에서 관리합니다</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-bar" id="statsBar">
+  <div class="stat-pill">
+    <span class="num" id="totalCount">1</span>
+    <span class="lbl">총 문서</span>
+  </div>
+  <div class="stat-pill">
+    <span class="num" id="recentCount">1</span>
+    <span class="lbl">이번 달</span>
+  </div>
+  <div class="stat-pill">
+    <span class="num">Q2</span>
+    <span class="lbl">2026 진행중</span>
+  </div>
+</div>
+
+<!-- Search -->
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input
+      class="search-input"
+      type="text"
+      id="searchInput"
+      placeholder="문서 검색..."
+      autocomplete="off"
+    >
+  </div>
+</div>
+
+<!-- Cards -->
+<main class="section">
+  <div class="section-header">
+    <span class="section-title">전체 문서</span>
+    <span class="section-count" id="visibleCount"></span>
+  </div>
+  <div class="cards" id="cardGrid">
+    <!-- 카드는 JS로 렌더링 -->
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-left">LINE FRIENDS SQUARE AI TF &nbsp;·&nbsp; 2026 Q2</div>
+  <div class="footer-right">
+    GitHub Pages로 배포 &nbsp;·&nbsp;
+    <a href="https://github.com" target="_blank">repo →</a>
+  </div>
+</footer>
+
+<script>
+  // ── 문서 데이터 ──
+  // 새 파일 추가할 때 여기에만 추가하면 됨
+  const docs = [
+    {
+      id: 'ai-tf-kickoff',
+      title: 'AI TF 킥오프',
+      desc: '전사 AI 역량 강화 TF 출범 보고. 투트랙 전략, 로드맵, 예산 요청 포함.',
+      file: 'ai-tf-kickoff.html',
+      date: '2026-03-26',
+      tags: ['kickoff'],
+      tagLabels: { kickoff: 'Kickoff' },
+      slides: 10,
+    },
+    // 예시: 다음 문서 추가 시 아래처럼
+    // {
+    //   id: 'monthly-report-apr',
+    //   title: '4월 월간 보고',
+    //   desc: '1호 자동화 결과 및 KPI 현황',
+    //   file: 'monthly-report-apr.html',
+    //   date: '2026-04-30',
+    //   tags: ['report'],
+    //   slides: 8,
+    // },
+  ];
+
+  // ── 태그 설정 ──
+  const TAG_CONFIG = {
+    kickoff:  { label: 'Kickoff',  cls: 'tag-kickoff'  },
+    report:   { label: 'Report',   cls: 'tag-report'   },
+    planning: { label: 'Planning', cls: 'tag-planning' },
+  };
+
+  // ── 날짜 포맷 ──
+  function fmtDate(str) {
+    const d = new Date(str);
+    return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  // ── 이번달 여부 ──
+  function isThisMonth(str) {
+    const d = new Date(str);
+    const now = new Date();
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }
+
+  // ── 카드 렌더 ──
+  function renderCard(doc) {
+    const tags = doc.tags.map(t => {
+      const cfg = TAG_CONFIG[t] || { label: t, cls: 'tag-kickoff' };
+      return `<span class="tag ${cfg.cls}">${cfg.label}</span>`;
+    }).join('');
+
+    const isNew = isThisMonth(doc.date);
+    const newBadge = isNew ? `<span class="tag tag-new">NEW</span>` : '';
+
+    // iframe 미리보기 스케일
+    const scale = 340 / 1280;
+
+    return `
+      <a class="card" href="${doc.file}" target="_blank" data-title="${doc.title}" data-desc="${doc.desc}" data-tags="${doc.tags.join(' ')}">
+        <div class="card-thumb">
+          <iframe
+            src="${doc.file}"
+            scrolling="no"
+            style="transform: scale(${scale}); width: 1280px; height: 720px;"
+            loading="lazy"
+            title="${doc.title} 미리보기"
+          ></iframe>
+          <div class="thumb-overlay"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tags">
+            ${tags}
+            ${newBadge}
+          </div>
+          <div class="card-title">${doc.title}</div>
+          <div class="card-desc">${doc.desc}</div>
+          <div class="card-footer">
+            <span class="card-date">${fmtDate(doc.date)} · ${doc.slides}장</span>
+            <span class="card-cta">열기 →</span>
+          </div>
+        </div>
+      </a>
+    `;
+  }
+
+  // ── 초기 렌더 ──
+  const grid = document.getElementById('cardGrid');
+  const visibleCount = document.getElementById('visibleCount');
+  const totalCount = document.getElementById('totalCount');
+  const recentCount = document.getElementById('recentCount');
+
+  function render(list) {
+    if (list.length === 0) {
+      grid.innerHTML = `<div class="empty">검색 결과가 없습니다</div>`;
+    } else {
+      grid.innerHTML = list.map(renderCard).join('');
+    }
+    visibleCount.textContent = list.length + '건';
+  }
+
+  // 통계
+  totalCount.textContent = docs.length;
+  recentCount.textContent = docs.filter(d => isThisMonth(d.date)).length;
+
+  // 최신순 정렬
+  const sorted = [...docs].sort((a, b) => new Date(b.date) - new Date(a.date));
+  render(sorted);
+
+  // ── 검색 ──
+  document.getElementById('searchInput').addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    if (!q) { render(sorted); return; }
+    const filtered = sorted.filter(d =>
+      d.title.toLowerCase().includes(q) ||
+      d.desc.toLowerCase().includes(q) ||
+      d.tags.some(t => t.toLowerCase().includes(q))
+    );
+    render(filtered);
+  });
+</script>
+
+</body>
+</html>
