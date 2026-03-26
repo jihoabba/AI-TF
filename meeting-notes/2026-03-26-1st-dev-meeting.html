@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1차 개발 미팅 — AI TF 회의록</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --muted: rgba(0,0,0,0.45);
+    --accent: #0071e3;
+    --green: #1d8348;
+    --orange: #b95000;
+    --divider: rgba(0,0,0,0.08);
+    --divider-strong: rgba(0,0,0,0.14);
+    --radius: 16px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  html {
+    background: var(--bg);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body { min-height: 100vh; padding-bottom: 100px; }
+
+  /* ── Header ── */
+  .header {
+    background: rgba(245,245,247,0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--divider);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 48px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(0,0,0,0.35); }
+  .header-sep { width: 1px; height: 14px; background: var(--divider-strong); }
+  .header-title { font-size: 14px; font-weight: 600; color: var(--text); }
+
+  .back-link {
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: opacity 0.15s;
+  }
+  .back-link:hover { opacity: 0.7; }
+
+  /* ── Document ── */
+  .doc {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 64px 48px;
+  }
+
+  /* Doc header */
+  .doc-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .doc-title {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    color: var(--text);
+    margin-bottom: 40px;
+  }
+
+  /* Meta card */
+  .meta-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 56px;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap: 28px;
+    box-shadow: var(--shadow);
+  }
+
+  .meta-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .meta-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .attendee { font-size: 14px; color: var(--text); line-height: 1.8; }
+  .attendee .role { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .attendee.absent { opacity: 0.45; }
+  .attendee.absent .name { text-decoration: line-through; }
+  .absent-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 52px; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--divider);
+    margin-bottom: 28px;
+  }
+
+  /* ── Discussion ── */
+  .discussion { display: flex; flex-direction: column; gap: 24px; }
+
+  .disc-item { display: flex; gap: 16px; align-items: flex-start; }
+
+  .disc-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .disc-avatar.yh { background: rgba(0,113,227,0.1); color: var(--accent); }
+  .disc-avatar.jk { background: rgba(29,131,72,0.1); color: var(--green); }
+
+  .disc-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 5px;
+    letter-spacing: 0.01em;
+  }
+
+  .disc-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .disc-text strong { font-weight: 600; }
+
+  /* ── Workflow ── */
+  .workflow { display: flex; flex-direction: column; gap: 0; }
+
+  .workflow-step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    position: relative;
+    padding-bottom: 28px;
+  }
+
+  .workflow-step:last-child { padding-bottom: 0; }
+
+  .workflow-step::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 32px;
+    bottom: 0;
+    width: 1px;
+    background: var(--divider);
+  }
+  .workflow-step:last-child::before { display: none; }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0,113,227,0.1);
+    border: 1.5px solid rgba(0,113,227,0.2);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-content { padding-top: 4px; }
+
+  .step-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── Action items ── */
+  .action-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .action-check {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid rgba(0,0,0,0.2);
+    border-radius: 5px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .action-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 3px;
+    line-height: 1.4;
+  }
+
+  .action-meta {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .action-meta .owner { font-weight: 600; color: var(--text); }
+
+  /* ── Next meeting ── */
+  .next-card {
+    background: var(--surface);
+    border: 1px solid rgba(0,113,227,0.18);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  .next-icon { font-size: 26px; flex-shrink: 0; }
+
+  .next-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 5px;
+  }
+
+  .next-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ── Key insight ── */
+  .insight-box {
+    background: rgba(0,113,227,0.05);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 18px 22px;
+    margin-top: 20px;
+  }
+
+  .insight-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .insight-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  @media (max-width: 768px) {
+    .header { padding: 0 24px; }
+    .doc { padding: 40px 24px; }
+    .doc-title { font-size: 32px; }
+    .meta-card { grid-template-columns: 1fr; gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <span class="header-logo">LINE FRIENDS SQUARE</span>
+    <div class="header-sep"></div>
+    <span class="header-title">AI TF 회의록</span>
+  </div>
+  <a class="back-link" href="../index.html">← 아카이브</a>
+</header>
+
+<div class="doc">
+
+  <div class="doc-eyebrow">Meeting Notes · 회의록 #001</div>
+  <h1 class="doc-title">1차 개발 미팅<br>AI TF 오리엔테이션</h1>
+
+  <!-- Meta -->
+  <div class="meta-card">
+    <div>
+      <div class="meta-label">일시</div>
+      <div class="meta-value">2026년 3월 26일</div>
+    </div>
+    <div>
+      <div class="meta-label">참석자</div>
+      <div class="meta-value">
+        <div class="attendee"><span class="name">염동혁</span> <span class="role">— 기획 · TF 리드</span></div>
+        <div class="attendee"><span class="name">최재균</span> <span class="role">— 개발</span></div>
+        <div class="attendee absent"><span class="name">장혜리</span> <span class="role">— 디자인</span></div>
+        <div class="absent-note">* 장혜리 당일 부재 · 추후 별도 미팅 예정</div>
+      </div>
+    </div>
+    <div>
+      <div class="meta-label">성격</div>
+      <div class="meta-value">TF 첫 팀 미팅<br>전반 방향 정렬</div>
+    </div>
+  </div>
+
+  <!-- Discussion -->
+  <div class="section">
+    <div class="section-label">논의 내용</div>
+    <div class="discussion">
+
+      <div class="disc-item">
+        <div class="disc-avatar yh">염</div>
+        <div>
+          <div class="disc-name">염동혁 — 기획 · TF 리드</div>
+          <div class="disc-text">
+            이번 TF의 핵심 목표는 <strong>구체적으로 쓸 수 있는 자동화 앱을 만드는 것</strong>. 막연한 AI 도입이 아니라, 각 팀의 반복 업무를 실제로 줄여주는 결과물을 만들어야 한다.
+          </div>
+        </div>
+      </div>
+
+      <div class="disc-item">
+        <div class="disc-avatar jk">재</div>
+        <div>
+          <div class="disc-name">최재균 — 개발</div>
+          <div class="disc-text">
+            기술적으로 먼저 해결해야 할 부분은 <strong>세일즈 DB의 구조 정의와 대시보드화</strong>. 데이터가 정리되어야 경영진 의사결정 트랙이 작동한다. 현재 진행 중인 프로젝트들을 소개하며 TF에 적용 가능한 기술 스택 설명.
+          </div>
+        </div>
+      </div>
+
+      <div class="disc-item">
+        <div class="disc-avatar yh">염</div>
+        <div>
+          <div class="disc-name">염동혁 — 기획 · TF 리드</div>
+          <div class="disc-text">
+            대시보드나 개발 기술 모두 중요하다. 그러나 결국 <strong>사용하는 사람이 자주 쓰게 만드는 것이 핵심</strong>. 쓰지 않으면 아무리 좋은 툴도 의미 없다. 사용성(UX)이 확보되어야 진짜 AI 전환(AX)이 일어난다.
+          </div>
+        </div>
+      </div>
+
+      <div class="disc-item">
+        <div class="disc-avatar jk">재</div>
+        <div>
+          <div class="disc-name">최재균 — 개발</div>
+          <div class="disc-text">사용성 우선이라는 방향에 동의.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="insight-box">
+      <div class="insight-label">핵심 합의</div>
+      <div class="insight-text">기능보다 사용성. 구현보다 쓰임새. 개발과 디자인은 "사람이 자주 쓸 수 있는 것"을 기준으로 판단한다.</div>
+    </div>
+  </div>
+
+  <!-- Workflow -->
+  <div class="section">
+    <div class="section-label">합의된 업무 프로세스</div>
+    <div class="workflow">
+
+      <div class="workflow-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">인터뷰 → 해석</div>
+          <div class="step-desc">염동혁이 담당 팀 / 담당자와 1:1 인터뷰 진행. 기술적 관점이 아닌 '문과 감성'으로 업무 흐름과 불편함을 재해석.</div>
+        </div>
+      </div>
+
+      <div class="workflow-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">프로토타입 · 목업 제작</div>
+          <div class="step-desc">인터뷰 결과를 바탕으로 실제로 써볼 수 있는 목업 또는 프로토타입 직접 제작. 코딩까지 포함 가능.</div>
+        </div>
+      </div>
+
+      <div class="workflow-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">최재균 — 피저빌리티 검토 · 코드 리뷰</div>
+          <div class="step-desc">목업 완성 후 최재균에게 기술 구현 가능성(Feasibility) 확인 요청. 코드를 직접 작성했다면 코드 리뷰도 함께 요청.</div>
+        </div>
+      </div>
+
+      <div class="workflow-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">장혜리 — UI 고도화 (병행)</div>
+          <div class="step-desc">피저빌리티 검토와 동시에 디자이너 장혜리에게 UI 개발 요청. 개발·디자인 양방향 병렬 진행.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="section">
+    <div class="section-label">액션 아이템</div>
+    <div class="action-list">
+      <div class="action-item">
+        <div class="action-check"></div>
+        <div>
+          <div class="action-text">우선순위 팀 인터뷰 일정 잡기 — B2B, MD팀 1순위</div>
+          <div class="action-meta"><span class="owner">염동혁</span> · 이번 주 내</div>
+        </div>
+      </div>
+      <div class="action-item">
+        <div class="action-check"></div>
+        <div>
+          <div class="action-text">첫 목업 제작 착수 — 인터뷰 결과 기반으로</div>
+          <div class="action-meta"><span class="owner">염동혁</span> · 인터뷰 완료 후</div>
+        </div>
+      </div>
+      <div class="action-item">
+        <div class="action-check"></div>
+        <div>
+          <div class="action-text">세일즈 DB 구조 초안 정리</div>
+          <div class="action-meta"><span class="owner">최재균</span> · TBD</div>
+        </div>
+      </div>
+      <div class="action-item">
+        <div class="action-check"></div>
+        <div>
+          <div class="action-text">장혜리 복귀 후 3인 미팅 일정 조율</div>
+          <div class="action-meta"><span class="owner">염동혁</span> · 복귀 확인 후</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Next -->
+  <div class="section">
+    <div class="section-label">다음 미팅</div>
+    <div class="next-card">
+      <div class="next-icon">📅</div>
+      <div>
+        <div class="next-title">2차 전체 미팅 — 장혜리 합류 (3인)</div>
+        <div class="next-desc">디자인 방향성 정렬 · 역할 분담 구체화 · 장혜리 복귀 후 일정 조율 예정</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
