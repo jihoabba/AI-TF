@@ -109,7 +109,7 @@
   .stat-pill .lbl { font-size: 13px; color: var(--text-secondary); }
   .stat-pill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .dot-report  { background: var(--accent); }
-  .dot-mockup  { background: var(--orange); }
+  .dot-idea    { background: var(--orange); }
   .dot-meeting { background: var(--green); }
 
   /* ── Search ── */
@@ -192,7 +192,7 @@
     position: relative; overflow: hidden;
   }
   .card-thumb-flat.meeting-bg { background: linear-gradient(135deg, rgba(29,131,72,0.06) 0%, rgba(29,131,72,0.02) 100%); }
-  .card-thumb-flat.mockup-bg  { background: linear-gradient(135deg, rgba(185,80,0,0.06) 0%, rgba(185,80,0,0.02) 100%); }
+  .card-thumb-flat.idea-bg    { background: linear-gradient(135deg, rgba(185,80,0,0.06) 0%, rgba(185,80,0,0.02) 100%); }
 
   .flat-icon { font-size: 36px; opacity: 0.55; }
   .flat-meta { font-size: 12px; font-weight: 500; color: var(--text-secondary); opacity: 0.7; letter-spacing: 0.04em; }
@@ -203,7 +203,7 @@
   .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
   .tag { padding: 3px 9px; border-radius: 100px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; }
   .tag-report  { background: var(--blue-bg);   color: var(--accent); }
-  .tag-mockup  { background: var(--orange-bg); color: var(--orange); }
+  .tag-idea    { background: var(--orange-bg); color: var(--orange); }
   .tag-meeting { background: var(--green-bg);  color: var(--green); }
   .tag-kickoff { background: var(--blue-bg);   color: var(--accent); }
   .tag-new     { background: rgba(0,113,227,0.1); color: var(--accent); }
@@ -291,9 +291,9 @@
     <span class="lbl">보고서</span>
   </div>
   <div class="stat-pill">
-    <div class="dot dot-mockup"></div>
-    <span class="num" id="mockupCount">—</span>
-    <span class="lbl">목업</span>
+    <div class="dot dot-idea"></div>
+    <span class="num" id="ideaCount">—</span>
+    <span class="lbl">아이디어</span>
   </div>
   <div class="stat-pill">
     <div class="dot dot-meeting"></div>
@@ -329,14 +329,14 @@
   <div class="cards" id="gridReports"></div>
 </main>
 
-<!-- Section: 목업 -->
-<main class="section" id="section-mockups">
+<!-- Section: IDEA -->
+<main class="section" id="section-ideas">
   <div class="section-header">
-    <div class="section-dot dot-mockup"></div>
-    <span class="section-title">목업</span>
-    <span class="section-count" id="countMockups"></span>
+    <div class="section-dot dot-idea"></div>
+    <span class="section-title">IDEA</span>
+    <span class="section-count" id="countIdeas"></span>
   </div>
-  <div class="cards" id="gridMockups"></div>
+  <div class="cards" id="gridIdeas"></div>
 </main>
 
 <!-- Section: 회의록 -->
@@ -374,16 +374,16 @@
       slides: 10,
     },
 
-    // ── 목업 ──
-    // 새 목업 추가 시 여기에 등록
+    // ── IDEA ──
+    // 새 아이디어 추가 시 여기에 등록
     // {
-    //   type: 'mockup',
+    //   type: 'idea',
     //   id: 'b2b-proposal-v1',
     //   title: 'B2B 제안서 자동화 — v0.1',
     //   desc: '영업팀 제안서 반복 제작 자동화. 고객사 정보 입력 → 초안 자동 생성.',
-    //   file: 'mockup/b2b-proposal-v1.html',
+    //   file: 'idea/b2b-proposal-v1.html',
     //   date: '2026-04-01',
-    //   tags: ['mockup', 'draft'],
+    //   tags: ['idea', 'draft'],
     //   status: 'Draft',
     // },
 
@@ -404,7 +404,7 @@
   // ── 태그 설정 ──
   const TAG_CONFIG = {
     report:  { label: 'Report',  cls: 'tag-report'  },
-    mockup:  { label: 'Mockup',  cls: 'tag-mockup'  },
+    idea:    { label: 'IDEA',    cls: 'tag-idea'    },
     meeting: { label: 'Meeting', cls: 'tag-meeting'  },
     kickoff: { label: 'Kickoff', cls: 'tag-kickoff'  },
     draft:   { label: 'Draft',   cls: 'tag-draft'   },
@@ -430,10 +430,10 @@
           <div class="flat-meta">#${doc.meetingNum} &nbsp;·&nbsp; ${names}</div>
         </div>`;
     }
-    if (doc.type === 'mockup') {
+    if (doc.type === 'idea') {
       return `
-        <div class="card-thumb-flat mockup-bg">
-          <div class="flat-icon">🖼️</div>
+        <div class="card-thumb-flat idea-bg">
+          <div class="flat-icon">💡</div>
           <div class="flat-meta">${doc.status || 'Draft'}</div>
         </div>`;
     }
@@ -454,7 +454,7 @@
 
   function renderFooterMeta(doc) {
     if (doc.type === 'meeting') return `${fmtDate(doc.date)} · ${doc.attendees.length}인 참석`;
-    if (doc.type === 'mockup')  return `${fmtDate(doc.date)} · ${doc.status || 'Draft'}`;
+    if (doc.type === 'idea')    return `${fmtDate(doc.date)} · ${doc.status || 'Draft'}`;
     return `${fmtDate(doc.date)} · ${doc.slides}장`;
   }
 
@@ -493,23 +493,23 @@
   const sorted = [...docs].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const reports  = sorted.filter(d => d.type === 'report');
-  const mockups  = sorted.filter(d => d.type === 'mockup');
+  const ideas    = sorted.filter(d => d.type === 'idea');
   const meetings = sorted.filter(d => d.type === 'meeting');
 
   // Stats
   document.getElementById('totalCount').textContent   = docs.length;
   document.getElementById('reportCount').textContent  = reports.length;
-  document.getElementById('mockupCount').textContent  = mockups.length;
+  document.getElementById('ideaCount').textContent    = ideas.length;
   document.getElementById('meetingCount').textContent = meetings.length;
 
   // Render sections
   renderGrid('gridReports',  reports,  '보고서가 아직 없습니다');
-  renderGrid('gridMockups',  mockups,  '목업이 아직 없습니다 — 인터뷰 완료 후 추가 예정');
+  renderGrid('gridIdeas',    ideas,    '아이디어가 아직 없습니다 — 인터뷰 완료 후 추가 예정');
   renderGrid('gridMeetings', meetings, '회의록이 아직 없습니다');
 
   // Section counts
   document.getElementById('countReports').textContent  = reports.length  + '건';
-  document.getElementById('countMockups').textContent  = mockups.length  + '건';
+  document.getElementById('countIdeas').textContent    = ideas.length    + '건';
   document.getElementById('countMeetings').textContent = meetings.length + '건';
 
   // ── Search ──
@@ -517,7 +517,7 @@
   const searchSection = document.getElementById('searchSection');
   const searchGrid    = document.getElementById('searchGrid');
   const searchCount   = document.getElementById('searchCount');
-  const sectionEls    = ['section-reports', 'section-mockups', 'section-meetings'].map(id => document.getElementById(id));
+  const sectionEls    = ['section-reports', 'section-ideas', 'section-meetings'].map(id => document.getElementById(id));
 
   searchInput.addEventListener('input', function () {
     const q = this.value.trim().toLowerCase();
