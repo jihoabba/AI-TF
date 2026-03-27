@@ -238,6 +238,122 @@
     .cards { grid-template-columns: 1fr; }
     .footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
   }
+
+  /* ── Board ── */
+  .board-section { max-width: 1200px; margin: 0 auto; padding: 0 48px 72px; }
+
+  .board-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .board-new-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    background: var(--surface);
+    border: 1px solid var(--divider-strong);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .board-new-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .board-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .note-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-left: 3px solid #7c3aed;
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+  }
+  .note-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+
+  .note-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #7c3aed;
+    margin-bottom: 2px;
+  }
+
+  .note-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+  }
+
+  .note-body {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .note-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--divider);
+    margin-top: 2px;
+  }
+
+  .note-author {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .note-author img {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+  }
+
+  .note-date { font-size: 11px; color: rgba(0,0,0,0.28); }
+
+  .board-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .dot-board { background: #7c3aed; }
+
+  @media (max-width: 768px) {
+    .board-section { padding: 0 24px 48px; }
+    .board-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -330,6 +446,20 @@
   </div>
   <div class="cards" id="gridIdeas"></div>
 </main>
+
+<!-- Board -->
+<section class="board-section">
+  <div class="board-header">
+    <div class="section-dot dot-board"></div>
+    <span class="section-title">게시판</span>
+    <a class="board-new-btn"
+       href="https://github.com/jihoabba/AI-TF/issues/new?labels=board&template=board.md"
+       target="_blank">+ 새 글 작성</a>
+  </div>
+  <div class="board-grid" id="boardGrid">
+    <div class="board-state">불러오는 중…</div>
+  </div>
+</section>
 
 <!-- Footer -->
 <footer class="footer">
@@ -453,6 +583,64 @@
       searchGrid.innerHTML = filtered.map(renderCard).join('');
     }
   });
+
+  // ── 게시판: GitHub Issues (label: board) ──
+  const REPO = 'jihoabba/AI-TF';
+
+  function timeAgo(str) {
+    const diff = (Date.now() - new Date(str)) / 1000;
+    if (diff < 60)   return '방금 전';
+    if (diff < 3600) return `${Math.floor(diff/60)}분 전`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}시간 전`;
+    return `${Math.floor(diff/86400)}일 전`;
+  }
+
+  function stripMd(text) {
+    return (text || '')
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/[#*`>_~\[\]]/g, '')
+      .replace(/\n+/g, ' ')
+      .trim();
+  }
+
+  function renderNotes(issues) {
+    const grid = document.getElementById('boardGrid');
+    if (!issues.length) {
+      grid.innerHTML = `<div class="board-state">아직 게시글이 없습니다.<br>위 <strong>+ 새 글 작성</strong> 버튼으로 첫 글을 남겨보세요.</div>`;
+      return;
+    }
+    grid.innerHTML = issues.map(issue => `
+      <a class="note-card" href="${issue.html_url}" target="_blank">
+        <div class="note-label">📌 ${issue.labels.filter(l => l.name !== 'board').map(l => l.name).join(' · ') || 'Note'}</div>
+        <div class="note-title">${issue.title}</div>
+        ${issue.body ? `<div class="note-body">${stripMd(issue.body)}</div>` : ''}
+        <div class="note-footer">
+          <span class="note-author">
+            <img src="${issue.user.avatar_url}" alt="">
+            ${issue.user.login}
+          </span>
+          <span class="note-date">${timeAgo(issue.created_at)}</span>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  async function loadBoard() {
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${REPO}/issues?labels=board&state=open&per_page=20&sort=created&direction=desc`,
+        { headers: { 'Accept': 'application/vnd.github.v3+json' } }
+      );
+      if (!res.ok) throw new Error(res.status);
+      const issues = await res.json();
+      renderNotes(issues);
+    } catch (e) {
+      document.getElementById('boardGrid').innerHTML =
+        `<div class="board-state">게시글을 불러오지 못했습니다.<br><small style="color:rgba(0,0,0,0.3)">GitHub API 오류 (${e.message})</small></div>`;
+    }
+  }
+
+  loadBoard();
 </script>
 
 </body>
