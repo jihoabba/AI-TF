@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI TF — LINE FRIENDS SQUARE</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -365,6 +366,73 @@
     .board-section { padding: 0 24px 48px; }
     .board-grid { grid-template-columns: 1fr; }
   }
+
+  /* ── Write Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 480px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeUp 0.2s ease;
+  }
+
+  .modal-title { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; }
+  .field input, .field textarea, .field select {
+    padding: 10px 14px;
+    border: 1px solid var(--divider-strong);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    resize: none;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
+  }
+  .field textarea { min-height: 100px; }
+
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-cancel {
+    padding: 9px 20px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    border: 1px solid var(--divider-strong); background: transparent;
+    color: var(--text-secondary); cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn-cancel:hover { background: var(--bg); }
+  .btn-submit {
+    padding: 9px 20px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    border: none; background: var(--accent); color: #fff; cursor: pointer;
+    font-family: inherit; transition: opacity 0.15s;
+  }
+  .btn-submit:hover { opacity: 0.85; }
+  .btn-submit:disabled { opacity: 0.5; cursor: default; }
+
+  .submit-msg { font-size: 13px; color: var(--green); font-weight: 600; text-align: center; display: none; }
+  .submit-msg.show { display: block; }
 </style>
 </head>
 <body>
@@ -463,14 +531,45 @@
   <div class="board-header">
     <div class="section-dot dot-board"></div>
     <span class="section-title">게시판</span>
-    <a class="board-new-btn"
-       href="https://www.notion.so/e1820c46cd2a4e3599abc8fdac85ae50"
-       target="_blank">+ 새 글 작성</a>
+    <button class="board-new-btn" onclick="openModal()">+ 새 글 작성</button>
   </div>
   <div class="board-grid" id="boardGrid">
     <div class="board-state">불러오는 중…</div>
   </div>
 </section>
+
+<!-- Write Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">새 글 작성</div>
+    <div class="field">
+      <label>제목</label>
+      <input type="text" id="fTitle" placeholder="글 제목" maxlength="100">
+    </div>
+    <div class="field">
+      <label>내용</label>
+      <textarea id="fContent" placeholder="내용을 입력하세요"></textarea>
+    </div>
+    <div class="field">
+      <label>카테고리</label>
+      <select id="fCategory">
+        <option value="메모">메모</option>
+        <option value="공지">공지</option>
+        <option value="요청사항">요청사항</option>
+        <option value="아이디어">아이디어</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>작성자</label>
+      <input type="text" id="fAuthor" placeholder="이름">
+    </div>
+    <div class="submit-msg" id="submitMsg">✓ 게시글이 등록됐습니다!</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-submit" id="btnSubmit" onclick="submitPost()">등록</button>
+    </div>
+  </div>
+</div>
 
 <!-- Footer -->
 <footer class="footer">
@@ -595,57 +694,98 @@
     }
   });
 
-  // ── 게시판: GitHub Issues (label: board) ──
-  const REPO = 'jihoabba/AI-TF';
+  // ── 게시판: Supabase 실시간 ──
+  const SUPA_URL = 'https://pflsamjncryfeyhmhxjh.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmbHNhbWpuY3J5ZmV5aG1oeGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1OTk3MDAsImV4cCI6MjA5MDE3NTcwMH0.kT1TWTEnZ7Yb7ygw4mpQQRcCKt4iryhvv9xKxcEqROE';
+  const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
   function timeAgo(str) {
     const diff = (Date.now() - new Date(str)) / 1000;
-    if (diff < 60)   return '방금 전';
-    if (diff < 3600) return `${Math.floor(diff/60)}분 전`;
+    if (diff < 60)    return '방금 전';
+    if (diff < 3600)  return `${Math.floor(diff/60)}분 전`;
     if (diff < 86400) return `${Math.floor(diff/3600)}시간 전`;
     return `${Math.floor(diff/86400)}일 전`;
-  }
-
-  function stripMd(text) {
-    return (text || '')
-      .replace(/```[\s\S]*?```/g, '')
-      .replace(/[#*`>_~\[\]]/g, '')
-      .replace(/\n+/g, ' ')
-      .trim();
   }
 
   function renderNotes(posts) {
     const grid = document.getElementById('boardGrid');
     if (!posts.length) {
-      grid.innerHTML = `<div class="board-state">아직 게시글이 없습니다.<br>위 <strong>+ 새 글 작성</strong> 버튼으로 노션에서 첫 글을 남겨보세요.</div>`;
+      grid.innerHTML = `<div class="board-state">아직 게시글이 없습니다.<br><strong>+ 새 글 작성</strong>으로 첫 글을 남겨보세요.</div>`;
       return;
     }
     grid.innerHTML = posts.map(p => `
-      <a class="note-card" href="${p.url}" target="_blank" data-cat="${p.category || '메모'}">
+      <div class="note-card" data-cat="${p.category || '메모'}">
         ${p.category ? `<div class="note-label ${p.category}">${p.category}</div>` : ''}
         <div class="note-title">${p.title}</div>
         ${p.content ? `<div class="note-body">${p.content}</div>` : ''}
         <div class="note-footer">
           <span class="note-author">${p.author || '—'}</span>
-          <span class="note-date">${timeAgo(p.date)}</span>
+          <span class="note-date">${timeAgo(p.created_at)}</span>
         </div>
-      </a>
+      </div>
     `).join('');
   }
 
   async function loadBoard() {
-    try {
-      const res = await fetch('board.json?t=' + Date.now());
-      if (!res.ok) throw new Error(res.status);
-      const posts = await res.json();
-      renderNotes(posts);
-    } catch (e) {
+    const { data, error } = await sb
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) {
       document.getElementById('boardGrid').innerHTML =
-        `<div class="board-state">게시글을 불러오지 못했습니다.<br><small style="color:rgba(0,0,0,0.3)">${e.message}</small></div>`;
+        `<div class="board-state">게시글을 불러오지 못했습니다.<br><small style="color:rgba(0,0,0,0.3)">${error.message}</small></div>`;
+      return;
     }
+    renderNotes(data);
   }
 
+  // 실시간 구독
+  sb.channel('posts-channel')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => loadBoard())
+    .subscribe();
+
   loadBoard();
+
+  // ── 글쓰기 모달 ──
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('open');
+    document.getElementById('fTitle').focus();
+  }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.getElementById('submitMsg').classList.remove('show');
+    document.getElementById('fTitle').value = '';
+    document.getElementById('fContent').value = '';
+    document.getElementById('fAuthor').value = '';
+    document.getElementById('fCategory').value = '메모';
+    document.getElementById('btnSubmit').disabled = false;
+  }
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  async function submitPost() {
+    const title   = document.getElementById('fTitle').value.trim();
+    const content = document.getElementById('fContent').value.trim();
+    const category = document.getElementById('fCategory').value;
+    const author  = document.getElementById('fAuthor').value.trim();
+    if (!title) { document.getElementById('fTitle').focus(); return; }
+
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.textContent = '등록 중…';
+
+    const { error } = await sb.from('posts').insert([{ title, content, category, author }]);
+
+    btn.textContent = '등록';
+    if (error) {
+      alert('오류: ' + error.message);
+      btn.disabled = false;
+      return;
+    }
+    document.getElementById('submitMsg').classList.add('show');
+    setTimeout(closeModal, 1200);
+  }
 </script>
 
 </body>
