@@ -286,13 +286,24 @@
   .note-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 
   .note-label {
+    display: inline-block;
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #7c3aed;
-    margin-bottom: 2px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-bottom: 4px;
   }
+  .note-label.공지      { background: rgba(0,113,227,0.1);  color: var(--accent); }
+  .note-label.요청사항  { background: rgba(192,57,43,0.1);  color: #c0392b; }
+  .note-label.메모      { background: rgba(0,0,0,0.06);     color: rgba(0,0,0,0.45); }
+  .note-label.아이디어  { background: rgba(185,80,0,0.1);   color: var(--orange); }
+
+  .note-card[data-cat="공지"]     { border-left-color: var(--accent); }
+  .note-card[data-cat="요청사항"] { border-left-color: #c0392b; }
+  .note-card[data-cat="메모"]     { border-left-color: rgba(0,0,0,0.2); }
+  .note-card[data-cat="아이디어"] { border-left-color: var(--orange); }
 
   .note-title {
     font-size: 15px;
@@ -453,7 +464,7 @@
     <div class="section-dot dot-board"></div>
     <span class="section-title">게시판</span>
     <a class="board-new-btn"
-       href="https://github.com/jihoabba/AI-TF/issues/new?labels=board&template=board.md"
+       href="https://www.notion.so/e1820c46cd2a4e3599abc8fdac85ae50"
        target="_blank">+ 새 글 작성</a>
   </div>
   <div class="board-grid" id="boardGrid">
@@ -603,23 +614,20 @@
       .trim();
   }
 
-  function renderNotes(issues) {
+  function renderNotes(posts) {
     const grid = document.getElementById('boardGrid');
-    if (!issues.length) {
-      grid.innerHTML = `<div class="board-state">아직 게시글이 없습니다.<br>위 <strong>+ 새 글 작성</strong> 버튼으로 첫 글을 남겨보세요.</div>`;
+    if (!posts.length) {
+      grid.innerHTML = `<div class="board-state">아직 게시글이 없습니다.<br>위 <strong>+ 새 글 작성</strong> 버튼으로 노션에서 첫 글을 남겨보세요.</div>`;
       return;
     }
-    grid.innerHTML = issues.map(issue => `
-      <a class="note-card" href="${issue.html_url}" target="_blank">
-        <div class="note-label">📌 ${issue.labels.filter(l => l.name !== 'board').map(l => l.name).join(' · ') || 'Note'}</div>
-        <div class="note-title">${issue.title}</div>
-        ${issue.body ? `<div class="note-body">${stripMd(issue.body)}</div>` : ''}
+    grid.innerHTML = posts.map(p => `
+      <a class="note-card" href="${p.url}" target="_blank" data-cat="${p.category || '메모'}">
+        ${p.category ? `<div class="note-label ${p.category}">${p.category}</div>` : ''}
+        <div class="note-title">${p.title}</div>
+        ${p.content ? `<div class="note-body">${p.content}</div>` : ''}
         <div class="note-footer">
-          <span class="note-author">
-            <img src="${issue.user.avatar_url}" alt="">
-            ${issue.user.login}
-          </span>
-          <span class="note-date">${timeAgo(issue.created_at)}</span>
+          <span class="note-author">${p.author || '—'}</span>
+          <span class="note-date">${timeAgo(p.date)}</span>
         </div>
       </a>
     `).join('');
@@ -627,16 +635,13 @@
 
   async function loadBoard() {
     try {
-      const res = await fetch(
-        `https://api.github.com/repos/${REPO}/issues?labels=board&state=open&per_page=20&sort=created&direction=desc`,
-        { headers: { 'Accept': 'application/vnd.github.v3+json' } }
-      );
+      const res = await fetch('board.json?t=' + Date.now());
       if (!res.ok) throw new Error(res.status);
-      const issues = await res.json();
-      renderNotes(issues);
+      const posts = await res.json();
+      renderNotes(posts);
     } catch (e) {
       document.getElementById('boardGrid').innerHTML =
-        `<div class="board-state">게시글을 불러오지 못했습니다.<br><small style="color:rgba(0,0,0,0.3)">GitHub API 오류 (${e.message})</small></div>`;
+        `<div class="board-state">게시글을 불러오지 못했습니다.<br><small style="color:rgba(0,0,0,0.3)">${e.message}</small></div>`;
     }
   }
 
