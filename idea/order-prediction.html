@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="tf-type"   content="idea">
+<meta name="tf-title"  content="발주량 예측">
+<meta name="tf-desc"   content="과거 팝업 데이터 + AI 분석으로 IP별 최적 발주량(최소/권장/최대) 산출. 신뢰도·인사이트·산출 근거 포함.">
+<meta name="tf-date"   content="2026-03-29">
+<meta name="tf-tags"   content="idea,prediction,inventory">
+<meta name="tf-status" content="Draft">
+<title>발주량 예측 — LINE FRIENDS SQUARE</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --text-2: rgba(0,0,0,0.5);
+    --text-3: rgba(0,0,0,0.28);
+    --accent: #0071e3;
+    --accent-soft: rgba(0,113,227,0.08);
+    --green: #1a7f4b;
+    --green-soft: rgba(26,127,75,0.08);
+    --orange: #b95000;
+    --orange-soft: rgba(185,80,0,0.08);
+    --red: #c0392b;
+    --divider: rgba(0,0,0,0.08);
+    --divider-strong: rgba(0,0,0,0.13);
+    --shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.09);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  html, body {
+    background: var(--bg);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* ── Nav ── */
+  .topnav {
+    height: 52px;
+    background: rgba(245,245,247,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--divider);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-left { display: flex; align-items: center; gap: 10px; }
+  .nav-brand { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); }
+  .nav-sep { width: 1px; height: 13px; background: var(--divider-strong); }
+  .nav-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .nav-badge {
+    padding: 3px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 600;
+    background: var(--orange-soft); color: var(--orange);
+  }
+
+  /* ── Layout ── */
+  .page { max-width: 1100px; margin: 0 auto; padding: 40px 40px 80px; }
+
+  /* ── Page Title ── */
+  .page-title {
+    font-size: 28px; font-weight: 700;
+    letter-spacing: -0.02em; color: var(--text);
+    margin-bottom: 6px;
+  }
+  .page-sub { font-size: 15px; color: var(--text-2); margin-bottom: 36px; }
+
+  /* ── Form Card ── */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .form-card-header {
+    padding: 20px 28px 16px;
+    border-bottom: 1px solid var(--divider);
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .form-step-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .form-card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+  .form-card-sub   { font-size: 13px; color: var(--text-2); margin-left: auto; }
+
+  .form-card-body { padding: 20px 28px 24px; }
+
+  /* ── IP Grid ── */
+  .ip-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .ip-btn {
+    padding: 14px 12px;
+    border: 1.5px solid var(--divider);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .ip-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .ip-btn.selected { border-color: var(--accent); background: var(--accent-soft); }
+
+  .ip-emoji { font-size: 28px; }
+  .ip-name  { font-size: 13px; font-weight: 600; color: var(--text); }
+  .ip-desc  { font-size: 11px; color: var(--text-2); line-height: 1.4; }
+
+  /* ── Category Select ── */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .cat-btn {
+    padding: 14px 16px;
+    border: 1.5px solid var(--divider);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    transition: all 0.15s;
+    font-size: 14px; font-weight: 600; color: var(--text);
+  }
+  .cat-btn:hover   { border-color: var(--accent); background: var(--accent-soft); }
+  .cat-btn.selected{ border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .cat-btn .cat-icon { font-size: 18px; }
+
+  /* ── Item Select ── */
+  .item-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .item-btn {
+    padding: 11px 14px;
+    border: 1.5px solid var(--divider);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    cursor: pointer;
+    font-size: 13px; font-weight: 500; color: var(--text);
+    transition: all 0.15s;
+    text-align: left;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .item-btn:hover    { border-color: var(--accent); background: var(--accent-soft); }
+  .item-btn.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+  .item-prev-qty {
+    font-size: 11px; color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .item-btn.selected .item-prev-qty { color: rgba(0,113,227,0.5); }
+
+  /* ── Textarea ── */
+  .feature-textarea {
+    width: 100%; min-height: 100px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--divider);
+    border-radius: var(--radius-sm);
+    font-size: 14px; font-family: inherit;
+    color: var(--text); background: var(--bg);
+    resize: none; outline: none;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+  .feature-textarea:focus { border-color: var(--accent); background: var(--surface); }
+  .feature-textarea::placeholder { color: var(--text-3); }
+
+  .textarea-hint {
+    font-size: 12px; color: var(--text-3); margin-top: 8px; line-height: 1.5;
+  }
+
+  /* ── Submit ── */
+  .submit-wrap { display: flex; justify-content: flex-end; margin-top: 20px; }
+
+  .btn-analyze {
+    padding: 14px 32px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-size: 15px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; gap: 8px;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .btn-analyze:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-analyze:active { transform: translateY(0); }
+  .btn-analyze:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+  /* ── Result ── */
+  .result-section {
+    margin-top: 32px;
+    display: none;
+  }
+  .result-section.show { display: block; }
+
+  .result-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .result-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .result-meta  { font-size: 13px; color: var(--text-2); }
+
+  /* KPI Row */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .kpi-card.min::before    { background: var(--orange); }
+  .kpi-card.optimal::before{ background: var(--accent); }
+  .kpi-card.max::before    { background: var(--green); }
+
+  .kpi-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .kpi-card.min     .kpi-label { color: var(--orange); }
+  .kpi-card.optimal .kpi-label { color: var(--accent); }
+  .kpi-card.max     .kpi-label { color: var(--green); }
+
+  .kpi-num {
+    font-size: 44px; font-weight: 800;
+    letter-spacing: -0.04em; line-height: 1;
+    margin-bottom: 4px;
+  }
+  .kpi-card.min     .kpi-num { color: var(--orange); }
+  .kpi-card.optimal .kpi-num { color: var(--accent); }
+  .kpi-card.max     .kpi-num { color: var(--green); }
+
+  .kpi-unit { font-size: 16px; font-weight: 400; margin-left: 4px; opacity: 0.6; }
+  .kpi-desc { font-size: 13px; color: var(--text-2); margin-top: 8px; line-height: 1.5; }
+
+  /* Confidence bar */
+  .confidence-wrap { margin-top: 14px; }
+  .confidence-label {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--text-3); margin-bottom: 5px;
+  }
+  .confidence-bar {
+    height: 4px; background: var(--divider); border-radius: 2px; overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%; border-radius: 2px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+  .kpi-card.min     .confidence-fill { background: var(--orange); }
+  .kpi-card.optimal .confidence-fill { background: var(--accent); }
+  .kpi-card.max     .confidence-fill { background: var(--green); }
+
+  /* Insight + Basis Row */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-section-label::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
+
+  .insight-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .insight-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    border: 1px solid var(--divider);
+    font-size: 13px; line-height: 1.55;
+  }
+  .insight-item .i-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .insight-item .i-text { color: var(--text); }
+  .insight-item .i-text strong { font-weight: 700; }
+
+  /* Basis */
+  .basis-list { display: flex; flex-direction: column; gap: 8px; }
+  .basis-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--divider);
+    background: var(--bg);
+  }
+  .basis-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .basis-bar-wrap { flex: 1; margin: 0 12px; }
+  .basis-bar {
+    height: 4px; background: var(--divider); border-radius: 2px; overflow: hidden;
+  }
+  .basis-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+  .basis-pct { font-size: 12px; font-weight: 600; color: var(--accent); width: 32px; text-align: right; }
+
+  /* Disclaimer */
+  .disclaimer {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    background: var(--orange-soft);
+    border: 1px solid rgba(185,80,0,0.15);
+    font-size: 12px; color: var(--orange); line-height: 1.6;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+
+  /* Loading */
+  .loading-state {
+    display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    padding: 56px;
+    gap: 16px;
+  }
+  .loading-state.show { display: flex; }
+
+  .loading-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--divider);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { font-size: 14px; color: var(--text-2); }
+  .loading-steps { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+  .loading-step { font-size: 12px; color: var(--text-3); opacity: 0; animation: fadeIn 0.4s ease forwards; }
+  .loading-step:nth-child(1) { animation-delay: 0.3s; }
+  .loading-step:nth-child(2) { animation-delay: 0.9s; }
+  .loading-step:nth-child(3) { animation-delay: 1.5s; }
+  .loading-step:nth-child(4) { animation-delay: 2.1s; }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  @media (max-width: 768px) {
+    .page { padding: 28px 20px 60px; }
+    .topnav { padding: 0 20px; }
+    .ip-grid { grid-template-columns: repeat(2, 1fr); }
+    .cat-grid { grid-template-columns: repeat(2, 1fr); }
+    .item-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi-row { grid-template-columns: 1fr; }
+    .bottom-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-left">
+    <span class="nav-brand">LINE FRIENDS SQUARE</span>
+    <div class="nav-sep"></div>
+    <span class="nav-title">발주량 예측</span>
+  </div>
+  <span class="nav-badge">AI Powered · 목업</span>
+</nav>
+
+<div class="page">
+
+  <h1 class="page-title">발주량 예측</h1>
+  <p class="page-sub">과거 데이터와 시장 트렌드를 분석해 최적 발주량을 제안합니다</p>
+
+  <!-- STEP 1: IP 선택 -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-step-num">1</div>
+      <span class="form-card-title">IP 선택</span>
+      <span class="form-card-sub">어떤 IP의 제품인가요?</span>
+    </div>
+    <div class="form-card-body">
+      <div class="ip-grid">
+        <button class="ip-btn selected" onclick="selectIP(this, 'BT21')">
+          <div class="ip-emoji">🐣</div>
+          <div class="ip-name">BT21</div>
+          <div class="ip-desc">BTS 공식 캐릭터</div>
+        </button>
+        <button class="ip-btn" onclick="selectIP(this, 'TRUZ')">
+          <div class="ip-emoji">🐯</div>
+          <div class="ip-name">TRUZ</div>
+          <div class="ip-desc">SEVENTEEN</div>
+        </button>
+        <button class="ip-btn" onclick="selectIP(this, 'ZNF')">
+          <div class="ip-emoji">🐻</div>
+          <div class="ip-name">ZNF</div>
+          <div class="ip-desc">ZEROBASEONE</div>
+        </button>
+        <button class="ip-btn" onclick="selectIP(this, 'NCTD')">
+          <div class="ip-emoji">🌀</div>
+          <div class="ip-name">NCTD</div>
+          <div class="ip-desc">NCT DREAM</div>
+        </button>
+        <button class="ip-btn" onclick="selectIP(this, 'ATZ')">
+          <div class="ip-emoji">⚡</div>
+          <div class="ip-name">ATZ</div>
+          <div class="ip-desc">ATEEZ</div>
+        </button>
+        <button class="ip-btn" onclick="selectIP(this, 'COLLER')">
+          <div class="ip-emoji">🎵</div>
+          <div class="ip-name">COLLER</div>
+          <div class="ip-desc">BOYNEXTDOOR</div>
+        </button>
+        <button class="ip-btn" onclick="selectIP(this, 'SSEB')">
+          <div class="ip-emoji">✨</div>
+          <div class="ip-name">SSEB</div>
+          <div class="ip-desc">STAYC</div>
+        </button>
+        <button class="ip-btn" onclick="selectIP(this, 'OTHER')">
+          <div class="ip-emoji">➕</div>
+          <div class="ip-name">기타</div>
+          <div class="ip-desc">직접 입력</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: 카테고리 선택 -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-step-num">2</div>
+      <span class="form-card-title">제품 카테고리</span>
+      <span class="form-card-sub">어떤 종류의 제품인가요?</span>
+    </div>
+    <div class="form-card-body">
+      <div class="cat-grid">
+        <button class="cat-btn selected" onclick="selectCat(this, 'figure')">
+          <span class="cat-icon">🪆</span> 피규어 / 인형
+        </button>
+        <button class="cat-btn" onclick="selectCat(this, 'keyring')">
+          <span class="cat-icon">🔑</span> 키링 / 액세서리
+        </button>
+        <button class="cat-btn" onclick="selectCat(this, 'pouch')">
+          <span class="cat-icon">👜</span> 파우치 / 가방
+        </button>
+        <button class="cat-btn" onclick="selectCat(this, 'stationery')">
+          <span class="cat-icon">📒</span> 문구 / 스티커
+        </button>
+        <button class="cat-btn" onclick="selectCat(this, 'apparel')">
+          <span class="cat-icon">👕</span> 의류 / 패션
+        </button>
+        <button class="cat-btn" onclick="selectCat(this, 'living')">
+          <span class="cat-icon">🏠</span> 리빙 / 잡화
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: 세부 품목 -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-step-num">3</div>
+      <span class="form-card-title">세부 품목 선택</span>
+      <span class="form-card-sub">복수 선택 가능</span>
+    </div>
+    <div class="form-card-body">
+      <div class="item-grid" id="itemGrid">
+        <button class="item-btn selected" onclick="toggleItem(this)">
+          <span>랜덤 인형 키링</span>
+          <span class="item-prev-qty">전회 10,214ea</span>
+        </button>
+        <button class="item-btn" onclick="toggleItem(this)">
+          <span>빅 인형</span>
+          <span class="item-prev-qty">전회 2,222ea</span>
+        </button>
+        <button class="item-btn" onclick="toggleItem(this)">
+          <span>쿠션</span>
+          <span class="item-prev-qty">전회 6,390ea</span>
+        </button>
+        <button class="item-btn" onclick="toggleItem(this)">
+          <span>아트 피규어</span>
+          <span class="item-prev-qty">전회 570ea</span>
+        </button>
+        <button class="item-btn" onclick="toggleItem(this)">
+          <span>마라백</span>
+          <span class="item-prev-qty">전회 2,580ea</span>
+        </button>
+        <button class="item-btn" onclick="toggleItem(this)">
+          <span>파자마 세트</span>
+          <span class="item-prev-qty">전회 395ea</span>
+        </button>
+        <button class="item-btn" onclick="toggleItem(this)">
+          <span>핀 뱃지 세트</span>
+          <span class="item-prev-qty">전회 1,500ea</span>
+        </button>
+        <button class="item-btn" onclick="toggleItem(this)">
+          <span>수면 안대</span>
+          <span class="item-prev-qty">전회 2,700ea</span>
+        </button>
+        <button class="item-btn" onclick="toggleItem(this)">
+          <span>스티커 세트</span>
+          <span class="item-prev-qty">전회 7,600ea</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: 제품 특장점 -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-step-num">4</div>
+      <span class="form-card-title">이번 제품 특장점</span>
+      <span class="form-card-sub">AI가 보정 근거로 활용합니다</span>
+    </div>
+    <div class="form-card-body">
+      <textarea class="feature-textarea" id="featureInput" placeholder="예시:
+· BTS 컴백과 동시 출시 예정
+· 역대 팝업 중 최대 규모 (홍대 단독 플래그십)
+· 신규 디자인 라인 첫 출시 — 수요 예측 어려움
+· 온라인 사전예약 반응이 기존 대비 2배 이상"></textarea>
+      <div class="textarea-hint">💡 팬덤 이벤트, 협업 여부, 독점 채널, 시즌 특이사항 등을 자유롭게 입력하세요</div>
+    </div>
+  </div>
+
+  <div class="submit-wrap">
+    <button class="btn-analyze" id="btnAnalyze" onclick="runAnalysis()">
+      ✦ 발주량 분석하기
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" id="loadingState">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">AI가 데이터를 분석하고 있습니다</div>
+    <div class="loading-steps">
+      <div class="loading-step">📊 과거 팝업 셀스루 데이터 조회 중…</div>
+      <div class="loading-step">🔍 동일 IP 유사 품목 패턴 분석 중…</div>
+      <div class="loading-step">🌐 외부 트렌드 및 팬덤 지표 반영 중…</div>
+      <div class="loading-step">✦ 발주량 범위 및 최적값 산출 중…</div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-section" id="resultSection">
+    <div class="result-header">
+      <div class="result-title">분석 결과 — 랜덤 인형 키링</div>
+      <div class="result-meta">BT21 · 피규어/인형 · 2026.03.27 기준</div>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi-card min">
+        <div class="kpi-label">최소 수량</div>
+        <div class="kpi-num">7,500<span class="kpi-unit">ea</span></div>
+        <div class="kpi-desc">손실 없이 소화 가능한 보수적 하한선. 셀스루 85% 이상 기대.</div>
+        <div class="confidence-wrap">
+          <div class="confidence-label"><span>신뢰도</span><span>78%</span></div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width:78%"></div></div>
+        </div>
+      </div>
+      <div class="kpi-card optimal">
+        <div class="kpi-label">✦ 최적 수량 (권장)</div>
+        <div class="kpi-num">11,000<span class="kpi-unit">ea</span></div>
+        <div class="kpi-desc">과거 데이터 + 이번 특장점 반영 최적값. 셀스루 92% 기대.</div>
+        <div class="confidence-wrap">
+          <div class="confidence-label"><span>신뢰도</span><span>91%</span></div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width:91%"></div></div>
+        </div>
+      </div>
+      <div class="kpi-card max">
+        <div class="kpi-label">최대 수량</div>
+        <div class="kpi-num">14,500<span class="kpi-unit">ea</span></div>
+        <div class="kpi-desc">컴백 흥행 시나리오 상한선. 재고 리스크 감수 시 적용.</div>
+        <div class="confidence-wrap">
+          <div class="confidence-label"><span>신뢰도</span><span>62%</span></div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width:62%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insight + Basis -->
+    <div class="bottom-row">
+      <div class="insight-card">
+        <div class="card-section-label">AI 인사이트</div>
+        <div class="insight-list">
+          <div class="insight-item">
+            <div class="i-icon">📈</div>
+            <div class="i-text">BT21 랜덤 키링류는 최근 3회 팝업 평균 셀스루 <strong>96%</strong>. 완판 패턴 강함.</div>
+          </div>
+          <div class="insight-item">
+            <div class="i-icon">🎤</div>
+            <div class="i-text">BTS 컴백 동시 출시는 과거 대비 수요 <strong>+18~35%</strong> 상승 패턴 확인.</div>
+          </div>
+          <div class="insight-item">
+            <div class="i-icon">⚠️</div>
+            <div class="i-text">홍대 단독 플래그십 첫 출시로 집객 효과 불확실. 온라인 채널 물량 <strong>최소 30%</strong> 확보 권장.</div>
+          </div>
+          <div class="insight-item">
+            <div class="i-icon">📦</div>
+            <div class="i-text">전회(10,214ea) 대비 +7.7% 상향 권장. 단 재고 이관 여력 확인 후 확정.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card">
+        <div class="card-section-label">산출 근거</div>
+        <div class="basis-list">
+          <div class="basis-item">
+            <span class="basis-name">과거 팝업 데이터</span>
+            <div class="basis-bar-wrap"><div class="basis-bar"><div class="basis-fill" style="width:85%"></div></div></div>
+            <span class="basis-pct">85%</span>
+          </div>
+          <div class="basis-item">
+            <span class="basis-name">IP 팬덤 지표</span>
+            <div class="basis-bar-wrap"><div class="basis-bar"><div class="basis-fill" style="width:70%"></div></div></div>
+            <span class="basis-pct">70%</span>
+          </div>
+          <div class="basis-item">
+            <span class="basis-name">컴백 이벤트 보정</span>
+            <div class="basis-bar-wrap"><div class="basis-bar"><div class="basis-fill" style="width:60%"></div></div></div>
+            <span class="basis-pct">60%</span>
+          </div>
+          <div class="basis-item">
+            <span class="basis-name">채널 믹스 분석</span>
+            <div class="basis-bar-wrap"><div class="basis-bar"><div class="basis-fill" style="width:55%"></div></div></div>
+            <span class="basis-pct">55%</span>
+          </div>
+          <div class="basis-item">
+            <span class="basis-name">외부 트렌드</span>
+            <div class="basis-bar-wrap"><div class="basis-bar"><div class="basis-fill" style="width:40%"></div></div></div>
+            <span class="basis-pct">40%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      <span>⚠️</span>
+      본 예측은 과거 데이터와 AI 분석 기반의 참고치입니다. 최종 발주량은 MD 담당자의 판단과 현장 상황을 반드시 반영하여 결정하시기 바랍니다.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function selectIP(btn, ip) {
+    document.querySelectorAll('.ip-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function selectCat(btn, cat) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function toggleItem(btn) {
+    btn.classList.toggle('selected');
+  }
+
+  function runAnalysis() {
+    const btn = document.getElementById('btnAnalyze');
+    btn.disabled = true;
+
+    const loading = document.getElementById('loadingState');
+    const result  = document.getElementById('resultSection');
+
+    result.classList.remove('show');
+    loading.classList.add('show');
+    loading.style.display = 'flex';
+
+    document.querySelectorAll('.loading-step').forEach(s => {
+      s.style.animation = 'none';
+      s.style.opacity = '0';
+      setTimeout(() => { s.style.animation = ''; }, 10);
+    });
+
+    setTimeout(() => {
+      loading.classList.remove('show');
+      loading.style.display = 'none';
+      result.classList.add('show');
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      btn.disabled = false;
+
+      setTimeout(() => {
+        document.querySelectorAll('.confidence-fill').forEach(el => {
+          const w = el.style.width;
+          el.style.width = '0%';
+          setTimeout(() => { el.style.width = w; }, 50);
+        });
+      }, 300);
+    }, 3000);
+  }
+</script>
+
+</body>
+</html>
