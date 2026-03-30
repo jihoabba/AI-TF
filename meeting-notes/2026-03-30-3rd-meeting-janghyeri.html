@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="tf-type"        content="meeting">
+<meta name="tf-title"       content="3차 미팅 — 장혜리 온보딩 & 아이디어 공유">
+<meta name="tf-desc"        content="장혜리 합류 후 첫 미팅. 킥오프 브리핑, 팀 AI 에이전트 GUI 아이디어, 트루즈 AX 사례 공유.">
+<meta name="tf-date"        content="2026-03-30">
+<meta name="tf-tags"        content="meeting,onboarding,idea">
+<meta name="tf-attendees"   content="염동혁,장혜리">
+<meta name="tf-meeting-num" content="003">
+
+<title>3차 미팅 — 장혜리 온보딩 & 아이디어 공유 · 2026.03.30</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --muted: rgba(0,0,0,0.45);
+    --accent: #0071e3;
+    --green: #1a7f4b;
+    --orange: #b95000;
+    --purple: #7c3aed;
+    --divider: rgba(0,0,0,0.08);
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  html {
+    background: var(--bg);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  body { min-height: 100vh; }
+
+  .topnav {
+    height: 52px;
+    background: rgba(245,245,247,0.88);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--divider);
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center;
+    padding: 0 40px; gap: 12px;
+  }
+  .nav-back { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; }
+  .nav-back:hover { opacity: 0.75; }
+  .nav-sep { width: 1px; height: 14px; background: var(--divider); }
+  .nav-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 56px 40px 96px; }
+
+  .doc-type {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--green);
+    background: rgba(26,127,75,0.08);
+    padding: 4px 10px; border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  .doc-title {
+    font-size: 34px; font-weight: 700;
+    letter-spacing: -0.03em; line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .doc-meta {
+    display: flex; flex-wrap: wrap; gap: 20px;
+    padding: 16px 0;
+    border-top: 1px solid var(--divider);
+    border-bottom: 1px solid var(--divider);
+    margin-bottom: 48px;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 3px; }
+  .meta-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+
+  .doc-body { display: flex; flex-direction: column; gap: 40px; }
+
+  .section { display: flex; flex-direction: column; gap: 12px; }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
+
+  .section-title { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+
+  .item-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    font-size: 14px; color: var(--text); line-height: 1.6;
+    box-shadow: var(--shadow);
+  }
+  .item-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .item-text { flex: 1; }
+  .item-text strong { font-weight: 700; }
+  .item-text .sub { color: var(--muted); display: block; margin-top: 2px; font-size: 13px; }
+
+  .quote {
+    background: var(--surface);
+    border-left: 3px solid var(--purple);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    font-size: 14px; color: var(--text); line-height: 1.7;
+    box-shadow: var(--shadow);
+  }
+
+  .idea-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-left: 3px solid var(--purple);
+    border-radius: 0 10px 10px 0;
+    padding: 20px 20px;
+    font-size: 14px; line-height: 1.7;
+    box-shadow: var(--shadow);
+  }
+  .idea-card .idea-title {
+    font-size: 15px; font-weight: 700; margin-bottom: 8px;
+    color: var(--purple);
+  }
+
+  .action-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    font-size: 14px; color: var(--text); line-height: 1.6;
+    box-shadow: var(--shadow);
+  }
+  .action-owner {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 2px 8px;
+    border-radius: 100px; white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+  }
+  .owner-dh  { background: rgba(0,113,227,0.1);   color: var(--accent); }
+  .owner-hr  { background: rgba(124,58,237,0.1);  color: var(--purple); }
+  .owner-all { background: rgba(0,0,0,0.06);      color: var(--muted); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 4px 10px; border-radius: 100px;
+    font-size: 12px; font-weight: 600;
+    border: 1px solid var(--divider);
+    color: var(--muted); background: var(--bg);
+  }
+  .chip.purple { background: rgba(124,58,237,0.07); color: var(--purple); border-color: rgba(124,58,237,0.15); }
+  .chip.blue   { background: rgba(0,113,227,0.07);  color: var(--accent); border-color: rgba(0,113,227,0.15); }
+  .chip.green  { background: rgba(26,127,75,0.07);  color: var(--green);  border-color: rgba(26,127,75,0.15); }
+
+  @media (max-width: 640px) {
+    .container { padding: 40px 20px 80px; }
+    .topnav { padding: 0 20px; }
+    .doc-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="nav-back" href="../index.html">← 아카이브</a>
+  <div class="nav-sep"></div>
+  <span class="nav-title">Meeting Notes #003</span>
+</nav>
+
+<div class="container">
+
+  <div class="doc-type">📋 Meeting Notes</div>
+  <h1 class="doc-title">3차 미팅<br>장혜리 온보딩 & 아이디어 공유</h1>
+
+  <div class="doc-meta">
+    <div class="meta-item">
+      <span class="meta-label">날짜</span>
+      <span class="meta-value">2026년 3월 30일</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">참석자</span>
+      <span class="meta-value">염동혁 (TF 리드) · 장혜리</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">문서 번호</span>
+      <span class="meta-value">#003</span>
+    </div>
+  </div>
+
+  <div class="doc-body">
+
+    <!-- 1. 킥오프 브리핑 -->
+    <div class="section">
+      <div class="section-label">01 · 킥오프 브리핑</div>
+      <div class="section-title">방향 정렬</div>
+      <div class="item-list">
+        <div class="item">
+          <div class="item-icon">🎯</div>
+          <div class="item-text">
+            <strong>TF 전반 방향 공유</strong>
+            <span class="sub">대표 지시사항 및 1차 개발 미팅에서 정립된 방향을 장혜리에게 온보딩</span>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-icon">🤝</div>
+          <div class="item-text">
+            <strong>사용성 최우선</strong>
+            <span class="sub">실질적으로 손이 가는 서비스를 만드는 것이 핵심. 겉보기 좋은 것보다 실무에서 쓰이는 것.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 팀 AI 에이전트 GUI -->
+    <div class="section">
+      <div class="section-label">02 · 아이디어</div>
+      <div class="section-title">팀별 AI 에이전트 GUI</div>
+      <div class="idea-card">
+        <div class="idea-title">💡 캐릭터 기반 AI 에이전트 인터페이스</div>
+        LINE FRIENDS는 IP 회사이기도 함. 각 팀을 상징하는 동물 캐릭터를 만들고, 해당 팀의 AI 자동화 솔루션이나 데이터에 접근할 때 그 캐릭터를 클릭하면 서비스가 나오는 컨셉츄얼한 GUI.
+        <br><br>
+        예시 — 마케팅팀의 <strong>삐돌이 대리</strong>: 타 팀이 마케팅 데이터나 자동화 솔루션을 원할 때 삐돌이를 클릭하면 관련 서비스가 펼쳐지는 형태.
+      </div>
+      <div class="item-list">
+        <div class="item">
+          <div class="item-icon">🌐</div>
+          <div class="item-text">
+            <strong>파편화 방지</strong>
+            <span class="sub">만들어진 AI 서비스가 흩어지면 누군 쓰고 누군 안 쓰다가 사라지는 문제 → 하나의 통합 인터페이스로 접근성 확보</span>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-icon">🎨</div>
+          <div class="item-text">
+            <strong>IP 정체성 활용</strong>
+            <span class="sub">요즘 트렌드인 AI 에이전트 개념을 우리 IP 특성과 결합. 재미있게 가자는 방향으로 의견 모음.</span>
+          </div>
+        </div>
+      </div>
+      <div class="chips">
+        <span class="chip purple">AI 에이전트</span>
+        <span class="chip purple">캐릭터 GUI</span>
+        <span class="chip blue">IP 활용</span>
+      </div>
+    </div>
+
+    <!-- 3. AX 사례 -->
+    <div class="section">
+      <div class="section-label">03 · AX 사례</div>
+      <div class="section-title">트루즈 이벤트 페이지 — 커머스 × 마케팅</div>
+      <div class="item-list">
+        <div class="item">
+          <div class="item-icon">📋</div>
+          <div class="item-text">
+            <strong>기존 방식</strong>
+            <span class="sub">엑셀에 텍스트만 정리해서 디자이너에게 전달 → 디자이너가 크리에이티브를 0부터 시작</span>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-icon">✨</div>
+          <div class="item-text">
+            <strong>새로운 방식 (이번 트루즈 사례)</strong>
+            <span class="sub">기획자가 HTML 페이지로 초벌 제작 후 디자이너에게 전달. 프레임이 잡혀 있어 디자이너의 필수 터치 포인트만 남음.</span>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-icon">📈</div>
+          <div class="item-text">
+            <strong>기대 효과</strong>
+            <span class="sub">업무 시간 단축 + 기획 의도 전달 이해도 강화. 실질적으로 MD 파일 제작 테스트 진행 예정.</span>
+          </div>
+        </div>
+      </div>
+      <div class="chips">
+        <span class="chip green">커머스팀</span>
+        <span class="chip green">마케팅팀</span>
+        <span class="chip blue">AX 사례</span>
+      </div>
+    </div>
+
+    <!-- 4. 액션 아이템 -->
+    <div class="section">
+      <div class="section-label">04 · 액션 아이템</div>
+      <div class="item-list">
+        <div class="action-item">
+          <span class="action-owner owner-dh">염동혁</span>
+          <div class="item-text">팀별 AI 에이전트 GUI 콘셉트 정리 — 캐릭터 설정 및 구조 초안 작성</div>
+        </div>
+        <div class="action-item">
+          <span class="action-owner owner-hr">장혜리</span>
+          <div class="item-text">MD 파일 활용 기획 초벌 워크플로우 테스트 진행</div>
+        </div>
+        <div class="action-item">
+          <span class="action-owner owner-all">공통</span>
+          <div class="item-text">각 팀 AI 사용 현황 인터뷰 스케줄 조율 시작</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
