@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI DESK — LINE FRIENDS SQUARE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #1a1025;
+    --desk: #2a1f3d;
+    --desk-edge: #1e1530;
+    --text: #f0eeff;
+    --text-2: rgba(240,238,255,0.5);
+    --text-3: rgba(240,238,255,0.25);
+    --divider: rgba(255,255,255,0.08);
+    --panel-bg: #211535;
+    --panel-surface: #2d1f47;
+  }
+
+  html, body {
+    background: var(--bg);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── 배경 ── */
+  .bg-scene {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(80,40,160,0.5) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 20% 60%, rgba(120,60,200,0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 40%, rgba(60,100,200,0.15) 0%, transparent 60%),
+      linear-gradient(180deg, #0d0818 0%, #1a1025 40%, #251540 100%);
+  }
+
+  /* 배경 광선 */
+  .bg-rays {
+    position: fixed; inset: 0; z-index: 0;
+    overflow: hidden;
+  }
+  .bg-ray {
+    position: absolute;
+    bottom: 0;
+    width: 3px;
+    transform-origin: bottom center;
+    opacity: 0.12;
+    filter: blur(2px);
+  }
+  .bg-ray:nth-child(1) { left: 15%; height: 70vh; background: linear-gradient(to top, #9b6dff, transparent); transform: rotate(-15deg); }
+  .bg-ray:nth-child(2) { left: 30%; height: 85vh; background: linear-gradient(to top, #c084fc, transparent); transform: rotate(-8deg); width: 6px; opacity: 0.1; }
+  .bg-ray:nth-child(3) { left: 50%; height: 90vh; background: linear-gradient(to top, #818cf8, transparent); transform: rotate(0deg); width: 8px; opacity: 0.15; }
+  .bg-ray:nth-child(4) { left: 65%; height: 80vh; background: linear-gradient(to top, #a78bfa, transparent); transform: rotate(8deg); width: 5px; }
+  .bg-ray:nth-child(5) { left: 80%; height: 65vh; background: linear-gradient(to top, #7c3aed, transparent); transform: rotate(15deg); }
+
+  /* ── Header ── */
+  .header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    height: 52px;
+    background: rgba(13,8,24,0.7);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--divider);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .header-logo { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-2); }
+  .header-sep  { width: 1px; height: 13px; background: var(--divider); }
+  .header-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.04em; }
+  .header-badge { padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; background: rgba(139,92,246,0.2); border: 1px solid rgba(139,92,246,0.3); color: #c4b5fd; }
+
+  /* ── Main layout ── */
+  .scene {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding-top: 52px;
+  }
+
+  /* ── Title area ── */
+  .title-area {
+    text-align: center;
+    padding: 48px 24px 0;
+    animation: fadeDown 0.6s ease forwards;
+  }
+
+  .title-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.2em;
+    text-transform: uppercase; color: #a78bfa;
+    margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .title-eyebrow::before, .title-eyebrow::after { content: ''; width: 20px; height: 1px; background: rgba(167,139,250,0.4); }
+
+  .title-main {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px; font-weight: 800;
+    letter-spacing: -0.02em; line-height: 1.1;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #e2d9ff 0%, #a78bfa 50%, #818cf8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .title-sub { font-size: 14px; color: var(--text-2); line-height: 1.6; }
+
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Panel (서비스 패널) ── */
+  .service-panel {
+    width: 100%;
+    max-width: 900px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+    display: none;
+    animation: fadeUp 0.25s ease forwards;
+  }
+  .service-panel.show { display: block; }
+
+  .sp-inner {
+    background: rgba(33,21,53,0.95);
+    border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+
+  .sp-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--divider);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sp-avatar { font-size: 28px; flex-shrink: 0; }
+  .sp-info   { flex: 1; }
+  .sp-name   { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .sp-sub    { font-size: 12px; color: var(--text-2); }
+  .sp-close  {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--divider);
+    color: var(--text-2); font-size: 12px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .sp-close:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+
+  .sp-services {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+  }
+
+  .sp-service {
+    padding: 20px 22px;
+    border-right: 1px solid var(--divider);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .sp-service:last-child { border-right: none; }
+  .sp-service:hover { background: rgba(139,92,246,0.08); }
+
+  .sp-svc-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(139,92,246,0.12);
+    border: 1px solid rgba(139,92,246,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 10px;
+  }
+  .sp-svc-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .sp-svc-desc { font-size: 11px; color: var(--text-2); line-height: 1.5; margin-bottom: 8px; }
+  .sp-svc-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+  .sp-svc-tag {
+    padding: 2px 7px; border-radius: 100px; font-size: 10px; font-weight: 600;
+    background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.2); color: #c4b5fd;
+  }
+
+  .sp-chat {
+    padding: 14px 20px; border-top: 1px solid var(--divider);
+    display: flex; gap: 8px; align-items: center;
+    background: rgba(255,255,255,0.02);
+  }
+  .sp-chat-input {
+    flex: 1; height: 36px; padding: 0 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--divider);
+    border-radius: 100px;
+    color: var(--text); font-size: 12px; font-family: inherit; outline: none;
+    transition: border-color 0.15s;
+  }
+  .sp-chat-input::placeholder { color: var(--text-3); }
+  .sp-chat-input:focus { border-color: rgba(139,92,246,0.4); }
+  .sp-chat-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #7c3aed; border: none; color: #fff;
+    font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: opacity 0.15s;
+  }
+  .sp-chat-btn:hover { opacity: 0.85; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── DESK SCENE ── */
+  .desk-scene {
+    width: 100%;
+    position: relative;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+
+  /* 책상 면 */
+  .desk-surface {
+    width: 100%;
+    height: 90px;
+    background: linear-gradient(180deg, #3d2b5e 0%, #2e1f4a 40%, #1e1530 100%);
+    position: relative;
+    box-shadow: 0 -4px 32px rgba(100,50,200,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  /* 책상 앞면 */
+  .desk-front {
+    width: 100%;
+    height: 40px;
+    background: linear-gradient(180deg, #1e1530 0%, #150f24 100%);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+
+  /* 캐릭터들 줄 */
+  .characters-row {
+    position: absolute;
+    bottom: 100%; /* 책상 위 */
+    left: 0; right: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0;
+    padding: 0 40px;
+  }
+
+  /* 개별 캐릭터 */
+  .char-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    flex: 1;
+    max-width: 140px;
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .char-wrap:hover { transform: translateY(-8px); }
+  .char-wrap.active { transform: translateY(-12px); }
+
+  /* 말풍선 */
+  .char-bubble {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%; transform: translateX(-50%);
+    background: rgba(255,255,255,0.95);
+    color: #1a1025;
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 11px; font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    transform: translateX(-50%) translateY(4px);
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .char-bubble::after {
+    content: '';
+    position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: rgba(255,255,255,0.95);
+  }
+
+  .char-wrap:hover .char-bubble {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* 노트북 */
+  .char-laptop {
+    width: 56px; height: 6px;
+    background: linear-gradient(180deg, #4a3060 0%, #3a2050 100%);
+    border-radius: 2px 2px 0 0;
+    position: relative;
+    margin-bottom: 0;
+    box-shadow: 0 -2px 8px rgba(100,50,200,0.2);
+  }
+
+  .char-laptop::before {
+    content: '';
+    position: absolute;
+    bottom: 100%; left: 3px; right: 3px;
+    height: 32px;
+    background: linear-gradient(180deg, #2a1f3d 0%, #1e1530 100%);
+    border-radius: 4px 4px 0 0;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-bottom: none;
+  }
+
+  .char-laptop::after {
+    content: '';
+    position: absolute;
+    bottom: 100%; left: 3px; right: 3px;
+    height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(99,102,241,0.3));
+    border-radius: 4px 4px 0 0;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-bottom: none;
+  }
+
+  /* 노트북 스크린 글로우 */
+  .laptop-screen {
+    position: absolute;
+    bottom: 6px; left: 3px; right: 3px;
+    height: 32px;
+    border-radius: 4px 4px 0 0;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-bottom: none;
+    background: linear-gradient(135deg, #1e0a3c, #0d1a3a);
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .laptop-screen::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(99,102,241,0.3));
+    animation: screenPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes screenPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  /* 캐릭터 바디 */
+  .char-body {
+    position: relative;
+    width: 64px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+    transition: filter 0.2s;
+    z-index: 2;
+    margin-bottom: -2px;
+  }
+
+  .char-wrap:hover .char-body { filter: drop-shadow(0 8px 20px rgba(139,92,246,0.4)); }
+  .char-wrap.active .char-body { filter: drop-shadow(0 8px 24px rgba(139,92,246,0.6)); }
+
+  /* 캐릭터 이름 */
+  .char-name {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    color: var(--text-2);
+    text-align: center;
+    position: absolute;
+    bottom: -18px;
+    left: 50%; transform: translateX(-50%);
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .char-wrap:hover .char-name { color: var(--text); }
+  .char-wrap.active .char-name { color: #c4b5fd; }
+
+  /* 상태 표시 */
+  .char-status {
+    width: 8px; height: 8px; border-radius: 50%;
+    position: absolute; top: 6px; right: 6px;
+    border: 1.5px solid rgba(13,8,24,0.8);
+    animation: statusPulse 2s ease-in-out infinite;
+  }
+  .s-online  { background: #4ade80; }
+  .s-busy    { background: #fb923c; }
+  .s-standby { background: #64748b; animation: none; }
+
+  @keyframes statusPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.4); } 50% { box-shadow: 0 0 0 4px rgba(74,222,128,0); } }
+
+  /* 책상 위 소품 */
+  .desk-props {
+    position: absolute;
+    bottom: 8px;
+    display: flex; align-items: flex-end; gap: 8px;
+  }
+  .desk-props.left  { left: 24px; }
+  .desk-props.right { right: 24px; }
+
+  .prop { font-size: 20px; opacity: 0.6; }
+  .prop-small { font-size: 14px; opacity: 0.4; }
+
+  /* 바닥 그림자 */
+  .desk-glow {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139,92,246,0.6), rgba(99,102,241,0.4), rgba(139,92,246,0.6), transparent);
+  }
+
+  /* ── Bottom request bar ── */
+  .request-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    padding: 12px 40px;
+    background: rgba(13,8,24,0.8);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--divider);
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .request-text { font-size: 12px; color: var(--text-2); }
+  .request-btn {
+    padding: 7px 16px; border-radius: 8px;
+    background: rgba(139,92,246,0.15);
+    border: 1px solid rgba(139,92,246,0.25);
+    color: #c4b5fd; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+  }
+  .request-btn:hover { background: rgba(139,92,246,0.25); }
+
+  @media (max-width: 768px) {
+    .characters-row { gap: 0; padding: 0 12px; }
+    .char-body { width: 48px; height: 48px; font-size: 28px; }
+    .char-laptop { width: 44px; }
+    .sp-services { grid-template-columns: 1fr; }
+    .sp-service { border-right: none; border-bottom: 1px solid var(--divider); }
+    .title-main { font-size: 28px; }
+    .header { padding: 0 20px; }
+    .request-bar { padding: 12px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-scene"></div>
+<div class="bg-rays">
+  <div class="bg-ray"></div>
+  <div class="bg-ray"></div>
+  <div class="bg-ray"></div>
+  <div class="bg-ray"></div>
+  <div class="bg-ray"></div>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <span class="header-logo">LINE FRIENDS SQUARE</span>
+    <div class="header-sep"></div>
+    <span class="header-title">AI DESK</span>
+  </div>
+  <span class="header-badge">Beta · AI TF</span>
+</header>
+
+<!-- Scene -->
+<div class="scene">
+
+  <!-- Title -->
+  <div class="title-area">
+    <div class="title-eyebrow">Character AI Agents</div>
+    <h1 class="title-main">팀의 AI를 만나보세요</h1>
+    <p class="title-sub">캐릭터를 클릭하면 해당 팀의 AI 서비스가 열립니다</p>
+  </div>
+
+  <!-- Service Panel -->
+  <div class="service-panel" id="servicePanel">
+    <div class="sp-inner">
+      <div class="sp-header">
+        <div class="sp-avatar" id="spAvatar"></div>
+        <div class="sp-info">
+          <div class="sp-name" id="spName"></div>
+          <div class="sp-sub" id="spSub"></div>
+        </div>
+        <button class="sp-close" onclick="closePanel()">✕</button>
+      </div>
+      <div class="sp-services" id="spServices"></div>
+      <div class="sp-chat">
+        <input class="sp-chat-input" type="text" id="spChatInput" placeholder="무엇이 궁금하세요?">
+        <button class="sp-chat-btn">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spacer -->
+  <div style="flex:1; min-height: 24px;"></div>
+
+  <!-- Desk Scene -->
+  <div class="desk-scene">
+    <div class="desk-surface">
+      <div class="desk-glow"></div>
+
+      <!-- 책상 소품 왼쪽 -->
+      <div class="desk-props left">
+        <span class="prop">☕</span>
+        <span class="prop-small">📎</span>
+      </div>
+
+      <!-- 책상 소품 오른쪽 -->
+      <div class="desk-props right">
+        <span class="prop-small">🖊</span>
+        <span class="prop">📱</span>
+      </div>
+
+      <!-- 캐릭터들 -->
+      <div class="characters-row">
+
+        <div class="char-wrap" onclick="openPanel('hr')" id="char-hr">
+          <div class="char-bubble">고슴도치 HR</div>
+          <div class="char-body">
+            🦔
+            <div class="char-status s-standby"></div>
+          </div>
+          <div style="position:relative; width:56px;">
+            <div class="laptop-screen"></div>
+            <div class="char-laptop"></div>
+          </div>
+          <div class="char-name">HR</div>
+        </div>
+
+        <div class="char-wrap" onclick="openPanel('logistics')" id="char-logistics">
+          <div class="char-bubble">코끼리 물류장</div>
+          <div class="char-body">
+            🐘
+            <div class="char-status s-standby"></div>
+          </div>
+          <div style="position:relative; width:56px;">
+            <div class="laptop-screen"></div>
+            <div class="char-laptop"></div>
+          </div>
+          <div class="char-name">물류</div>
+        </div>
+
+        <div class="char-wrap" onclick="openPanel('offline')" id="char-offline">
+          <div class="char-bubble">곰탱이 팀장</div>
+          <div class="char-body">
+            🐻
+            <div class="char-status s-busy"></div>
+          </div>
+          <div style="position:relative; width:56px;">
+            <div class="laptop-screen"></div>
+            <div class="char-laptop"></div>
+          </div>
+          <div class="char-name">오프라인</div>
+        </div>
+
+        <div class="char-wrap" onclick="openPanel('marketing')" id="char-marketing">
+          <div class="char-bubble">삐돌이 대리</div>
+          <div class="char-body" style="font-size:46px;">
+            🐧
+            <div class="char-status s-online"></div>
+          </div>
+          <div style="position:relative; width:64px;">
+            <div class="laptop-screen"></div>
+            <div class="char-laptop" style="width:64px;"></div>
+          </div>
+          <div class="char-name">마케팅</div>
+        </div>
+
+        <div class="char-wrap" onclick="openPanel('md')" id="char-md">
+          <div class="char-bubble">사자킹 MD</div>
+          <div class="char-body" style="font-size:50px; width:72px; height:72px;">
+            🦁
+            <div class="char-status s-online"></div>
+          </div>
+          <div style="position:relative; width:72px;">
+            <div class="laptop-screen" style="height:36px;"></div>
+            <div class="char-laptop" style="width:72px;"></div>
+          </div>
+          <div class="char-name">MD</div>
+        </div>
+
+        <div class="char-wrap" onclick="openPanel('commerce')" id="char-commerce">
+          <div class="char-bubble">여우비 매니저</div>
+          <div class="char-body" style="font-size:46px;">
+            🦊
+            <div class="char-status s-online"></div>
+          </div>
+          <div style="position:relative; width:64px;">
+            <div class="laptop-screen"></div>
+            <div class="char-laptop" style="width:64px;"></div>
+          </div>
+          <div class="char-name">커머스</div>
+        </div>
+
+        <div class="char-wrap" onclick="openPanel('b2b')" id="char-b2b">
+          <div class="char-bubble">독수리 대표</div>
+          <div class="char-body">
+            🦅
+            <div class="char-status s-online"></div>
+          </div>
+          <div style="position:relative; width:56px;">
+            <div class="laptop-screen"></div>
+            <div class="char-laptop"></div>
+          </div>
+          <div class="char-name">B2B</div>
+        </div>
+
+        <div class="char-wrap" onclick="openPanel('cx')" id="char-cx">
+          <div class="char-bubble">나비 크리에이터</div>
+          <div class="char-body">
+            🦋
+            <div class="char-status s-busy"></div>
+          </div>
+          <div style="position:relative; width:56px;">
+            <div class="laptop-screen"></div>
+            <div class="char-laptop"></div>
+          </div>
+          <div class="char-name">CX</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="desk-front"></div>
+  </div>
+
+</div>
+
+<!-- Bottom bar -->
+<div class="request-bar">
+  <span class="request-text">우리 팀 업무 자동화를 요청하고 싶다면</span>
+  <button class="request-btn">AI TF에게 요청하기 →</button>
+</div>
+
+<script>
+  const data = {
+    marketing: {
+      avatar: '🐧', name: '삐돌이 대리', sub: '마케팅팀 AI 에이전트 · 온라인',
+      services: [
+        { icon: '📊', name: '마케팅 대시보드', desc: '광고 성과, 유입 채널, 전환율 한눈에 확인', tags: ['GA4','Meta','ROAS'] },
+        { icon: '✍️', name: '콘텐츠 초안 생성', desc: '제품 특장점 입력하면 카피·SNS 문구 자동 생성', tags: ['Claude AI','카카오','인스타'] },
+        { icon: '📈', name: '광고 성과 분석', desc: '매체별 성과 비교 및 최적화 인사이트 리포트', tags: ['주간보고','자동화'] },
+      ]
+    },
+    commerce: {
+      avatar: '🦊', name: '여우비 매니저', sub: '커머스팀 AI 에이전트 · 온라인',
+      services: [
+        { icon: '🛍', name: '세일즈 대시보드', desc: '온/오프 채널별 매출·셀스루 실시간 현황', tags: ['셀스루','채널분석'] },
+        { icon: '📦', name: '상품 현황 조회', desc: 'IP별 판매 현황 및 재고 소진율 확인', tags: ['재고','OTB','소진율'] },
+        { icon: '🤖', name: '판매 예측', desc: '과거 데이터 기반 팝업 예상 매출 예측', tags: ['AI예측','팝업'] },
+      ]
+    },
+    offline: {
+      avatar: '🐻', name: '곰탱이 팀장', sub: '오프라인 세일즈 AI 에이전트 · 바쁨',
+      services: [
+        { icon: '🏬', name: '팝업 현황 관리', desc: '진행중·예정 팝업 일정, 목표 대비 현황', tags: ['팝업일정','매출목표'] },
+        { icon: '📋', name: '일일 판매 리포트', desc: '매장별 일별 판매 현황 자동 집계 및 공유', tags: ['자동리포트','일별'] },
+        { icon: '🎯', name: '프로모션 분석', desc: '프로모션별 효과 측정 및 다음 행사 제안', tags: ['프로모션','효과분석'] },
+      ]
+    },
+    md: {
+      avatar: '🦁', name: '사자킹 MD', sub: 'MD팀 AI 에이전트 · 온라인',
+      services: [
+        { icon: '📊', name: '발주량 예측', desc: 'IP·카테고리·특장점 입력 시 최적 발주량 산출', tags: ['AI예측','발주','OTB'] },
+        { icon: '📦', name: '재고 현황 분석', desc: 'SKU별 소진율, 이관 필요 품목 자동 감지', tags: ['재고','SKU','이관'] },
+        { icon: '📋', name: 'MD 업무 자동화', desc: '상품 등록, 상세페이지 초안 자동 생성', tags: ['상품등록','초안'] },
+      ]
+    },
+    b2b: {
+      avatar: '🦅', name: '독수리 대표', sub: 'B2B팀 AI 에이전트 · 온라인',
+      services: [
+        { icon: '📄', name: '제안서 자동화', desc: '거래처 정보 입력 시 맞춤 제안서 초안 생성', tags: ['제안서','자동화'] },
+        { icon: '🤝', name: '거래처 관리', desc: '계약 현황, 미팅 기록, 후속 알림 자동화', tags: ['CRM','계약','알림'] },
+        { icon: '📈', name: 'B2B 매출 현황', desc: '거래처별 월별 매출 현황 및 성장률 추적', tags: ['매출','트래킹'] },
+      ]
+    },
+    cx: {
+      avatar: '🦋', name: '나비 크리에이터', sub: 'CX팀 AI 에이전트 · 바쁨',
+      services: [
+        { icon: '📅', name: '촬영 스케줄 관리', desc: '포토/영상 촬영 일정 자동 정리 및 리마인드', tags: ['스케줄','촬영','알림'] },
+        { icon: '🖼', name: '에셋 현황', desc: 'IP별 보유 에셋 목록, 사용 현황, 재사용 파일', tags: ['에셋','파일관리'] },
+        { icon: '✨', name: 'AI 이미지 가이드', desc: '미드저니·Firefly 활용 가이드 및 프롬프트 라이브러리', tags: ['미드저니','Firefly'] },
+      ]
+    },
+    logistics: {
+      avatar: '🐘', name: '코끼리 물류장', sub: '물류팀 AI 에이전트 · 대기중',
+      services: [
+        { icon: '📦', name: '재고 트래킹', desc: '창고별 재고 현황, 입출고 내역 실시간 확인', tags: ['재고','창고','실시간'] },
+        { icon: '🚚', name: '배송 현황', desc: '주문별 배송 상태 추적 및 이슈 자동 감지', tags: ['배송','트래킹'] },
+        { icon: '📋', name: '물류 리포트', desc: '주간 입출고 자동 집계 및 이상 수량 알림', tags: ['리포트','자동화'] },
+      ]
+    },
+    hr: {
+      avatar: '🦔', name: '고슴도치 HR', sub: 'HR AI 에이전트 · 대기중',
+      services: [
+        { icon: '📢', name: '공지 자동 발송', desc: '전사 공지·일정 알림 슬랙/라인 자동 발송', tags: ['공지','자동발송'] },
+        { icon: '📅', name: '일정 관리', desc: '회사 주요 일정·행사·마감일 자동 정리 알림', tags: ['캘린더','일정','알림'] },
+        { icon: '📋', name: '인사 업무 자동화', desc: '반복 서류 작업, 온보딩 체크리스트 자동화', tags: ['온보딩','서류'] },
+      ]
+    },
+  };
+
+  let current = null;
+
+  function openPanel(team) {
+    const d = data[team];
+    if (!d) return;
+
+    document.querySelectorAll('.char-wrap').forEach(c => c.classList.remove('active'));
+    document.getElementById('char-' + team).classList.add('active');
+
+    document.getElementById('spAvatar').textContent = d.avatar;
+    document.getElementById('spName').textContent = d.name;
+    document.getElementById('spSub').textContent = d.sub;
+    document.getElementById('spChatInput').placeholder = `${d.name}에게 물어보세요...`;
+
+    document.getElementById('spServices').innerHTML = d.services.map(s => `
+      <div class="sp-service">
+        <div class="sp-svc-icon">${s.icon}</div>
+        <div class="sp-svc-name">${s.name}</div>
+        <div class="sp-svc-desc">${s.desc}</div>
+        <div class="sp-svc-tags">${s.tags.map(t => `<span class="sp-svc-tag">${t}</span>`).join('')}</div>
+      </div>
+    `).join('');
+
+    const panel = document.getElementById('servicePanel');
+    panel.classList.add('show');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    current = team;
+  }
+
+  function closePanel() {
+    document.getElementById('servicePanel').classList.remove('show');
+    document.querySelectorAll('.char-wrap').forEach(c => c.classList.remove('active'));
+    current = null;
+  }
+</script>
+
+</body>
+</html>
