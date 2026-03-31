@@ -353,13 +353,26 @@
   /* 캐릭터 바디 */
   .char-body {
     position: relative;
-    width: 64px; height: 64px;
+    width: 80px; height: 80px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 40px;
     filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
     transition: filter 0.2s;
     z-index: 2;
     margin-bottom: -2px;
+  }
+
+  .char-body img {
+    width: 80px; height: 80px;
+    object-fit: contain;
+    mix-blend-mode: lighten;
+    display: block;
+  }
+
+  .char-wrap.ceo .char-body {
+    width: 100px; height: 100px;
+  }
+  .char-wrap.ceo .char-body img {
+    width: 100px; height: 100px;
   }
 
   .char-wrap:hover .char-body { filter: drop-shadow(0 8px 20px rgba(139,92,246,0.4)); }
@@ -433,8 +446,10 @@
 
   @media (max-width: 768px) {
     .characters-row { gap: 0; padding: 0 12px; }
-    .char-body { width: 48px; height: 48px; font-size: 28px; }
-    .char-laptop { width: 44px; }
+    .char-body { width: 56px; height: 56px; }
+    .char-body img { width: 56px; height: 56px; }
+    .char-wrap.ceo .char-body, .char-wrap.ceo .char-body img { width: 70px; height: 70px; }
+    .char-laptop { width: 56px; }
     .sp-services { grid-template-columns: 1fr; }
     .sp-service { border-right: none; border-bottom: 1px solid var(--divider); }
     .title-main { font-size: 28px; }
@@ -519,12 +534,12 @@
         <div class="char-wrap" onclick="openPanel('hr')" id="char-hr">
           <div class="char-bubble">고슴도치 HR</div>
           <div class="char-body">
-            🦔
+            <img src="assets/characters/mkt.png" data-character="hr">
             <div class="char-status s-standby"></div>
           </div>
-          <div style="position:relative; width:56px;">
+          <div style="position:relative; width:80px;">
             <div class="laptop-screen"></div>
-            <div class="char-laptop"></div>
+            <div class="char-laptop" style="width:80px;"></div>
           </div>
           <div class="char-name">HR</div>
         </div>
@@ -532,12 +547,12 @@
         <div class="char-wrap" onclick="openPanel('logistics')" id="char-logistics">
           <div class="char-bubble">코끼리 물류장</div>
           <div class="char-body">
-            🐘
+            <img src="assets/characters/mkt.png" data-character="logistics">
             <div class="char-status s-standby"></div>
           </div>
-          <div style="position:relative; width:56px;">
+          <div style="position:relative; width:80px;">
             <div class="laptop-screen"></div>
-            <div class="char-laptop"></div>
+            <div class="char-laptop" style="width:80px;"></div>
           </div>
           <div class="char-name">물류</div>
         </div>
@@ -545,51 +560,64 @@
         <div class="char-wrap" onclick="openPanel('offline')" id="char-offline">
           <div class="char-bubble">곰탱이 팀장</div>
           <div class="char-body">
-            🐻
+            <img src="assets/characters/mkt.png" data-character="offline">
             <div class="char-status s-busy"></div>
           </div>
-          <div style="position:relative; width:56px;">
+          <div style="position:relative; width:80px;">
             <div class="laptop-screen"></div>
-            <div class="char-laptop"></div>
+            <div class="char-laptop" style="width:80px;"></div>
           </div>
           <div class="char-name">오프라인</div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('marketing')" id="char-marketing">
           <div class="char-bubble">삐돌이 대리</div>
-          <div class="char-body" style="font-size:46px;">
-            🐧
+          <div class="char-body">
+            <img src="assets/characters/mkt.png" data-character="marketing">
             <div class="char-status s-online"></div>
           </div>
-          <div style="position:relative; width:64px;">
+          <div style="position:relative; width:80px;">
             <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:64px;"></div>
+            <div class="char-laptop" style="width:80px;"></div>
           </div>
           <div class="char-name">마케팅</div>
         </div>
 
-        <div class="char-wrap" onclick="openPanel('md')" id="char-md">
-          <div class="char-bubble">사자킹 MD</div>
-          <div class="char-body" style="font-size:50px; width:72px; height:72px;">
-            🦁
+        <div class="char-wrap ceo" onclick="openPanel('ceo')" id="char-ceo">
+          <div class="char-bubble">구교철 대표</div>
+          <div class="char-body">
+            <img src="assets/characters/mkt.png" data-character="ceo">
             <div class="char-status s-online"></div>
           </div>
-          <div style="position:relative; width:72px;">
-            <div class="laptop-screen" style="height:36px;"></div>
-            <div class="char-laptop" style="width:72px;"></div>
+          <div style="position:relative; width:100px;">
+            <div class="laptop-screen"></div>
+            <div class="char-laptop" style="width:100px;"></div>
+          </div>
+          <div class="char-name">대표</div>
+        </div>
+
+        <div class="char-wrap" onclick="openPanel('md')" id="char-md">
+          <div class="char-bubble">사자킹 MD</div>
+          <div class="char-body">
+            <img src="assets/characters/mkt.png" data-character="md">
+            <div class="char-status s-online"></div>
+          </div>
+          <div style="position:relative; width:80px;">
+            <div class="laptop-screen"></div>
+            <div class="char-laptop" style="width:80px;"></div>
           </div>
           <div class="char-name">MD</div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('commerce')" id="char-commerce">
           <div class="char-bubble">여우비 매니저</div>
-          <div class="char-body" style="font-size:46px;">
-            🦊
+          <div class="char-body">
+            <img src="assets/characters/mkt.png" data-character="commerce">
             <div class="char-status s-online"></div>
           </div>
-          <div style="position:relative; width:64px;">
+          <div style="position:relative; width:80px;">
             <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:64px;"></div>
+            <div class="char-laptop" style="width:80px;"></div>
           </div>
           <div class="char-name">커머스</div>
         </div>
@@ -597,12 +625,12 @@
         <div class="char-wrap" onclick="openPanel('b2b')" id="char-b2b">
           <div class="char-bubble">독수리 대표</div>
           <div class="char-body">
-            🦅
+            <img src="assets/characters/mkt.png" data-character="b2b">
             <div class="char-status s-online"></div>
           </div>
-          <div style="position:relative; width:56px;">
+          <div style="position:relative; width:80px;">
             <div class="laptop-screen"></div>
-            <div class="char-laptop"></div>
+            <div class="char-laptop" style="width:80px;"></div>
           </div>
           <div class="char-name">B2B</div>
         </div>
@@ -610,12 +638,12 @@
         <div class="char-wrap" onclick="openPanel('cx')" id="char-cx">
           <div class="char-bubble">나비 크리에이터</div>
           <div class="char-body">
-            🦋
+            <img src="assets/characters/mkt.png" data-character="cx">
             <div class="char-status s-busy"></div>
           </div>
-          <div style="position:relative; width:56px;">
+          <div style="position:relative; width:80px;">
             <div class="laptop-screen"></div>
-            <div class="char-laptop"></div>
+            <div class="char-laptop" style="width:80px;"></div>
           </div>
           <div class="char-name">CX</div>
         </div>
@@ -635,8 +663,15 @@
 
 <script>
   const data = {
+    ceo: {
+      character: 'ceo', name: '구교철 대표', sub: 'CEO · 온라인',
+      services: [
+        { icon: '📋', name: '대표 지시사항', desc: 'TF 방향 및 이번 주 대표 지시사항 확인', tags: ['방향','우선순위','TF'] },
+        { icon: '📊', name: '주간 브리핑', desc: '전사 주요 KPI 및 이슈 자동 요약 리포트', tags: ['KPI','브리핑','주간'] },
+      ]
+    },
     marketing: {
-      avatar: '🐧', name: '삐돌이 대리', sub: '마케팅팀 AI 에이전트 · 온라인',
+      character: 'marketing', name: '삐돌이 대리', sub: '마케팅팀 AI 에이전트 · 온라인',
       services: [
         { icon: '📊', name: '마케팅 대시보드', desc: '광고 성과, 유입 채널, 전환율 한눈에 확인', tags: ['GA4','Meta','ROAS'] },
         { icon: '✍️', name: '콘텐츠 초안 생성', desc: '제품 특장점 입력하면 카피·SNS 문구 자동 생성', tags: ['Claude AI','카카오','인스타'] },
@@ -644,7 +679,7 @@
       ]
     },
     commerce: {
-      avatar: '🦊', name: '여우비 매니저', sub: '커머스팀 AI 에이전트 · 온라인',
+      character: 'commerce', name: '여우비 매니저', sub: '커머스팀 AI 에이전트 · 온라인',
       services: [
         { icon: '🛍', name: '세일즈 대시보드', desc: '온/오프 채널별 매출·셀스루 실시간 현황', tags: ['셀스루','채널분석'] },
         { icon: '📦', name: '상품 현황 조회', desc: 'IP별 판매 현황 및 재고 소진율 확인', tags: ['재고','OTB','소진율'] },
@@ -652,7 +687,7 @@
       ]
     },
     offline: {
-      avatar: '🐻', name: '곰탱이 팀장', sub: '오프라인 세일즈 AI 에이전트 · 바쁨',
+      character: 'offline', name: '곰탱이 팀장', sub: '오프라인 세일즈 AI 에이전트 · 바쁨',
       services: [
         { icon: '🏬', name: '팝업 현황 관리', desc: '진행중·예정 팝업 일정, 목표 대비 현황', tags: ['팝업일정','매출목표'] },
         { icon: '📋', name: '일일 판매 리포트', desc: '매장별 일별 판매 현황 자동 집계 및 공유', tags: ['자동리포트','일별'] },
@@ -660,7 +695,7 @@
       ]
     },
     md: {
-      avatar: '🦁', name: '사자킹 MD', sub: 'MD팀 AI 에이전트 · 온라인',
+      character: 'md', name: '사자킹 MD', sub: 'MD팀 AI 에이전트 · 온라인',
       services: [
         { icon: '📊', name: '발주량 예측', desc: 'IP·카테고리·특장점 입력 시 최적 발주량 산출', tags: ['AI예측','발주','OTB'] },
         { icon: '📦', name: '재고 현황 분석', desc: 'SKU별 소진율, 이관 필요 품목 자동 감지', tags: ['재고','SKU','이관'] },
@@ -668,7 +703,7 @@
       ]
     },
     b2b: {
-      avatar: '🦅', name: '독수리 대표', sub: 'B2B팀 AI 에이전트 · 온라인',
+      character: 'b2b', name: '독수리 대표', sub: 'B2B팀 AI 에이전트 · 온라인',
       services: [
         { icon: '📄', name: '제안서 자동화', desc: '거래처 정보 입력 시 맞춤 제안서 초안 생성', tags: ['제안서','자동화'] },
         { icon: '🤝', name: '거래처 관리', desc: '계약 현황, 미팅 기록, 후속 알림 자동화', tags: ['CRM','계약','알림'] },
@@ -676,7 +711,7 @@
       ]
     },
     cx: {
-      avatar: '🦋', name: '나비 크리에이터', sub: 'CX팀 AI 에이전트 · 바쁨',
+      character: 'cx', name: '나비 크리에이터', sub: 'CX팀 AI 에이전트 · 바쁨',
       services: [
         { icon: '📅', name: '촬영 스케줄 관리', desc: '포토/영상 촬영 일정 자동 정리 및 리마인드', tags: ['스케줄','촬영','알림'] },
         { icon: '🖼', name: '에셋 현황', desc: 'IP별 보유 에셋 목록, 사용 현황, 재사용 파일', tags: ['에셋','파일관리'] },
@@ -684,7 +719,7 @@
       ]
     },
     logistics: {
-      avatar: '🐘', name: '코끼리 물류장', sub: '물류팀 AI 에이전트 · 대기중',
+      character: 'logistics', name: '코끼리 물류장', sub: '물류팀 AI 에이전트 · 대기중',
       services: [
         { icon: '📦', name: '재고 트래킹', desc: '창고별 재고 현황, 입출고 내역 실시간 확인', tags: ['재고','창고','실시간'] },
         { icon: '🚚', name: '배송 현황', desc: '주문별 배송 상태 추적 및 이슈 자동 감지', tags: ['배송','트래킹'] },
@@ -692,7 +727,7 @@
       ]
     },
     hr: {
-      avatar: '🦔', name: '고슴도치 HR', sub: 'HR AI 에이전트 · 대기중',
+      character: 'hr', name: '고슴도치 HR', sub: 'HR AI 에이전트 · 대기중',
       services: [
         { icon: '📢', name: '공지 자동 발송', desc: '전사 공지·일정 알림 슬랙/라인 자동 발송', tags: ['공지','자동발송'] },
         { icon: '📅', name: '일정 관리', desc: '회사 주요 일정·행사·마감일 자동 정리 알림', tags: ['캘린더','일정','알림'] },
@@ -710,7 +745,7 @@
     document.querySelectorAll('.char-wrap').forEach(c => c.classList.remove('active'));
     document.getElementById('char-' + team).classList.add('active');
 
-    document.getElementById('spAvatar').textContent = d.avatar;
+    document.getElementById('spAvatar').innerHTML = `<img src="assets/characters/mkt.png" data-character="${d.character}" style="width:36px;height:36px;object-fit:contain;mix-blend-mode:lighten;">`;
     document.getElementById('spName').textContent = d.name;
     document.getElementById('spSub').textContent = d.sub;
     document.getElementById('spChatInput').placeholder = `${d.name}에게 물어보세요...`;
