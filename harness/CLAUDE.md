@@ -1,6 +1,6 @@
-# AI TF 아이디어 구체화 오케스트레이터
+# AX TF 아이디어 구체화 오케스트레이터
 
-이 프로젝트는 LINE FRIENDS SQUARE AI TF 전용 3-Agent 하네스 구조로 동작합니다.
+이 프로젝트는 LINE FRIENDS SQUARE AX TF 전용 3-Agent 하네스 구조로 동작합니다.
 TF에서 나온 아이디어를 받아, Planner → Generator → Evaluator 파이프라인으로 실무 목업을 자동 생성합니다.
 
 목적: 아이디어를 HTML 프로토타입으로 빠르게 구체화하고, TF 착수 기준과 사용성 기준으로 검수.

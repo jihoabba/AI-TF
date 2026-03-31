@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * AI TF — 인덱스 자동 빌드 스크립트
+ * AX TF — 인덱스 자동 빌드 스크립트
  *
  * reports/, idea/, meeting-notes/ 폴더의 HTML 파일을 스캔하여
  * 각 파일의 <meta name="tf-*"> 태그를 읽고 index.html의
