@@ -16,15 +16,14 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #1a1025;
-    --desk: #2a1f3d;
-    --desk-edge: #1e1530;
-    --text: #f0eeff;
-    --text-2: rgba(240,238,255,0.5);
-    --text-3: rgba(240,238,255,0.25);
-    --divider: rgba(255,255,255,0.08);
-    --panel-bg: #211535;
-    --panel-surface: #2d1f47;
+    --bg: #f0f0f5;
+    --text: #1d1d1f;
+    --text-2: rgba(29,29,31,0.5);
+    --text-3: rgba(29,29,31,0.25);
+    --divider: rgba(0,0,0,0.08);
+    --panel-bg: #ffffff;
+    --panel-surface: #f5f5f7;
+    --accent: #0071e3;
   }
 
   html, body {
@@ -39,38 +38,16 @@
   /* ── 배경 ── */
   .bg-scene {
     position: fixed; inset: 0; z-index: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(80,40,160,0.5) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 40% at 20% 60%, rgba(120,60,200,0.2) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 30% at 80% 40%, rgba(60,100,200,0.15) 0%, transparent 60%),
-      linear-gradient(180deg, #0d0818 0%, #1a1025 40%, #251540 100%);
+    background: var(--bg);
   }
-
-  /* 배경 광선 */
-  .bg-rays {
-    position: fixed; inset: 0; z-index: 0;
-    overflow: hidden;
-  }
-  .bg-ray {
-    position: absolute;
-    bottom: 0;
-    width: 3px;
-    transform-origin: bottom center;
-    opacity: 0.12;
-    filter: blur(2px);
-  }
-  .bg-ray:nth-child(1) { left: 15%; height: 70vh; background: linear-gradient(to top, #9b6dff, transparent); transform: rotate(-15deg); }
-  .bg-ray:nth-child(2) { left: 30%; height: 85vh; background: linear-gradient(to top, #c084fc, transparent); transform: rotate(-8deg); width: 6px; opacity: 0.1; }
-  .bg-ray:nth-child(3) { left: 50%; height: 90vh; background: linear-gradient(to top, #818cf8, transparent); transform: rotate(0deg); width: 8px; opacity: 0.15; }
-  .bg-ray:nth-child(4) { left: 65%; height: 80vh; background: linear-gradient(to top, #a78bfa, transparent); transform: rotate(8deg); width: 5px; }
-  .bg-ray:nth-child(5) { left: 80%; height: 65vh; background: linear-gradient(to top, #7c3aed, transparent); transform: rotate(15deg); }
 
   /* ── Header ── */
   .header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 200;
     height: 52px;
-    background: rgba(13,8,24,0.7);
+    background: rgba(255,255,255,0.8);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--divider);
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 40px;
@@ -79,7 +56,7 @@
   .header-logo { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-2); }
   .header-sep  { width: 1px; height: 13px; background: var(--divider); }
   .header-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.04em; }
-  .header-badge { padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; background: rgba(139,92,246,0.2); border: 1px solid rgba(139,92,246,0.3); color: #c4b5fd; }
+  .header-badge { padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; background: rgba(0,113,227,0.1); border: 1px solid rgba(0,113,227,0.2); color: #0071e3; }
 
   /* ── Main layout ── */
   .scene {
@@ -99,20 +76,18 @@
 
   .title-eyebrow {
     font-size: 11px; font-weight: 600; letter-spacing: 0.2em;
-    text-transform: uppercase; color: #a78bfa;
+    text-transform: uppercase; color: var(--accent);
     margin-bottom: 14px;
     display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .title-eyebrow::before, .title-eyebrow::after { content: ''; width: 20px; height: 1px; background: rgba(167,139,250,0.4); }
+  .title-eyebrow::before, .title-eyebrow::after { content: ''; width: 20px; height: 1px; background: rgba(0,113,227,0.3); }
 
   .title-main {
     font-family: 'Syne', sans-serif;
     font-size: 42px; font-weight: 800;
     letter-spacing: -0.02em; line-height: 1.1;
     margin-bottom: 12px;
-    background: linear-gradient(135deg, #e2d9ff 0%, #a78bfa 50%, #818cf8 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text);
   }
 
   .title-sub { font-size: 14px; color: var(--text-2); line-height: 1.6; }
@@ -131,12 +106,11 @@
   .service-panel.show { display: block; }
 
   .sp-inner {
-    background: rgba(33,21,53,0.95);
-    border: 1px solid rgba(139,92,246,0.25);
+    background: #ffffff;
+    border: 1px solid var(--divider);
     border-radius: 20px;
-    backdrop-filter: blur(20px);
     overflow: hidden;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06);
   }
 
   .sp-header {
@@ -150,12 +124,12 @@
   .sp-sub    { font-size: 12px; color: var(--text-2); }
   .sp-close  {
     width: 28px; height: 28px; border-radius: 50%;
-    background: rgba(255,255,255,0.06); border: 1px solid var(--divider);
+    background: rgba(0,0,0,0.05); border: 1px solid var(--divider);
     color: var(--text-2); font-size: 12px;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     transition: all 0.15s;
   }
-  .sp-close:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+  .sp-close:hover { background: rgba(0,0,0,0.1); color: var(--text); }
 
   .sp-services {
     display: grid; grid-template-columns: repeat(3, 1fr);
@@ -168,12 +142,12 @@
     transition: background 0.15s;
   }
   .sp-service:last-child { border-right: none; }
-  .sp-service:hover { background: rgba(139,92,246,0.08); }
+  .sp-service:hover { background: rgba(0,113,227,0.04); }
 
   .sp-svc-icon {
     width: 38px; height: 38px; border-radius: 10px;
-    background: rgba(139,92,246,0.12);
-    border: 1px solid rgba(139,92,246,0.2);
+    background: rgba(0,113,227,0.08);
+    border: 1px solid rgba(0,113,227,0.15);
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; margin-bottom: 10px;
   }
@@ -182,27 +156,27 @@
   .sp-svc-tags { display: flex; flex-wrap: wrap; gap: 3px; }
   .sp-svc-tag {
     padding: 2px 7px; border-radius: 100px; font-size: 10px; font-weight: 600;
-    background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.2); color: #c4b5fd;
+    background: rgba(0,113,227,0.08); border: 1px solid rgba(0,113,227,0.15); color: #0071e3;
   }
 
   .sp-chat {
     padding: 14px 20px; border-top: 1px solid var(--divider);
     display: flex; gap: 8px; align-items: center;
-    background: rgba(255,255,255,0.02);
+    background: var(--panel-surface);
   }
   .sp-chat-input {
     flex: 1; height: 36px; padding: 0 14px;
-    background: rgba(255,255,255,0.05);
+    background: #ffffff;
     border: 1px solid var(--divider);
     border-radius: 100px;
     color: var(--text); font-size: 12px; font-family: inherit; outline: none;
     transition: border-color 0.15s;
   }
   .sp-chat-input::placeholder { color: var(--text-3); }
-  .sp-chat-input:focus { border-color: rgba(139,92,246,0.4); }
+  .sp-chat-input:focus { border-color: rgba(0,113,227,0.5); }
   .sp-chat-btn {
     width: 36px; height: 36px; border-radius: 50%;
-    background: #7c3aed; border: none; color: #fff;
+    background: #0071e3; border: none; color: #fff;
     font-size: 14px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; transition: opacity 0.15s;
@@ -223,17 +197,17 @@
   .desk-surface {
     width: 100%;
     height: 90px;
-    background: linear-gradient(180deg, #3d2b5e 0%, #2e1f4a 40%, #1e1530 100%);
+    background: linear-gradient(180deg, #e8c07a 0%, #d4a96a 50%, #c49558 100%);
     position: relative;
-    box-shadow: 0 -4px 32px rgba(100,50,200,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+    box-shadow: 0 -4px 24px rgba(160,100,30,0.2), inset 0 1px 0 rgba(255,255,255,0.35);
   }
 
   /* 책상 앞면 */
   .desk-front {
     width: 100%;
     height: 40px;
-    background: linear-gradient(180deg, #1e1530 0%, #150f24 100%);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    background: linear-gradient(180deg, #b8935a 0%, #a07845 100%);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   }
 
   /* 캐릭터들 줄 */
@@ -295,11 +269,11 @@
   /* 노트북 */
   .char-laptop {
     width: 56px; height: 6px;
-    background: linear-gradient(180deg, #4a3060 0%, #3a2050 100%);
+    background: linear-gradient(180deg, #c49558 0%, #a87840 100%);
     border-radius: 2px 2px 0 0;
     position: relative;
     margin-bottom: 0;
-    box-shadow: 0 -2px 8px rgba(100,50,200,0.2);
+    box-shadow: 0 -2px 6px rgba(150,100,30,0.2);
   }
 
   .char-laptop::before {
@@ -307,9 +281,9 @@
     position: absolute;
     bottom: 100%; left: 3px; right: 3px;
     height: 32px;
-    background: linear-gradient(180deg, #2a1f3d 0%, #1e1530 100%);
+    background: linear-gradient(180deg, #e8e8ed 0%, #d8d8dd 100%);
     border-radius: 4px 4px 0 0;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(0,0,0,0.1);
     border-bottom: none;
   }
 
@@ -319,21 +293,21 @@
     bottom: 100%; left: 3px; right: 3px;
     height: 32px;
     display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(99,102,241,0.3));
+    background: linear-gradient(135deg, rgba(0,113,227,0.12), rgba(99,149,255,0.08));
     border-radius: 4px 4px 0 0;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(0,0,0,0.1);
     border-bottom: none;
   }
 
-  /* 노트북 스크린 글로우 */
+  /* 노트북 스크린 */
   .laptop-screen {
     position: absolute;
     bottom: 6px; left: 3px; right: 3px;
     height: 32px;
     border-radius: 4px 4px 0 0;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(0,0,0,0.1);
     border-bottom: none;
-    background: linear-gradient(135deg, #1e0a3c, #0d1a3a);
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
     overflow: hidden;
     display: flex; align-items: center; justify-content: center;
   }
@@ -341,7 +315,7 @@
   .laptop-screen::after {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(99,102,241,0.3));
+    background: linear-gradient(135deg, rgba(0,113,227,0.2), rgba(99,149,255,0.1));
     animation: screenPulse 3s ease-in-out infinite;
   }
 
@@ -364,7 +338,7 @@
   .char-body img {
     width: 80px; height: 80px;
     object-fit: contain;
-    mix-blend-mode: lighten;
+    mix-blend-mode: multiply;
     display: block;
   }
 
@@ -375,8 +349,8 @@
     width: 100px; height: 100px;
   }
 
-  .char-wrap:hover .char-body { filter: drop-shadow(0 8px 20px rgba(139,92,246,0.4)); }
-  .char-wrap.active .char-body { filter: drop-shadow(0 8px 24px rgba(139,92,246,0.6)); }
+  .char-wrap:hover .char-body { filter: drop-shadow(0 8px 20px rgba(0,0,0,0.2)); }
+  .char-wrap.active .char-body { filter: drop-shadow(0 8px 24px rgba(0,113,227,0.3)); }
 
   /* 캐릭터 이름 */
   .char-name {
@@ -390,13 +364,13 @@
     transition: color 0.2s;
   }
   .char-wrap:hover .char-name { color: var(--text); }
-  .char-wrap.active .char-name { color: #c4b5fd; }
+  .char-wrap.active .char-name { color: var(--accent); }
 
   /* 상태 표시 */
   .char-status {
     width: 8px; height: 8px; border-radius: 50%;
     position: absolute; top: 6px; right: 6px;
-    border: 1.5px solid rgba(13,8,24,0.8);
+    border: 1.5px solid rgba(255,255,255,0.9);
     animation: statusPulse 2s ease-in-out infinite;
   }
   .s-online  { background: #4ade80; }
@@ -422,27 +396,28 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(139,92,246,0.6), rgba(99,102,241,0.4), rgba(139,92,246,0.6), transparent);
+    background: linear-gradient(90deg, transparent, rgba(212,169,106,0.8), rgba(232,192,122,0.6), rgba(212,169,106,0.8), transparent);
   }
 
   /* ── Bottom request bar ── */
   .request-bar {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
     padding: 12px 40px;
-    background: rgba(13,8,24,0.8);
+    background: rgba(255,255,255,0.85);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--divider);
     display: flex; align-items: center; justify-content: center; gap: 12px;
   }
   .request-text { font-size: 12px; color: var(--text-2); }
   .request-btn {
     padding: 7px 16px; border-radius: 8px;
-    background: rgba(139,92,246,0.15);
-    border: 1px solid rgba(139,92,246,0.25);
-    color: #c4b5fd; font-size: 12px; font-weight: 600;
-    cursor: pointer; font-family: inherit; transition: all 0.15s;
+    background: #0071e3;
+    border: none;
+    color: #fff; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: opacity 0.15s;
   }
-  .request-btn:hover { background: rgba(139,92,246,0.25); }
+  .request-btn:hover { opacity: 0.85; }
 
   @media (max-width: 768px) {
     .characters-row { gap: 0; padding: 0 12px; }
@@ -461,13 +436,6 @@
 <body>
 
 <div class="bg-scene"></div>
-<div class="bg-rays">
-  <div class="bg-ray"></div>
-  <div class="bg-ray"></div>
-  <div class="bg-ray"></div>
-  <div class="bg-ray"></div>
-  <div class="bg-ray"></div>
-</div>
 
 <!-- Header -->
 <header class="header">
@@ -516,135 +484,96 @@
     <div class="desk-surface">
       <div class="desk-glow"></div>
 
-      <!-- 책상 소품 왼쪽 -->
-      <div class="desk-props left">
-        <span class="prop">☕</span>
-        <span class="prop-small">📎</span>
-      </div>
-
-      <!-- 책상 소품 오른쪽 -->
-      <div class="desk-props right">
-        <span class="prop-small">🖊</span>
-        <span class="prop">📱</span>
-      </div>
-
       <!-- 캐릭터들 -->
       <div class="characters-row">
 
         <div class="char-wrap" onclick="openPanel('hr')" id="char-hr">
-          <div class="char-bubble">고슴도치 HR</div>
+          <div class="char-bubble">HR</div>
           <div class="char-body">
-            <img src="assets/characters/mkt.png" data-character="hr">
+            <img src="assets/characters/hr.png" data-character="hr">
             <div class="char-status s-standby"></div>
           </div>
-          <div style="position:relative; width:80px;">
-            <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:80px;"></div>
-          </div>
+
           <div class="char-name">HR</div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('logistics')" id="char-logistics">
-          <div class="char-bubble">코끼리 물류장</div>
+          <div class="char-bubble">물류</div>
           <div class="char-body">
-            <img src="assets/characters/mkt.png" data-character="logistics">
+            <img src="assets/characters/logistic.png" data-character="logistics">
             <div class="char-status s-standby"></div>
           </div>
-          <div style="position:relative; width:80px;">
-            <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:80px;"></div>
-          </div>
+
           <div class="char-name">물류</div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('offline')" id="char-offline">
-          <div class="char-bubble">곰탱이 팀장</div>
+          <div class="char-bubble">오프라인</div>
           <div class="char-body">
-            <img src="assets/characters/mkt.png" data-character="offline">
+            <img src="assets/characters/offline.png" data-character="offline">
             <div class="char-status s-busy"></div>
           </div>
-          <div style="position:relative; width:80px;">
-            <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:80px;"></div>
-          </div>
+
           <div class="char-name">오프라인</div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('marketing')" id="char-marketing">
-          <div class="char-bubble">삐돌이 대리</div>
+          <div class="char-bubble">마케팅</div>
           <div class="char-body">
             <img src="assets/characters/mkt.png" data-character="marketing">
             <div class="char-status s-online"></div>
           </div>
-          <div style="position:relative; width:80px;">
-            <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:80px;"></div>
-          </div>
+
           <div class="char-name">마케팅</div>
         </div>
 
         <div class="char-wrap ceo" onclick="openPanel('ceo')" id="char-ceo">
-          <div class="char-bubble">구교철 대표</div>
+          <div class="char-bubble">대표</div>
           <div class="char-body">
-            <img src="assets/characters/mkt.png" data-character="ceo">
+            <img src="assets/characters/ceo.png" data-character="ceo">
             <div class="char-status s-online"></div>
           </div>
-          <div style="position:relative; width:100px;">
-            <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:100px;"></div>
-          </div>
+
           <div class="char-name">대표</div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('md')" id="char-md">
-          <div class="char-bubble">사자킹 MD</div>
+          <div class="char-bubble">MD</div>
           <div class="char-body">
-            <img src="assets/characters/mkt.png" data-character="md">
+            <img src="assets/characters/md.png" data-character="md">
             <div class="char-status s-online"></div>
           </div>
-          <div style="position:relative; width:80px;">
-            <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:80px;"></div>
-          </div>
+
           <div class="char-name">MD</div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('commerce')" id="char-commerce">
-          <div class="char-bubble">여우비 매니저</div>
+          <div class="char-bubble">커머스</div>
           <div class="char-body">
-            <img src="assets/characters/mkt.png" data-character="commerce">
+            <img src="assets/characters/commerce.png" data-character="commerce">
             <div class="char-status s-online"></div>
           </div>
-          <div style="position:relative; width:80px;">
-            <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:80px;"></div>
-          </div>
+
           <div class="char-name">커머스</div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('b2b')" id="char-b2b">
-          <div class="char-bubble">독수리 대표</div>
+          <div class="char-bubble">B2B</div>
           <div class="char-body">
-            <img src="assets/characters/mkt.png" data-character="b2b">
+            <img src="assets/characters/b2b.png" data-character="b2b">
             <div class="char-status s-online"></div>
           </div>
-          <div style="position:relative; width:80px;">
-            <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:80px;"></div>
-          </div>
+
           <div class="char-name">B2B</div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('cx')" id="char-cx">
-          <div class="char-bubble">나비 크리에이터</div>
+          <div class="char-bubble">CX</div>
           <div class="char-body">
-            <img src="assets/characters/mkt.png" data-character="cx">
+            <img src="assets/characters/cx.png" data-character="cx">
             <div class="char-status s-busy"></div>
           </div>
-          <div style="position:relative; width:80px;">
-            <div class="laptop-screen"></div>
-            <div class="char-laptop" style="width:80px;"></div>
-          </div>
+
           <div class="char-name">CX</div>
         </div>
 
@@ -664,14 +593,14 @@
 <script>
   const data = {
     ceo: {
-      character: 'ceo', name: '구교철 대표', sub: 'CEO · 온라인',
+      character: 'ceo', name: '대표', sub: 'CEO · 온라인',
       services: [
         { icon: '📋', name: '대표 지시사항', desc: 'TF 방향 및 이번 주 대표 지시사항 확인', tags: ['방향','우선순위','TF'] },
         { icon: '📊', name: '주간 브리핑', desc: '전사 주요 KPI 및 이슈 자동 요약 리포트', tags: ['KPI','브리핑','주간'] },
       ]
     },
     marketing: {
-      character: 'marketing', name: '삐돌이 대리', sub: '마케팅팀 AI 에이전트 · 온라인',
+      character: 'marketing', name: '마케팅', sub: '마케팅팀 AI 에이전트 · 온라인',
       services: [
         { icon: '📊', name: '마케팅 대시보드', desc: '광고 성과, 유입 채널, 전환율 한눈에 확인', tags: ['GA4','Meta','ROAS'] },
         { icon: '✍️', name: '콘텐츠 초안 생성', desc: '제품 특장점 입력하면 카피·SNS 문구 자동 생성', tags: ['Claude AI','카카오','인스타'] },
@@ -679,7 +608,7 @@
       ]
     },
     commerce: {
-      character: 'commerce', name: '여우비 매니저', sub: '커머스팀 AI 에이전트 · 온라인',
+      character: 'commerce', name: '커머스', sub: '커머스팀 AI 에이전트 · 온라인',
       services: [
         { icon: '🛍', name: '세일즈 대시보드', desc: '온/오프 채널별 매출·셀스루 실시간 현황', tags: ['셀스루','채널분석'] },
         { icon: '📦', name: '상품 현황 조회', desc: 'IP별 판매 현황 및 재고 소진율 확인', tags: ['재고','OTB','소진율'] },
@@ -687,7 +616,7 @@
       ]
     },
     offline: {
-      character: 'offline', name: '곰탱이 팀장', sub: '오프라인 세일즈 AI 에이전트 · 바쁨',
+      character: 'offline', name: '오프라인', sub: '오프라인 세일즈 AI 에이전트 · 바쁨',
       services: [
         { icon: '🏬', name: '팝업 현황 관리', desc: '진행중·예정 팝업 일정, 목표 대비 현황', tags: ['팝업일정','매출목표'] },
         { icon: '📋', name: '일일 판매 리포트', desc: '매장별 일별 판매 현황 자동 집계 및 공유', tags: ['자동리포트','일별'] },
@@ -695,7 +624,7 @@
       ]
     },
     md: {
-      character: 'md', name: '사자킹 MD', sub: 'MD팀 AI 에이전트 · 온라인',
+      character: 'md', name: 'MD', sub: 'MD팀 AI 에이전트 · 온라인',
       services: [
         { icon: '📊', name: '발주량 예측', desc: 'IP·카테고리·특장점 입력 시 최적 발주량 산출', tags: ['AI예측','발주','OTB'] },
         { icon: '📦', name: '재고 현황 분석', desc: 'SKU별 소진율, 이관 필요 품목 자동 감지', tags: ['재고','SKU','이관'] },
@@ -703,7 +632,7 @@
       ]
     },
     b2b: {
-      character: 'b2b', name: '독수리 대표', sub: 'B2B팀 AI 에이전트 · 온라인',
+      character: 'b2b', name: 'B2B', sub: 'B2B팀 AI 에이전트 · 온라인',
       services: [
         { icon: '📄', name: '제안서 자동화', desc: '거래처 정보 입력 시 맞춤 제안서 초안 생성', tags: ['제안서','자동화'] },
         { icon: '🤝', name: '거래처 관리', desc: '계약 현황, 미팅 기록, 후속 알림 자동화', tags: ['CRM','계약','알림'] },
@@ -711,7 +640,7 @@
       ]
     },
     cx: {
-      character: 'cx', name: '나비 크리에이터', sub: 'CX팀 AI 에이전트 · 바쁨',
+      character: 'cx', name: 'CX', sub: 'CX팀 AI 에이전트 · 바쁨',
       services: [
         { icon: '📅', name: '촬영 스케줄 관리', desc: '포토/영상 촬영 일정 자동 정리 및 리마인드', tags: ['스케줄','촬영','알림'] },
         { icon: '🖼', name: '에셋 현황', desc: 'IP별 보유 에셋 목록, 사용 현황, 재사용 파일', tags: ['에셋','파일관리'] },
@@ -719,7 +648,7 @@
       ]
     },
     logistics: {
-      character: 'logistics', name: '코끼리 물류장', sub: '물류팀 AI 에이전트 · 대기중',
+      character: 'logistics', name: '물류', sub: '물류팀 AI 에이전트 · 대기중',
       services: [
         { icon: '📦', name: '재고 트래킹', desc: '창고별 재고 현황, 입출고 내역 실시간 확인', tags: ['재고','창고','실시간'] },
         { icon: '🚚', name: '배송 현황', desc: '주문별 배송 상태 추적 및 이슈 자동 감지', tags: ['배송','트래킹'] },
@@ -727,7 +656,7 @@
       ]
     },
     hr: {
-      character: 'hr', name: '고슴도치 HR', sub: 'HR AI 에이전트 · 대기중',
+      character: 'hr', name: 'HR', sub: 'HR AI 에이전트 · 대기중',
       services: [
         { icon: '📢', name: '공지 자동 발송', desc: '전사 공지·일정 알림 슬랙/라인 자동 발송', tags: ['공지','자동발송'] },
         { icon: '📅', name: '일정 관리', desc: '회사 주요 일정·행사·마감일 자동 정리 알림', tags: ['캘린더','일정','알림'] },
@@ -745,7 +674,8 @@
     document.querySelectorAll('.char-wrap').forEach(c => c.classList.remove('active'));
     document.getElementById('char-' + team).classList.add('active');
 
-    document.getElementById('spAvatar').innerHTML = `<img src="assets/characters/mkt.png" data-character="${d.character}" style="width:36px;height:36px;object-fit:contain;mix-blend-mode:lighten;">`;
+    const imgFile = d.character === 'logistics' ? 'logistic' : d.character;
+    document.getElementById('spAvatar').innerHTML = `<img src="assets/characters/${imgFile}.png" data-character="${d.character}" style="width:36px;height:36px;object-fit:contain;mix-blend-mode:multiply;">`;
     document.getElementById('spName').textContent = d.name;
     document.getElementById('spSub').textContent = d.sub;
     document.getElementById('spChatInput').placeholder = `${d.name}에게 물어보세요...`;
