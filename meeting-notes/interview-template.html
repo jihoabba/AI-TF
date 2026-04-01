@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- ── 문서 메타
+  type:       "meeting"
+  id:         "YYYY-MM-DD-team-interview"
+  title:      "[팀명] 팀 인터뷰"
+  desc:       "자동화 가능 업무 식별 인터뷰. 작업명·소요시간·빈도·인원 수집."
+  file:       "meeting-notes/YYYY-MM-DD-team-interview.html"
+  date:       "YYYY-MM-DD"
+  tags:       ["meeting", "interview", "automation"]
+  attendees:  ["동혁", "인터뷰이"]
+  meetingNum: "000"
+── -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>팀 인터뷰 템플릿 · AX TF</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f5f7; --surface: #ffffff; --text: #1d1d1f;
+  --muted: rgba(0,0,0,0.45); --accent: #0071e3;
+  --green: #1a7f4b; --orange: #b95000; --red: #c0392b;
+  --divider: rgba(0,0,0,0.08); --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --purple: #7c3eee;
+}
+html { background: var(--bg); font-family: -apple-system,"SF Pro Text","Helvetica Neue",sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; font-size: 15px; line-height: 1.6; }
+body { min-height: 100vh; }
+.topnav { height: 52px; background: rgba(245,245,247,0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--divider); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; padding: 0 40px; gap: 12px; }
+.nav-back { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; }
+.nav-back:hover { opacity: 0.75; }
+.nav-sep { width: 1px; height: 14px; background: var(--divider); }
+.nav-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+.container { max-width: 760px; margin: 0 auto; padding: 56px 40px 96px; }
+.doc-type { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--green); background: rgba(26,127,75,0.08); padding: 4px 10px; border-radius: 100px; margin-bottom: 20px; }
+.doc-title { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 20px; }
+.doc-meta { display: flex; flex-wrap: wrap; gap: 20px; padding: 16px 0; border-top: 1px solid var(--divider); border-bottom: 1px solid var(--divider); margin-bottom: 48px; }
+.meta-item { display: flex; flex-direction: column; gap: 3px; }
+.meta-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.meta-input { font-size: 14px; font-weight: 500; color: var(--text); background: none; border: none; border-bottom: 1.5px solid var(--divider); padding: 2px 4px; min-width: 120px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.meta-input:focus { border-color: var(--accent); }
+.meta-select { font-size: 14px; font-weight: 500; color: var(--text); background: none; border: none; border-bottom: 1.5px solid var(--divider); padding: 2px 4px; font-family: inherit; outline: none; cursor: pointer; }
+.meta-select:focus { border-color: var(--accent); }
+.doc-body { display: flex; flex-direction: column; gap: 40px; }
+.section { display: flex; flex-direction: column; gap: 12px; }
+.section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
+.section-title { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+.section-desc { font-size: 13px; color: var(--muted); }
+.q-block { display: flex; flex-direction: column; gap: 6px; }
+.q-label { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
+.q-text { font-size: 14px; font-weight: 600; color: var(--text); }
+.q-input { width: 100%; background: var(--surface); border: 1px solid var(--divider); border-radius: 10px; padding: 12px 16px; font-size: 14px; color: var(--text); line-height: 1.6; font-family: inherit; resize: vertical; min-height: 72px; outline: none; box-shadow: var(--shadow); transition: border-color 0.15s; }
+.q-input:focus { border-color: var(--accent); }
+.task-card { background: var(--surface); border: 1px solid var(--divider); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 14px; }
+.task-card-header { display: flex; align-items: center; justify-content: space-between; }
+.task-num { font-size: 11px; font-weight: 700; color: var(--purple); letter-spacing: 0.12em; text-transform: uppercase; }
+.task-delete { background: none; border: none; cursor: pointer; font-size: 13px; color: var(--muted); padding: 4px 8px; border-radius: 6px; transition: background 0.15s; font-family: inherit; }
+.task-delete:hover { background: rgba(192,57,43,0.08); color: var(--red); }
+.task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.task-field { display: flex; flex-direction: column; gap: 4px; }
+.task-field.full { grid-column: 1 / -1; }
+.task-field label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.task-field input, .task-field select, .task-field textarea { background: var(--bg); border: 1px solid var(--divider); border-radius: 8px; padding: 9px 12px; font-size: 14px; color: var(--text); font-family: inherit; outline: none; transition: border-color 0.15s; width: 100%; }
+.task-field input:focus, .task-field select:focus, .task-field textarea:focus { border-color: var(--accent); background: var(--surface); }
+.task-calc { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(124,62,238,0.06); border-radius: 8px; border: 1px solid rgba(124,62,238,0.12); }
+.task-calc-label { font-size: 12px; font-weight: 600; color: var(--purple); }
+.task-calc-value { font-size: 20px; font-weight: 800; color: var(--purple); margin-left: auto; }
+.task-calc-unit { font-size: 12px; color: var(--purple); opacity: 0.7; }
+.add-task-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: none; border: 1.5px dashed var(--divider); border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.add-task-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,113,227,0.03); }
+.summary-bar { display: flex; flex-wrap: wrap; gap: 20px; padding: 16px 20px; background: rgba(124,62,238,0.05); border: 1px solid rgba(124,62,238,0.12); border-radius: 10px; }
+.summary-item { display: flex; flex-direction: column; gap: 2px; }
+.summary-label { font-size: 11px; font-weight: 700; color: var(--purple); opacity: 0.7; letter-spacing: 0.1em; text-transform: uppercase; }
+.summary-value { font-size: 22px; font-weight: 800; color: var(--purple); }
+.save-section { background: var(--surface); border: 1px solid var(--divider); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 14px; }
+.save-title { font-size: 15px; font-weight: 700; }
+.save-desc { font-size: 13px; color: var(--muted); }
+.webhook-row { display: flex; gap: 8px; }
+.webhook-input { flex: 1; background: var(--bg); border: 1px solid var(--divider); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--text); font-family: inherit; outline: none; transition: border-color 0.15s; }
+.webhook-input:focus { border-color: var(--accent); }
+.btn-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.save-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.15s; white-space: nowrap; }
+.save-btn:hover { opacity: 0.85; }
+.save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.preview-btn { background: none; border: 1px solid var(--divider); border-radius: 10px; padding: 12px 20px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.preview-btn:hover { border-color: var(--accent); color: var(--accent); }
+.save-status { font-size: 13px; font-weight: 600; }
+.save-status.success { color: var(--green); }
+.save-status.error { color: var(--red); }
+.save-status.loading { color: var(--muted); }
+.preview-wrap { display: none; flex-direction: column; gap: 6px; }
+.preview-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.preview-box { background: var(--bg); border: 1px solid var(--divider); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--muted); font-family: monospace; line-height: 2; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
+@media (max-width: 640px) {
+  .container { padding: 40px 20px 80px; }
+  .topnav { padding: 0 20px; }
+  .doc-title { font-size: 26px; }
+  .doc-meta { gap: 16px; }
+  .task-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="nav-back" href="../index.html">← 아카이브</a>
+  <div class="nav-sep"></div>
+  <span class="nav-title" id="nav-num">🎙️ Interview Notes #—</span>
+</nav>
+
+<div class="container">
+  <div class="doc-type">🎙️ Interview Notes</div>
+  <h1 class="doc-title" id="doc-title">팀 인터뷰</h1>
+
+  <div class="doc-meta">
+    <div class="meta-item">
+      <span class="meta-label">📅 날짜</span>
+      <input class="meta-input" id="meta-date" type="date" style="min-width:130px;">
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">🏢 팀명</span>
+      <select class="meta-select" id="meta-team" onchange="syncTitle()">
+        <option value="">선택</option>
+        <option>B2B</option><option>MD</option><option>물류</option>
+        <option>오프라인세일즈</option><option>커머스플랫폼</option>
+        <option>HR</option><option>CX</option><option>기타</option>
+      </select>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">👤 인터뷰이</span>
+      <input class="meta-input" id="meta-person" type="text" placeholder="이름">
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">🏷️ 구분</span>
+      <select class="meta-select" id="meta-role" onchange="syncTitle()">
+        <option value="리드">리드</option>
+        <option value="실무자">실무자</option>
+      </select>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label"># 문서 번호</span>
+      <input class="meta-input" id="meta-num" type="text" placeholder="005" style="min-width:60px;" oninput="syncNum()">
+    </div>
+  </div>
+
+  <div class="doc-body">
+
+    <div class="section">
+      <div class="section-label">01 · 💼 업무 현황</div>
+      <div class="section-title">주요 업무 파악</div>
+      <div class="q-block">
+        <div class="q-label">Q1</div>
+        <div class="q-text">현재 맡고 계신 주요 업무를 3가지만 꼽아주신다면요?</div>
+        <textarea class="q-input" id="q1" placeholder="답변 기록..."></textarea>
+      </div>
+      <div class="q-block">
+        <div class="q-label">Q2</div>
+        <div class="q-text">⏱️ 가장 많은 시간이 걸리는 업무는 무엇인가요? 한 달에 몇 시간 정도 쓰시는 것 같으세요?</div>
+        <textarea class="q-input" id="q2" placeholder="답변 기록..."></textarea>
+      </div>
+      <div class="q-block">
+        <div class="q-label">Q3</div>
+        <div class="q-text">🔄 지금 업무에서 반복적으로 하고 있는 작업이 있나요? (복붙, 취합, 정리 등)</div>
+        <textarea class="q-input" id="q3" placeholder="답변 기록..."></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">02 · ⚡ 페인포인트</div>
+      <div class="section-title">불편함과 비효율</div>
+      <div class="q-block">
+        <div class="q-label">Q4</div>
+        <div class="q-text">😤 "이게 왜 아직도 수작업이지?" 싶었던 순간이 있었나요?</div>
+        <textarea class="q-input" id="q4" placeholder="답변 기록..."></textarea>
+      </div>
+      <div class="q-block">
+        <div class="q-label">Q5</div>
+        <div class="q-text">🔗 다른 팀·시스템에서 데이터를 받을 때 불편한 점이 있으신가요?</div>
+        <textarea class="q-input" id="q5" placeholder="답변 기록..."></textarea>
+      </div>
+      <div class="q-block">
+        <div class="q-label">Q6</div>
+        <div class="q-text">🛠️ 지금 쓰는 툴이나 프로세스 중 가장 답답한 부분 하나만 꼽으면요?</div>
+        <textarea class="q-input" id="q6" placeholder="답변 기록..."></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">03 · 🤖 AI · 툴 현황</div>
+      <div class="section-title">현재 사용 도구</div>
+      <div class="q-block">
+        <div class="q-label">Q7</div>
+        <div class="q-text">✨ 현재 업무에 AI 툴 쓰고 계신 게 있나요? (Gemini, ChatGPT 등)</div>
+        <textarea class="q-input" id="q7" placeholder="답변 기록..."></textarea>
+      </div>
+      <div class="q-block">
+        <div class="q-label">Q8</div>
+        <div class="q-text">👎 써보셨는데 별로였던 경험도 있으신가요? 어떤 부분에서요?</div>
+        <textarea class="q-input" id="q8" placeholder="답변 기록..."></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">04 · 🎯 자동화 니즈</div>
+      <div class="section-title">핵심 발언 & 수용도</div>
+      <div class="q-block">
+        <div class="q-label">Q9</div>
+        <div class="q-text">🏆 만약 어떤 업무든 자동화해드릴 수 있다면, 딱 한 가지만 골라주신다면?</div>
+        <textarea class="q-input" id="q9" placeholder="답변 기록..."></textarea>
+      </div>
+      <div class="q-block">
+        <div class="q-label">Q10</div>
+        <div class="q-text">💬 AI가 내 업무에 들어오는 것에 대해 솔직히 어떻게 느끼세요?</div>
+        <textarea class="q-input" id="q10" placeholder="답변 기록..."></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">05 · 📋 자동화 후보 작업</div>
+      <div class="section-title">작업 항목 기록</div>
+      <div class="section-desc">발굴된 작업을 추가하세요. 저장 시 인터뷰 1건 = 시트 1행, 작업 항목은 한 셀에 요약 기록됩니다.</div>
+
+      <div class="summary-bar" id="summary-bar" style="display:none;">
+        <div class="summary-item">
+          <span class="summary-label">📌 작업 항목</span>
+          <span class="summary-value" id="s-count">0개</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">⏰ 월 절감 합계</span>
+          <span class="summary-value" id="s-total">—h</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">⭐ 어젠다 후보</span>
+          <span class="summary-value" id="s-agenda">—</span>
+        </div>
+      </div>
+
+      <div id="task-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <button class="add-task-btn" onclick="addTask()">＋ 작업 항목 추가</button>
+    </div>
+
+    <div class="save-section">
+      <div class="save-title">📤 구글 시트에 저장</div>
+      <div class="save-desc">인터뷰 1건이 시트 1행으로 저장됩니다. 작업 항목 여러 개는 "/" 구분자로 한 셀에 기록됩니다.</div>
+      <div class="webhook-row">
+        <input class="webhook-input" id="webhook-url" type="text" placeholder="Apps Script 웹 앱 URL (https://script.google.com/macros/s/…/exec)">
+      </div>
+      <div class="btn-row">
+        <button class="save-btn" id="save-btn" onclick="saveToSheet()">📤 시트에 저장</button>
+        <button class="preview-btn" onclick="togglePreview()">🔍 데이터 미리보기</button>
+        <div class="save-status" id="save-status"></div>
+      </div>
+      <div class="preview-wrap" id="preview-wrap">
+        <div class="preview-label">저장될 데이터 (1행)</div>
+        <div class="preview-box" id="preview-box"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.getElementById('meta-date').valueAsDate = new Date();
+
+function syncTitle() {
+  const team = document.getElementById('meta-team').value;
+  const role = document.getElementById('meta-role').value;
+  document.getElementById('doc-title').textContent = team ? `${team} 팀 인터뷰 (${role})` : '팀 인터뷰';
+}
+function syncNum() {
+  const n = document.getElementById('meta-num').value;
+  document.getElementById('nav-num').textContent = n ? `🎙️ Interview Notes #${n}` : '🎙️ Interview Notes #—';
+}
+
+let taskSeq = 0;
+
+function addTask() {
+  taskSeq++;
+  const id = taskSeq;
+  const el = document.createElement('div');
+  el.className = 'task-card';
+  el.id = `tc-${id}`;
+  el.innerHTML = `
+    <div class="task-card-header">
+      <span class="task-num">📌 작업 항목 #${id}</span>
+      <button class="task-delete" onclick="removeTask(${id})">✕ 삭제</button>
+    </div>
+    <div class="task-grid">
+      <div class="task-field full">
+        <label>✏️ 작업명 *</label>
+        <input type="text" data-f="name" placeholder="예: 주간 판매 현황 엑셀 취합" oninput="recalc(${id})">
+      </div>
+      <div class="task-field">
+        <label>⏱️ 1회 소요 시간 (분)</label>
+        <input type="number" min="1" data-f="dur" placeholder="60" oninput="recalc(${id})">
+      </div>
+      <div class="task-field">
+        <label>🔄 빈도</label>
+        <select data-f="freq">
+          <option value="">선택</option>
+          <option value="매일">매일 (주 5회)</option>
+          <option value="주1회">주 1회</option>
+          <option value="격주">격주 1회</option>
+          <option value="월1회">월 1회</option>
+          <option value="custom">직접입력</option>
+        </select>
+      </div>
+      <div class="task-field" id="cf-${id}" style="display:none;">
+        <label>📆 월 횟수</label>
+        <input type="number" min="1" data-f="freqN" placeholder="3" oninput="recalc(${id})">
+      </div>
+      <div class="task-field">
+        <label>👥 관련 인원 수</label>
+        <input type="number" min="1" data-f="ppl" placeholder="1" oninput="recalc(${id})">
+      </div>
+      <div class="task-field">
+        <label>🏢 연관 팀</label>
+        <input type="text" data-f="teams" placeholder="예: MD, 물류" oninput="updateSummary()">
+      </div>
+      <div class="task-field full">
+        <label>🔧 현재 사용 툴</label>
+        <input type="text" data-f="tools" placeholder="예: 엑셀, SAP, 카카오톡">
+      </div>
+    </div>
+    <div class="task-calc">
+      <span class="task-calc-label">⚡ 월 절감 예상</span>
+      <span class="task-calc-value" id="cv-${id}">—</span>
+      <span class="task-calc-unit">시간/월</span>
+    </div>
+  `;
+  const freqSel = el.querySelector('[data-f="freq"]');
+  freqSel.addEventListener('change', () => {
+    document.getElementById(`cf-${id}`).style.display = freqSel.value === 'custom' ? 'flex' : 'none';
+    recalc(id);
+  });
+  document.getElementById('task-list').appendChild(el);
+  updateSummary();
+}
+
+function removeTask(id) {
+  document.getElementById(`tc-${id}`)?.remove();
+  updateSummary();
+}
+
+function getMonthly(card) {
+  const freq = card.querySelector('[data-f="freq"]').value;
+  if (freq === '매일')  return 22;
+  if (freq === '주1회') return 4;
+  if (freq === '격주')  return 2;
+  if (freq === '월1회') return 1;
+  if (freq === 'custom') {
+    const v = parseFloat(card.querySelector('[data-f="freqN"]')?.value);
+    return isNaN(v) ? null : v;
+  }
+  return null;
+}
+
+function recalc(id) {
+  const card = document.getElementById(`tc-${id}`);
+  const dur = parseFloat(card.querySelector('[data-f="dur"]').value);
+  const ppl = parseFloat(card.querySelector('[data-f="ppl"]').value) || 1;
+  const mo  = getMonthly(card);
+  const el  = document.getElementById(`cv-${id}`);
+  el.textContent = (!isNaN(dur) && mo !== null) ? (dur * mo * ppl / 60).toFixed(1) : '—';
+  updateSummary();
+}
+
+function isAgendaCandidate(card) {
+  const id = card.id.replace('tc-', '');
+  const saving = parseFloat(document.getElementById(`cv-${id}`)?.textContent);
+  const teams  = card.querySelector('[data-f="teams"]')?.value || '';
+  const multiTeam = teams.split(/[,\/·、]/).map(t => t.trim()).filter(Boolean).length >= 2;
+  return saving >= 10 && multiTeam;
+}
+
+function updateSummary() {
+  const cards = Array.from(document.querySelectorAll('.task-card'));
+  let total = 0, agenda = 0;
+  cards.forEach(card => {
+    const id = card.id.replace('tc-', '');
+    const v = parseFloat(document.getElementById(`cv-${id}`)?.textContent);
+    if (!isNaN(v)) total += v;
+    if (isAgendaCandidate(card)) agenda++;
+  });
+  document.getElementById('s-count').textContent  = `${cards.length}개`;
+  document.getElementById('s-total').textContent  = cards.length ? `${total.toFixed(1)}h` : '—h';
+  document.getElementById('s-agenda').textContent = cards.length ? `${agenda}건` : '—';
+  document.getElementById('summary-bar').style.display = cards.length ? 'flex' : 'none';
+}
+
+function buildRow() {
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const cards = Array.from(document.querySelectorAll('.task-card'));
+  let totalSaving = 0;
+  const taskSummaries = cards.map(card => {
+    const id   = card.id.replace('tc-', '');
+    const f    = fn => card.querySelector(`[data-f="${fn}"]`)?.value?.trim() || '';
+    const freq = f('freq') === 'custom' ? `월${f('freqN')}회` : f('freq');
+    const cv   = parseFloat(document.getElementById(`cv-${id}`)?.textContent);
+    if (!isNaN(cv)) totalSaving += cv;
+    return `${f('name')}(${f('dur')}분·${freq || '?'}·${f('ppl')||'1'}명)`;
+  });
+
+  return {
+    타임스탬프:       new Date().toLocaleString('ko-KR'),
+    날짜:            g('meta-date'),
+    팀명:            document.getElementById('meta-team').value || '',
+    인터뷰이:        g('meta-person'),
+    구분:            document.getElementById('meta-role').value,
+    작업항목수:      cards.length,
+    작업목록:        taskSummaries.join(' / '),
+    월절감시간합계:  totalSaving.toFixed(1),
+    Q1_주요업무:    g('q1'),
+    Q2_시간소요업무: g('q2'),
+    Q3_반복작업:    g('q3'),
+    Q4_수작업불편:  g('q4'),
+    Q5_데이터수신:  g('q5'),
+    Q6_툴불편:      g('q6'),
+    Q7_AI툴현황:    g('q7'),
+    Q8_AI불만경험:  g('q8'),
+    Q9_자동화1순위: g('q9'),
+    Q10_AI수용도:   g('q10'),
+  };
+}
+
+function togglePreview() {
+  const wrap = document.getElementById('preview-wrap');
+  const showing = wrap.style.display === 'flex';
+  if (!showing) {
+    const row = buildRow();
+    const lines = Object.entries(row).map(([k, v]) => `${k.padEnd(16)}: ${v || '(미입력)'}`).join('\n');
+    document.getElementById('preview-box').textContent = lines;
+    wrap.style.display = 'flex';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+async function saveToSheet() {
+  const url = document.getElementById('webhook-url').value.trim();
+  if (!url) { setStatus('error', '⚠️ 웹훅 URL을 입력해주세요.'); return; }
+  const row = buildRow();
+  if (!row['팀명']) { setStatus('error', '⚠️ 팀명을 선택해주세요.'); return; }
+
+  setStatus('loading', '저장 중...');
+  document.getElementById('save-btn').disabled = true;
+
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ row })
+    });
+    setStatus('success', `✅ 저장 완료 — ${row['팀명']} · ${row['인터뷰이'] || '이름 미입력'}`);
+    document.getElementById('preview-wrap').style.display = 'flex';
+    document.getElementById('preview-box').textContent = Object.entries(row).map(([k,v]) => `${k.padEnd(16)}: ${v||'(미입력)'}`).join('\n');
+  } catch(e) {
+    setStatus('error', '❌ 저장 실패 — URL을 확인해주세요.');
+  } finally {
+    document.getElementById('save-btn').disabled = false;
+  }
+}
+
+function setStatus(type, msg) {
+  const el = document.getElementById('save-status');
+  el.className = `save-status ${type}`;
+  el.textContent = msg;
+}
+
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('axtf_webhook');
+  if (saved) document.getElementById('webhook-url').value = saved;
+});
+document.getElementById('webhook-url').addEventListener('input', function() {
+  localStorage.setItem('axtf_webhook', this.value);
+});
+</script>
+</body>
+</html>
