@@ -24,6 +24,8 @@
     --green-bg: rgba(29,131,72,0.08);
     --orange-bg: rgba(185,80,0,0.08);
     --blue-bg: rgba(0,113,227,0.07);
+    --purple: #7048c1;
+    --purple-bg: rgba(112,72,193,0.08);
   }
 
   html {
@@ -109,9 +111,10 @@
   .stat-pill .num { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
   .stat-pill .lbl { font-size: 13px; color: var(--text-secondary); }
   .stat-pill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .dot-report  { background: var(--accent); }
-  .dot-idea    { background: var(--orange); }
-  .dot-meeting { background: var(--green); }
+  .dot-report    { background: var(--accent); }
+  .dot-idea      { background: var(--orange); }
+  .dot-meeting   { background: var(--green); }
+  .dot-interview { background: var(--purple); }
 
   /* ── Search ── */
   .search-wrap {
@@ -168,9 +171,10 @@
     top: 0; left: 0; right: 0;
     height: 2px;
   }
-  .card[data-type="report"]::before  { background: var(--accent); }
-  .card[data-type="meeting"]::before { background: var(--green); }
-  .card[data-type="idea"]::before    { background: var(--orange); }
+  .card[data-type="report"]::before    { background: var(--accent); }
+  .card[data-type="meeting"]::before  { background: var(--green); }
+  .card[data-type="idea"]::before     { background: var(--orange); }
+  .card[data-type="interview"]::before { background: var(--purple); }
 
   .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: rgba(0,113,227,0.18); }
 
@@ -185,9 +189,10 @@
 
   .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
   .tag { padding: 3px 9px; border-radius: 100px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; }
-  .tag-report  { background: var(--blue-bg);   color: var(--accent); }
-  .tag-idea    { background: var(--orange-bg); color: var(--orange); }
-  .tag-meeting { background: var(--green-bg);  color: var(--green); }
+  .tag-report    { background: var(--blue-bg);   color: var(--accent); }
+  .tag-idea      { background: var(--orange-bg); color: var(--orange); }
+  .tag-meeting   { background: var(--green-bg);  color: var(--green); }
+  .tag-interview { background: var(--purple-bg); color: var(--purple); }
   .tag-kickoff { background: var(--blue-bg);   color: var(--accent); }
   .tag-new     { background: rgba(0,113,227,0.1); color: var(--accent); }
   .tag-draft   { background: var(--orange-bg); color: var(--orange); }
@@ -612,6 +617,11 @@
     <span class="num" id="meetingCount">—</span>
     <span class="lbl">회의록</span>
   </div>
+  <div class="stat-pill">
+    <div class="dot dot-interview"></div>
+    <span class="num" id="interviewCount">—</span>
+    <span class="lbl">인터뷰</span>
+  </div>
 </div>
 
 <!-- Search -->
@@ -659,6 +669,16 @@
     <span class="section-count" id="countIdeas"></span>
   </div>
   <div class="cards" id="gridIdeas"></div>
+</main>
+
+<!-- Section: 인터뷰 -->
+<main class="section" id="section-interviews">
+  <div class="section-header">
+    <div class="section-dot dot-interview"></div>
+    <span class="section-title">인터뷰</span>
+    <span class="section-count" id="countInterviews"></span>
+  </div>
+  <div class="cards" id="gridInterviews"></div>
 </main>
 
 <!-- Board -->
@@ -740,17 +760,18 @@
 </footer>
 
 <script>
-                      // [TF-DOCS-START] — 자동 생성 영역, scripts/build-index.js가 관리합니다
-  const docs = [{"type":"idea","id":"ai-desk","title":"AI DESK","desc":"팀별 동물 캐릭터 AI 에이전트 GUI. 캐릭터 클릭 시 해당 팀의 AI 서비스 패널이 열리는 컨셉츄얼한 인터페이스.","file":"idea/ai-desk.html","date":"2026-03-30","tags":["idea","ai-agent","gui"],"status":"Draft"},{"type":"idea","id":"event-page-template","title":"기획전(이벤트) 페이지 템플릿","desc":"기획자가 HTML로 크리에이티브 초벌 제작 후 디자이너에게 전달하는 AX 사례. TRUZ 이벤트 페이지 적용.","file":"idea/event-page-template.html","date":"2026-03-30","tags":["idea","ax","template"],"status":"Draft"},{"type":"meeting","id":"2026-03-30-3rd-meeting-janghyeri","title":"3차 미팅 — 장혜리 온보딩 & 아이디어 공유","desc":"장혜리 합류 후 첫 미팅. 킥오프 브리핑, 팀 AI 에이전트 GUI 아이디어, 트루즈 AX 사례 공유.","file":"meeting-notes/2026-03-30-3rd-meeting-janghyeri.html","date":"2026-03-30","tags":["meeting","onboarding","idea"],"attendees":["염동혁","장혜리"],"meetingNum":"003"},{"type":"idea","id":"order-prediction","title":"발주량 예측","desc":"과거 팝업 데이터 + AI 분석으로 IP별 최적 발주량(최소/권장/최대) 산출. 신뢰도·인사이트·산출 근거 포함.","file":"idea/order-prediction.html","date":"2026-03-29","tags":["idea","prediction","inventory"],"status":"Draft"},{"type":"idea","id":"shopping-memo","title":"쇼핑 메모장","desc":"팝업 방문 고객용 쇼핑 체크리스트. Firebase 상품 목록 연동, 수량 조절, 직접 입력, 메모 기능 포함.","file":"idea/shopping-memo.html","date":"2026-03-29","tags":["idea","ux","shopping"],"status":"Draft"},{"type":"meeting","id":"2026-03-27-ceo-direction","title":"대표 지시사항 — TF 방향 수립","desc":"킥오프 전 대표 방향 공유. 진단-처방-검증 프레임, 세일즈 자동화, AI 툴 트렌드 팔로업 지시.","file":"meeting-notes/2026-03-27-ceo-direction.html","date":"2026-03-27","tags":["meeting","direction"],"attendees":["구교철 Bryan","염동혁"],"meetingNum":"002"},{"type":"report","id":"ai-tf-kickoff","title":"AX TF 킥오프","desc":"전사 AI 역량 강화 TF 출범 보고. 투트랙 전략, 로드맵, KPI, 예산 요청 포함.","file":"reports/ai-tf-kickoff.html","date":"2026-03-26","tags":["report","kickoff"],"slides":10},{"type":"idea","id":"popup_dashboard","title":"팝업 세일즈 대시보드","desc":"팝업 매출 현황 대시보드 아이디어. KPI, 일별 추이, 채널별·품목별 Sellthru, AI 인사이트 포함.","file":"idea/popup_dashboard.html","date":"2026-03-26","tags":["idea","dashboard"],"status":"Draft"},{"type":"meeting","id":"2026-03-26-1st-dev-meeting","title":"1차 개발 미팅","desc":"AX TF 오리엔테이션. 방향 정렬, 업무 프로세스 합의. 염동혁 · 최재균 (장혜리 부재).","file":"meeting-notes/2026-03-26-1st-dev-meeting.html","date":"2026-03-26","tags":["meeting"],"attendees":["염동혁","최재균"],"meetingNum":"001"}];
+                    // [TF-DOCS-START] — 자동 생성 영역, scripts/build-index.js가 관리합니다
+  const docs = [{"type":"interview","id":"interview-template","title":"팀 인터뷰 양식","desc":"팀별 업무 현황, 페인포인트, 자동화 후보 작업을 수집하는 인터뷰 폼. 구글 시트 자동 저장 연동.","file":"interview/template.html","date":"2026-04-01","tags":["interview"],"status":"Template"},{"type":"idea","id":"ai-desk","title":"AI DESK","desc":"팀별 동물 캐릭터 AI 에이전트 GUI. 캐릭터 클릭 시 해당 팀의 AI 서비스 패널이 열리는 컨셉츄얼한 인터페이스.","file":"idea/ai-desk.html","date":"2026-03-30","tags":["idea","ai-agent","gui"],"status":"Draft"},{"type":"idea","id":"event-page-template","title":"기획전(이벤트) 페이지 템플릿","desc":"기획자가 HTML로 크리에이티브 초벌 제작 후 디자이너에게 전달하는 AX 사례. TRUZ 이벤트 페이지 적용.","file":"idea/event-page-template.html","date":"2026-03-30","tags":["idea","ax","template"],"status":"Draft"},{"type":"meeting","id":"2026-03-30-3rd-meeting-janghyeri","title":"3차 미팅 — 장혜리 온보딩 & 아이디어 공유","desc":"장혜리 합류 후 첫 미팅. 킥오프 브리핑, 팀 AI 에이전트 GUI 아이디어, 트루즈 AX 사례 공유.","file":"meeting-notes/2026-03-30-3rd-meeting-janghyeri.html","date":"2026-03-30","tags":["meeting","onboarding","idea"],"attendees":["염동혁","장혜리"],"meetingNum":"003"},{"type":"idea","id":"order-prediction","title":"발주량 예측","desc":"과거 팝업 데이터 + AI 분석으로 IP별 최적 발주량(최소/권장/최대) 산출. 신뢰도·인사이트·산출 근거 포함.","file":"idea/order-prediction.html","date":"2026-03-29","tags":["idea","prediction","inventory"],"status":"Draft"},{"type":"idea","id":"shopping-memo","title":"쇼핑 메모장","desc":"팝업 방문 고객용 쇼핑 체크리스트. Firebase 상품 목록 연동, 수량 조절, 직접 입력, 메모 기능 포함.","file":"idea/shopping-memo.html","date":"2026-03-29","tags":["idea","ux","shopping"],"status":"Draft"},{"type":"meeting","id":"2026-03-27-ceo-direction","title":"대표 지시사항 — TF 방향 수립","desc":"킥오프 전 대표 방향 공유. 진단-처방-검증 프레임, 세일즈 자동화, AI 툴 트렌드 팔로업 지시.","file":"meeting-notes/2026-03-27-ceo-direction.html","date":"2026-03-27","tags":["meeting","direction"],"attendees":["구교철 Bryan","염동혁"],"meetingNum":"002"},{"type":"report","id":"ai-tf-kickoff","title":"AX TF 킥오프","desc":"전사 AI 역량 강화 TF 출범 보고. 투트랙 전략, 로드맵, KPI, 예산 요청 포함.","file":"reports/ai-tf-kickoff.html","date":"2026-03-26","tags":["report","kickoff"],"slides":10},{"type":"idea","id":"popup_dashboard","title":"팝업 세일즈 대시보드","desc":"팝업 매출 현황 대시보드 아이디어. KPI, 일별 추이, 채널별·품목별 Sellthru, AI 인사이트 포함.","file":"idea/popup_dashboard.html","date":"2026-03-26","tags":["idea","dashboard"],"status":"Draft"},{"type":"meeting","id":"2026-03-26-1st-dev-meeting","title":"1차 개발 미팅","desc":"AX TF 오리엔테이션. 방향 정렬, 업무 프로세스 합의. 염동혁 · 최재균 (장혜리 부재).","file":"meeting-notes/2026-03-26-1st-dev-meeting.html","date":"2026-03-26","tags":["meeting"],"attendees":["염동혁","최재균"],"meetingNum":"001"}];
   // [TF-DOCS-END]
 
   // ── 태그 설정 ──
   const TAG_CONFIG = {
-    report:  { label: 'Report',  cls: 'tag-report'  },
-    idea:    { label: 'IDEA',    cls: 'tag-idea'    },
-    meeting: { label: 'Meeting', cls: 'tag-meeting'  },
-    kickoff: { label: 'Kickoff', cls: 'tag-kickoff'  },
-    draft:   { label: 'Draft',   cls: 'tag-draft'   },
+    report:    { label: 'Report',    cls: 'tag-report'    },
+    idea:      { label: 'IDEA',      cls: 'tag-idea'      },
+    meeting:   { label: 'Meeting',   cls: 'tag-meeting'   },
+    interview: { label: 'Interview', cls: 'tag-interview' },
+    kickoff:   { label: 'Kickoff',   cls: 'tag-kickoff'   },
+    draft:     { label: 'Draft',     cls: 'tag-draft'     },
   };
 
   function fmtDate(str) {
@@ -765,8 +786,9 @@
   }
 
   function footerMeta(doc) {
-    if (doc.type === 'meeting') return `${fmtDate(doc.date)} · ${doc.attendees.length}인 참석`;
-    if (doc.type === 'idea')    return `${fmtDate(doc.date)} · ${doc.status || 'Draft'}`;
+    if (doc.type === 'meeting')   return `${fmtDate(doc.date)} · ${doc.attendees.length}인 참석`;
+    if (doc.type === 'idea')      return `${fmtDate(doc.date)} · ${doc.status || 'Draft'}`;
+    if (doc.type === 'interview') return `${fmtDate(doc.date)} · ${doc.status || 'Template'}`;
     return `${fmtDate(doc.date)} · ${doc.slides}장`;
   }
 
@@ -803,32 +825,36 @@
   // Sort by date descending
   const sorted = [...docs].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  const reports  = sorted.filter(d => d.type === 'report');
-  const ideas    = sorted.filter(d => d.type === 'idea');
-  const meetings = sorted.filter(d => d.type === 'meeting');
+  const reports    = sorted.filter(d => d.type === 'report');
+  const ideas      = sorted.filter(d => d.type === 'idea');
+  const meetings   = sorted.filter(d => d.type === 'meeting');
+  const interviews = sorted.filter(d => d.type === 'interview');
 
   // Stats
-  document.getElementById('totalCount').textContent   = docs.length;
-  document.getElementById('reportCount').textContent  = reports.length;
-  document.getElementById('ideaCount').textContent    = ideas.length;
-  document.getElementById('meetingCount').textContent = meetings.length;
+  document.getElementById('totalCount').textContent     = docs.length;
+  document.getElementById('reportCount').textContent    = reports.length;
+  document.getElementById('ideaCount').textContent      = ideas.length;
+  document.getElementById('meetingCount').textContent   = meetings.length;
+  document.getElementById('interviewCount').textContent = interviews.length;
 
   // Render sections
-  renderGrid('gridReports',  reports,  '보고서가 아직 없습니다');
-  renderGrid('gridIdeas',    ideas,    '아이디어가 아직 없습니다 — 인터뷰 완료 후 추가 예정');
-  renderGrid('gridMeetings', meetings, '회의록이 아직 없습니다');
+  renderGrid('gridReports',    reports,    '보고서가 아직 없습니다');
+  renderGrid('gridIdeas',      ideas,      '아이디어가 아직 없습니다 — 인터뷰 완료 후 추가 예정');
+  renderGrid('gridMeetings',   meetings,   '회의록이 아직 없습니다');
+  renderGrid('gridInterviews', interviews, '인터뷰 자료가 아직 없습니다');
 
   // Section counts
-  document.getElementById('countReports').textContent  = reports.length  + '건';
-  document.getElementById('countIdeas').textContent    = ideas.length    + '건';
-  document.getElementById('countMeetings').textContent = meetings.length + '건';
+  document.getElementById('countReports').textContent    = reports.length    + '건';
+  document.getElementById('countIdeas').textContent      = ideas.length      + '건';
+  document.getElementById('countMeetings').textContent   = meetings.length   + '건';
+  document.getElementById('countInterviews').textContent = interviews.length + '건';
 
   // ── Search ──
   const searchInput   = document.getElementById('searchInput');
   const searchSection = document.getElementById('searchSection');
   const searchGrid    = document.getElementById('searchGrid');
   const searchCount   = document.getElementById('searchCount');
-  const sectionEls    = ['section-reports', 'section-meetings', 'section-ideas'].map(id => document.getElementById(id));
+  const sectionEls    = ['section-reports', 'section-meetings', 'section-ideas', 'section-interviews'].map(id => document.getElementById(id));
 
   searchInput.addEventListener('input', function () {
     const q = this.value.trim().toLowerCase();
