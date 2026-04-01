@@ -293,6 +293,100 @@
     line-height: 1.6;
   }
 
+  /* ── Supplement divider ── */
+  .supplement-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 44px 0 32px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .supplement-divider::before,
+  .supplement-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--divider);
+  }
+
+  /* ── Need cards (teal) ── */
+  .need-list { display: flex; flex-direction: column; gap: 10px; }
+  .need-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-left: 3px solid #0e7490;
+    border-radius: 14px;
+    padding: 18px 22px;
+    box-shadow: var(--shadow);
+  }
+  .need-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .need-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .need-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .need-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: rgba(14,116,144,0.08);
+    color: #0e7490;
+  }
+
+  /* ── TF note ── */
+  .tfnote {
+    background: rgba(0,0,0,0.025);
+    border: 1px solid var(--divider);
+    border-left: 3px solid rgba(0,0,0,0.18);
+    border-radius: 14px;
+    padding: 22px 26px;
+    box-shadow: var(--shadow);
+  }
+  .tfnote-header {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .tfnote-items { display: flex; flex-direction: column; gap: 10px; }
+  .tfnote-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .tfnote-item .bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.25);
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  .tfnote-conclusion {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--divider);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
   /* ── Responsive ── */
   @media (max-width: 680px) {
     .topnav { padding: 0 20px; }
@@ -489,6 +583,93 @@
         <div class="qa-a">단순 반복 업무만 자동화되어도 파트너사와의 실질적인 영업 활동에 더 집중할 수 있을 것 같습니다. 관계 기반의 영업 자체는 AI로 대체하기 어렵지만, 그 주변의 잡무를 줄여주는 것만으로도 체감 효과는 클 것 같다는 생각입니다.</div>
       </div>
 
+    </div>
+  </div>
+
+
+  <!-- 구분선 -->
+  <div class="supplement-divider">리드 추가 의견 — 안영민</div>
+
+  <!-- 영업 고도화 니즈 -->
+  <div class="section">
+    <div class="section-title">📣 영업 고도화 니즈</div>
+    <div class="need-list">
+
+      <div class="need-card">
+        <div class="need-title">시장·채널 분석 어시스턴트</div>
+        <div class="need-desc">아박, 다이소 등 주요 채널 특성과 상권·타겟 분석을 지원하는 기획 보조 도구. 신규 거래처 발굴 및 공략 전략 수립 단계에서의 리서치 공수를 줄이는 것이 핵심 목표.</div>
+        <div class="need-tags">
+          <span class="need-tag">기획 지원</span>
+          <span class="need-tag">채널 분석</span>
+          <span class="need-tag">상권·타겟</span>
+        </div>
+      </div>
+
+      <div class="need-card">
+        <div class="need-title">영업 조사 공유 봇</div>
+        <div class="need-desc">현재 리드와 팀원이 각자 수행하는 시장 조사·영업 리스트 선정 과정을 팀 내에서 공유하는 어시스턴트. 슬랙 또는 단톡방에 봇 형태로 운영하는 아이디어. 배경 조사 공유를 통해 팀 내 이해도를 빠르게 끌어올리고 신규 팀원 온보딩에도 활용 가능.</div>
+        <div class="need-tags">
+          <span class="need-tag">지식 공유</span>
+          <span class="need-tag">Slack 봇</span>
+          <span class="need-tag">온보딩</span>
+        </div>
+      </div>
+
+      <div class="need-card">
+        <div class="need-title">맞춤형 제안서 자동화</div>
+        <div class="need-desc">거래처별 특성을 반영한 콜드메일용 맞춤 제안서 초안 자동 생성. 획일화된 제안서보다 응답률이 높아질 것으로 기대. 업체 정보 입력 → 제안서 초안 출력 형태로 구현 검토.</div>
+        <div class="need-tags">
+          <span class="need-tag">제안서</span>
+          <span class="need-tag">콜드메일</span>
+          <span class="need-tag">응답률 개선</span>
+        </div>
+      </div>
+
+      <div class="need-card">
+        <div class="need-title">프로젝트 매니징 시스템</div>
+        <div class="need-desc">B2B팀이 신설 팀인 만큼 일정·스펙 관리 체계가 아직 미비. 매번 맨파워로 운영하다 보니 휴먼 에러 발생 가능성이 있음. 표준화된 PM 체계 구축으로 반복 실수를 줄이고 운영 안정성을 높이는 것이 목표.</div>
+        <div class="need-tags">
+          <span class="need-tag">운영 체계</span>
+          <span class="need-tag">일정 관리</span>
+          <span class="need-tag">리스크 감소</span>
+        </div>
+      </div>
+
+      <div class="need-card">
+        <div class="need-title">B2B 매장 데이터 대시보드</div>
+        <div class="need-desc">올해 신규 오픈 예정인 B2B 직영 매장의 운영 데이터(매출, 재고, 방문 트래픽 등)를 시각화하는 대시보드. 빠른 의사결정과 현황 파악을 위한 인프라로 구축 희망.</div>
+        <div class="need-tags">
+          <span class="need-tag">대시보드</span>
+          <span class="need-tag">데이터 시각화</span>
+          <span class="need-tag">신규 매장</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- AI TF 검토 의견 -->
+  <div class="section">
+    <div class="section-title">💬 AI TF 검토 의견</div>
+    <div class="tfnote">
+      <div class="tfnote-header">현실적 검토</div>
+      <div class="tfnote-items">
+        <div class="tfnote-item">
+          <div class="bullet"></div>
+          <div><strong>프로젝트 매니징 시스템</strong> — 운영 중 수정 요구가 잦을 텐데 즉각적인 AS가 어렵고, AS가 안 되면 사용률이 자연히 떨어질 위험. 지속 운영 구조를 선제적으로 설계해야 함.</div>
+        </div>
+        <div class="tfnote-item">
+          <div class="bullet"></div>
+          <div><strong>기획 업무 어시스턴트 (시장·채널 분석)</strong> — 실제 효용을 사전에 장담하기 어려운 영역. 파일럿 범위를 좁게 잡고 검증 후 확장하는 접근 필요.</div>
+        </div>
+        <div class="tfnote-item">
+          <div class="bullet"></div>
+          <div><strong>제안서·보고서 자동화</strong> — 완성도를 끌어올리는 데 개인 역량 의존도가 높아 확장성에 한계. 성격상 AI 자동화보다 마케팅 지원에 가까운 측면이 있음.</div>
+        </div>
+      </div>
+      <div class="tfnote-conclusion">
+        → <strong>실무 자동화(이미지 삽입, 리포트 생성 등)를 1순위</strong>로 진행하되, 위 항목들은 추가 논의를 거쳐 우선순위를 별도로 결정할 예정.
+      </div>
     </div>
   </div>
 
