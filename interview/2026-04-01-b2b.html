@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인터뷰 — B2B 염재훈 · 2026.04.01</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --muted: rgba(0,0,0,0.45);
+    --divider: rgba(0,0,0,0.08);
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --accent: #0071e3;
+    --purple: #7048c1;
+    --purple-bg: rgba(112,72,193,0.08);
+    --green: #1d8348;
+    --green-bg: rgba(29,131,72,0.08);
+    --orange: #b95000;
+    --orange-bg: rgba(185,80,0,0.08);
+    --red: #c0392b;
+    --red-bg: rgba(192,57,43,0.08);
+    --radius: 16px;
+  }
+
+  html {
+    background: var(--bg);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── Nav ── */
+  .topnav {
+    height: 52px;
+    background: rgba(245,245,247,0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--divider);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    gap: 12px;
+  }
+  .nav-back { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; }
+  .nav-back:hover { opacity: 0.7; }
+  .nav-sep { width: 1px; height: 14px; background: var(--divider); }
+  .nav-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+  /* ── Layout ── */
+  .page { max-width: 860px; margin: 0 auto; padding: 48px 40px 96px; }
+
+  /* ── Header ── */
+  .header {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-left {}
+  .header-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--purple);
+    background: var(--purple-bg);
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+  }
+  .header-name {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .header-meta {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+  }
+  .header-meta span { display: flex; align-items: center; gap: 5px; }
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .role-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    background: var(--green-bg);
+    padding: 4px 12px;
+    border-radius: 100px;
+  }
+
+  /* ── Summary cards ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .summary-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .summary-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  /* ── Highlight box ── */
+  .highlight {
+    background: linear-gradient(135deg, rgba(112,72,193,0.06) 0%, rgba(0,113,227,0.06) 100%);
+    border: 1px solid rgba(112,72,193,0.15);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 32px;
+  }
+  .highlight-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 12px;
+  }
+  .highlight-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .highlight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .highlight-item .bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--purple);
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+
+  /* ── Sections ── */
+  .section {
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  /* ── QA cards ── */
+  .qa-list { display: flex; flex-direction: column; gap: 12px; }
+  .qa-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+  }
+  .qa-q {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .qa-a {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ── Automation candidates ── */
+  .auto-list { display: flex; flex-direction: column; gap: 10px; }
+  .auto-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-left: 3px solid var(--orange);
+    border-radius: 14px;
+    padding: 18px 22px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .auto-rank {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--orange);
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 24px;
+  }
+  .auto-content {}
+  .auto-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .auto-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .auto-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .auto-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: var(--orange-bg);
+    color: var(--orange);
+  }
+  .auto-tag.blue {
+    background: rgba(0,113,227,0.07);
+    color: var(--accent);
+  }
+
+  /* ── Pain point cards ── */
+  .pain-list { display: flex; flex-direction: column; gap: 10px; }
+  .pain-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-left: 3px solid var(--red);
+    border-radius: 14px;
+    padding: 18px 22px;
+    box-shadow: var(--shadow);
+  }
+  .pain-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .pain-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 680px) {
+    .topnav { padding: 0 20px; }
+    .page { padding: 32px 20px 72px; }
+    .header { padding: 24px 22px; }
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .header-name { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="nav-back" href="../index.html">← 아카이브</a>
+  <div class="nav-sep"></div>
+  <span class="nav-title">인터뷰 — B2B · 염재훈</span>
+</nav>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-tag">Interview</div>
+      <div class="header-name">염재훈</div>
+      <div class="header-meta">
+        <span>📅 2026년 4월 1일</span>
+        <span>🏢 B2B팀</span>
+        <span>👤 실무자</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="role-badge">실무자</div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label">주요 담당 업무</div>
+      <div class="summary-value">영업 · 운영 · 정산</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">최대 리소스</div>
+      <div class="summary-value">발주리스트 제품 이미지 작업</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">반복 작업 주기</div>
+      <div class="summary-value">매주 1시간+ (SAP 데이터 정리)</div>
+    </div>
+  </div>
+
+  <!-- Highlight: 자동화 우선순위 -->
+  <div class="highlight">
+    <div class="highlight-title">⚡ 핵심 자동화 후보</div>
+    <div class="highlight-items">
+      <div class="highlight-item">
+        <div class="bullet"></div>
+        <div><strong>발주리스트 이미지 자동 삽입</strong> — SAP 데이터 기반 제품 리스트 엑셀에 이미지를 수동으로 붙이는 노가다 작업. 인터뷰이가 직접 1순위로 지목.</div>
+      </div>
+      <div class="highlight-item">
+        <div class="bullet"></div>
+        <div><strong>주간 판매량 리포트 자동화</strong> — SAP raw 데이터 → 엑셀 양식 변환 작업. 매주 1시간 소요. 양식 고정이라 자동화 가능성 높음.</div>
+      </div>
+      <div class="highlight-item">
+        <div class="bullet"></div>
+        <div><strong>계약서·메일 초안 생성</strong> — 현재 ChatGPT/Gemini 일부 활용 중. 표준 템플릿 + 자동 발송까지 확장 가능.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 자동화 후보 작업 -->
+  <div class="section">
+    <div class="section-title">🎯 자동화 후보 작업</div>
+    <div class="auto-list">
+
+      <div class="auto-card">
+        <div class="auto-rank">1</div>
+        <div class="auto-content">
+          <div class="auto-title">발주리스트 제품 이미지 자동 삽입</div>
+          <div class="auto-desc">SAP에서 필터링한 제품 리스트 엑셀 파일에 제품 이미지를 하나씩 수작업으로 붙이는 작업. 파트너사 미팅 전마다 발생. "이게 핵심"이라고 직접 언급.</div>
+          <div class="auto-tags">
+            <span class="auto-tag">SAP 연동</span>
+            <span class="auto-tag">엑셀 자동화</span>
+            <span class="auto-tag blue">반복성 높음</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auto-card">
+        <div class="auto-rank">2</div>
+        <div class="auto-content">
+          <div class="auto-title">주간 판매량 리포트 자동 생성</div>
+          <div class="auto-desc">매주 SAP에서 raw 데이터 다운로드 → 정해진 엑셀 양식에 붙여넣기 → 리드미팅 전달. 주 1시간 이상 소요. 양식이 고정되어 있어 자동화 효과 즉각적.</div>
+          <div class="auto-tags">
+            <span class="auto-tag">주 1회</span>
+            <span class="auto-tag">SAP 연동</span>
+            <span class="auto-tag blue">즉시 적용 가능</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auto-card">
+        <div class="auto-rank">3</div>
+        <div class="auto-content">
+          <div class="auto-title">계약서·이메일 초안 자동 생성 + 발송</div>
+          <div class="auto-desc">현재 ChatGPT/Gemini로 초안 작성 후 약간 수정해서 보내고 있음. 자동 발송까지 연결되면 좋겠다고 언급. 표준 템플릿화 가능성 있음.</div>
+          <div class="auto-tags">
+            <span class="auto-tag">Gemini 연동</span>
+            <span class="auto-tag">Gmail</span>
+            <span class="auto-tag blue">현재 부분 활용 중</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 페인포인트 -->
+  <div class="section">
+    <div class="section-title">😤 페인포인트</div>
+    <div class="pain-list">
+
+      <div class="pain-card">
+        <div class="pain-title">제품 리스트 규격화 부재</div>
+        <div class="pain-desc">신규 거래처 미팅 전 제품 리스트 솔팅 시 기준이 없음. 업체 홈페이지·기사를 직접 조사해서 맞춤 리스트를 만들어야 함. SAP 필터링 후 좋은 제품 선별까지 오래 걸림.</div>
+      </div>
+
+      <div class="pain-card">
+        <div class="pain-title">온라인팀 PDP 정보 공유 지연</div>
+        <div class="pain-desc">온라인 파트너사에 제품 정보 전달이 필요한데, 온라인팀에서 PDP(제품 상세 페이지) 자료를 빠르게 공유받지 못하고 있음.</div>
+      </div>
+
+      <div class="pain-card">
+        <div class="pain-title">Google Drive 외부 공유 제한</div>
+        <div class="pain-desc">GWS 전환 후 용량 큰 파일의 외부 드라이브 공유가 막혀 파트너사에 파일 전달 시 불편. 대안 필요.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Q&A 전문 -->
+  <div class="section">
+    <div class="section-title">📋 인터뷰 전문</div>
+    <div class="qa-list">
+
+      <div class="qa-card">
+        <div class="qa-q">Q1. 현재 맡고 계신 주요 업무 3가지는?</div>
+        <div class="qa-a">영업, 운영, 정산. 영업은 문서작업 최신화가 혼자 하기 빡세고, 운영은 보고서 작성이랑 숫자 보는 게 많고, 정산은 생각보다 오래 안 걸림. 지영님이랑 재무팀 서포트가 있긴 하다.</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">Q2. 가장 많은 시간이 걸리는 업무는? 한 달에 몇 시간?</div>
+        <div class="qa-a">운영쪽 리소스가 가장 많이 들어감. 특히 신규 거래처에 대한 제품 리스트 솔팅 작업. 공급률 확장, 업체 기사·홈페이지 사전 조사 후 리스트업. SAP 데이터 기반으로 필터링해서 좋은 제품 위주로 고르는데 오래 걸림. 엑셀 파일에 제품 이미지를 노가다로 붙이는 게 너무 귀찮음. 발주리스트가 핵심.</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">Q3. 반복적으로 하고 있는 작업이 있나요?</div>
+        <div class="qa-a">매주 판매량 raw 데이터 정리해서 리드미팅에 전달. SAP에서 다운받아서 엑셀 양식에 넣어 양식화. 보안 문제가 있긴 한데, 적어도 주 1시간은 걸린다.</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">Q4. "이게 왜 아직도 수작업이지?" 싶었던 순간은?</div>
+        <div class="qa-a">계약서 작성 부분. 메일 초안 생성기로 텍스트 약간 바꿔서 하는 건데, 자동으로 보내지는 게 있으면 좋겠다.</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">Q5. 다른 팀·시스템에서 데이터 받을 때 불편한 점은?</div>
+        <div class="qa-a">온라인 파트너사에 제품 사항을 전달해야 하는데, 온라인팀에서 PDP 전달하는 걸 빠르게 공유받는 부분이 필요하다.</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">Q6. 지금 쓰는 툴·프로세스 중 가장 답답한 부분은?</div>
+        <div class="qa-a">구글 메일로 바꾸니까 용량이 큰 게 많아서 드라이브 외부 오픈이 안 되니까 답답함.</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">Q7. 현재 AI 툴 쓰고 계신 게 있나요?</div>
+        <div class="qa-a">Gemini, ChatGPT, Gamma 써봤음. 무료가 다 써서 잘 못 씀. 파트너사 미팅 전에 회사 정보 알려고 쓰고, 심도 있는 메일 내용은 초안 작성 후 문장 워싱. PPT 작업 시 장표별 주제 정해주고 골격 잡는 용도로 씀.</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">Q8. 써봤는데 별로였던 경험은?</div>
+        <div class="qa-a">Gamma 써봤는데 작업 퀄리티가 별로였음.</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">Q9. 딱 한 가지만 자동화해드린다면?</div>
+        <div class="qa-a">발주리스트에 이미지 넣는 것.</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">Q10. AI가 내 업무에 들어오는 것에 대해 솔직히 어떻게 생각하세요?</div>
+        <div class="qa-a">잡 업무라도 처리되면 파트너사와의 업무에 집중할 수 있을 것 같다. 파트너사 영업은 AI가 힘드니까.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+</body>
+</html>
