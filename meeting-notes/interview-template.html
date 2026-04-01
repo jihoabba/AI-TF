@@ -243,9 +243,7 @@ body { min-height: 100vh; }
     <div class="save-section">
       <div class="save-title">📤 구글 시트에 저장</div>
       <div class="save-desc">인터뷰 1건이 시트 1행으로 저장됩니다. 작업 항목 여러 개는 "/" 구분자로 한 셀에 기록됩니다.</div>
-      <div class="webhook-row">
-        <input class="webhook-input" id="webhook-url" type="text" placeholder="Apps Script 웹 앱 URL (https://script.google.com/macros/s/…/exec)">
-      </div>
+      <input type="hidden" id="webhook-url" value="https://script.google.com/macros/s/AKfycbxcJZMCJZh0m4B37DykVNdEqCh3p167HJSnvwn7a9FOtq_DjZPm5_8qyCZkHGmKdcRF/exec">
       <div class="btn-row">
         <button class="save-btn" id="save-btn" onclick="saveToSheet()">📤 시트에 저장</button>
         <button class="preview-btn" onclick="togglePreview()">🔍 데이터 미리보기</button>
@@ -469,13 +467,6 @@ function setStatus(type, msg) {
   el.textContent = msg;
 }
 
-window.addEventListener('load', () => {
-  const saved = localStorage.getItem('axtf_webhook');
-  if (saved) document.getElementById('webhook-url').value = saved;
-});
-document.getElementById('webhook-url').addEventListener('input', function() {
-  localStorage.setItem('axtf_webhook', this.value);
-});
 </script>
 </body>
 </html>
