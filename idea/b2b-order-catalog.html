@@ -224,25 +224,34 @@ async function fetchImage(code, imgEl) {
     if (imgCache[code]) setImg(imgEl, imgCache[code]);
     return;
   }
-  const base = 'https://linefriendssquare.com';
-  const searchUrl  = `${base}/search.json?type=product&q=${encodeURIComponent(code)}&options%5Bprefix%5D=last`;
-  const suggestUrl = `${base}/search/suggest.json?q=${encodeURIComponent(code)}&resources%5Btype%5D=product`;
+  const q = encodeURIComponent(code);
+  const searchUrl = `https://linefriendssquare.com/search.json?type=product&q=${q}`;
 
   const strategies = [
-    () => fetch(searchUrl).then(r => r.json()).then(extractImg),
-    () => fetch(suggestUrl).then(r => r.json()).then(extractImg),
-    () => fetch(`https://corsproxy.io/?url=${encodeURIComponent(searchUrl)}`).then(r => r.json()).then(extractImg),
+    // allorigins /raw — 응답 본문 직접 반환 (JSON API에 가장 적합)
+    () => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(searchUrl)}`)
+            .then(r => { if (!r.ok) throw new Error(`allorigins/raw ${r.status}`); return r.json(); })
+            .then(extractImg),
+    // allorigins /get — {contents: "..."} 래핑 방식
     () => fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`)
-            .then(r => r.json()).then(w => extractImg(JSON.parse(w.contents))),
+            .then(r => r.json())
+            .then(w => { if (!w.contents) throw new Error('allorigins/get empty'); return extractImg(JSON.parse(w.contents)); }),
+    // corsproxy.io
+    () => fetch(`https://corsproxy.io/?url=${encodeURIComponent(searchUrl)}`)
+            .then(r => { if (!r.ok) throw new Error(`corsproxy ${r.status}`); return r.json(); })
+            .then(extractImg),
   ];
 
-  for (const strategy of strategies) {
+  for (let i = 0; i < strategies.length; i++) {
     try {
-      const src = await strategy();
+      const src = await strategies[i]();
       if (src) { imgCache[code] = src; setImg(imgEl, src); return; }
-    } catch(e) {}
+    } catch(e) {
+      console.warn(`[img] ${code} 전략${i+1} 실패:`, e.message);
+    }
   }
   imgCache[code] = null;
+  console.warn(`[img] ${code} — 이미지 없음 (모든 전략 실패)`);
 }
 
 function setImg(imgEl, src) {
