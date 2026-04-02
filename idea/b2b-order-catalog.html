@@ -54,10 +54,8 @@ html, body { height: 100%; background: var(--bg); font-family: -apple-system,"SF
 /* ── Product Item ── */
 .product-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--divider); border-radius: 12px; padding: 12px 14px; margin-bottom: 6px; transition: border-color .15s, box-shadow .15s; }
 .product-item.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.product-img { width: 52px; height: 52px; border-radius: 8px; background: var(--bg); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
-.product-img img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; opacity: 0; transition: opacity .2s; }
-.product-img img.loaded { opacity: 1; }
-.img-placeholder { font-size: 18px; }
+.product-img-link { width: 52px; height: 52px; border-radius: 8px; background: var(--bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1.5px solid var(--divider); transition: border-color .15s, background .15s; font-size: 20px; cursor: pointer; }
+.product-img-link:hover { border-color: var(--accent); background: rgba(0,113,227,0.06); }
 .product-info { flex: 1; min-width: 0; }
 .product-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .product-code { font-size: 11px; color: var(--muted); margin-top: 1px; }
@@ -180,73 +178,6 @@ let activeChars = new Set();
 let activeCats  = new Set();
 let searchQ = '';
 
-// ── Image loading queue ──
-const imgCache = {};
-let activeReqs = 0;
-const MAX_REQ = 3;
-const imgQueue = [];
-
-function processImgQueue() {
-  while (activeReqs < MAX_REQ && imgQueue.length > 0) {
-    const { code, el } = imgQueue.shift();
-    activeReqs++;
-    fetchImage(code, el).finally(() => { activeReqs--; processImgQueue(); });
-  }
-}
-
-
-const EDGE_FN = 'https://pflsamjncryfeyhmhxjh.supabase.co/functions/v1/get-product-image';
-
-async function fetchImage(code, imgEl) {
-  if (imgCache[code] !== undefined) {
-    if (imgCache[code]) setImg(imgEl, imgCache[code]);
-    return;
-  }
-
-  try {
-    const res = await fetch(`${EDGE_FN}?code=${encodeURIComponent(code)}`);
-    if (!res.ok) throw new Error(`edge fn ${res.status}`);
-    const { imageUrl } = await res.json();
-    imgCache[code] = imageUrl || null;
-    if (imageUrl) setImg(imgEl, imageUrl);
-  } catch(e) {
-    imgCache[code] = null;
-    console.warn(`[img] ${code} 실패:`, e.message);
-  }
-}
-
-function setImg(imgEl, src) {
-  // Set onload BEFORE src to catch cached images
-  imgEl.onload = () => {
-    imgEl.classList.add('loaded');
-    const ph = imgEl.nextElementSibling;
-    if (ph) ph.style.display = 'none';
-  };
-  imgEl.onerror = () => { imgEl.style.display = 'none'; };
-  imgEl.src = src;
-  if (imgEl.complete && imgEl.naturalWidth > 0) {
-    imgEl.classList.add('loaded');
-    const ph = imgEl.nextElementSibling;
-    if (ph) ph.style.display = 'none';
-  }
-}
-
-// ── Intersection Observer for lazy loading ──
-const imgObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const el = entry.target;
-      const code = el.dataset.code;
-      if (code && !imgCache[code]) {
-        imgQueue.push({ code, el });
-        processImgQueue();
-      } else if (imgCache[code]) {
-        setImg(el, imgCache[code]);
-      }
-      imgObserver.unobserve(el);
-    }
-  });
-}, { rootMargin: '200px' });
 
 // ── Init ──
 async function init() {
@@ -383,10 +314,7 @@ function renderList() {
 
     return `
       <div class="product-item${qty > 0 ? ' selected' : ''}" id="item-${p.code}">
-        <div class="product-img">
-          <img data-code="${p.code}" alt="">
-          <span class="img-placeholder">🖼</span>
-        </div>
+        <a class="product-img-link" href="https://linefriendssquare.com/search?type=product&q=${encodeURIComponent(p.code)}" target="_blank" title="상품 검색">🔗</a>
         <div class="product-info">
           <div class="product-name">${p.name}</div>
           <div class="product-code">${p.code}</div>
@@ -408,16 +336,6 @@ function renderList() {
     `;
   }).join('');
 
-  // Observe images
-  container.querySelectorAll('.product-img img').forEach(img => {
-    const code = img.dataset.code;
-    if (imgCache[code] != null) {
-      setImg(img, imgCache[code]);
-    } else if (imgCache[code] === undefined) {
-      imgObserver.observe(img);
-    }
-    // imgCache[code] === null → fetch failed, leave placeholder
-  });
 }
 
 // ── Quantity controls ──
