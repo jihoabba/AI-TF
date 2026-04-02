@@ -9,6 +9,11 @@ on:
       - 'meeting-notes/**'
       - 'interview/**'
 
+# 동시 실행 방지 — 큐에 쌓되 취소하지 않음
+concurrency:
+  group: build-index
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -16,8 +21,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout latest main
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,5 +41,6 @@ jobs:
           git add index.html
           git diff --staged --quiet && echo "변경 없음, 스킵" || (
             git commit -m "chore: auto-update index [skip ci]" &&
+            git pull --rebase origin main &&
             git push
           )
