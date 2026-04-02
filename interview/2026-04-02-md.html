@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인터뷰 — MD 장하라 · 2026.04.02</title>
+<meta name="tf-type"  content="interview">
+<meta name="tf-title" content="인터뷰 — MD 장하라">
+<meta name="tf-desc"  content="MD팀 리드 인터뷰. SAP 데이터 열람·편집 자동화, 재고 리오더 알림, 외부 데이터 접근성 개선이 핵심 자동화 후보로 도출.">
+<meta name="tf-date"  content="2026-04-02">
+<meta name="tf-tags"  content="interview,md">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f5f7; --surface: #ffffff; --text: #1d1d1f;
+    --muted: rgba(0,0,0,0.45); --accent: #0071e3;
+    --green: #1a7f4b; --orange: #b95000; --red: #c0392b;
+    --divider: rgba(0,0,0,0.08); --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  html { background: var(--bg); font-family: -apple-system,"SF Pro Text","Helvetica Neue",sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; font-size: 15px; line-height: 1.6; }
+  body { min-height: 100vh; }
+
+  .topnav { height: 52px; background: rgba(245,245,247,0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--divider); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; padding: 0 40px; gap: 12px; }
+  .nav-back { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; }
+  .nav-back:hover { opacity: 0.75; }
+  .nav-sep { width: 1px; height: 14px; background: var(--divider); }
+  .nav-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 56px 40px 96px; }
+
+  .doc-type { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--green); background: rgba(26,127,75,0.08); padding: 4px 10px; border-radius: 100px; margin-bottom: 20px; }
+  .doc-title { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 20px; }
+  .doc-meta { display: flex; flex-wrap: wrap; gap: 20px; padding: 16px 0; border-top: 1px solid var(--divider); border-bottom: 1px solid var(--divider); margin-bottom: 48px; }
+  .meta-item { display: flex; flex-direction: column; gap: 3px; }
+  .meta-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+
+  .doc-body { display: flex; flex-direction: column; gap: 40px; }
+  .section { display: flex; flex-direction: column; gap: 12px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
+  .section-title { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+
+  .item-list { display: flex; flex-direction: column; gap: 8px; }
+  .item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--divider); border-radius: 10px; font-size: 14px; color: var(--text); line-height: 1.6; box-shadow: var(--shadow); }
+  .item-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .item-text { flex: 1; }
+  .item-text strong { font-weight: 700; }
+  .item-text .sub { color: var(--muted); display: block; margin-top: 2px; font-size: 13px; }
+
+  .quote { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; box-shadow: var(--shadow); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; border: 1px solid var(--divider); color: var(--muted); background: var(--bg); }
+  .chip.blue   { background: rgba(0,113,227,0.07);  color: var(--accent); border-color: rgba(0,113,227,0.15); }
+  .chip.orange { background: rgba(185,80,0,0.07);   color: var(--orange); border-color: rgba(185,80,0,0.15); }
+
+  @media (max-width: 640px) {
+    .container { padding: 40px 20px 80px; }
+    .topnav { padding: 0 20px; }
+    .doc-title { font-size: 26px; }
+    .doc-meta { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="nav-back" href="../index.html">← 아카이브</a>
+  <div class="nav-sep"></div>
+  <span class="nav-title">인터뷰 — MD · 장하라</span>
+</nav>
+
+<div class="container">
+  <div class="doc-type">🎤 Interview</div>
+  <h1 class="doc-title">인터뷰 — MD 장하라</h1>
+  <div class="doc-meta">
+    <div class="meta-item">
+      <span class="meta-label">날짜</span>
+      <span class="meta-value">2026년 4월 2일</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">팀</span>
+      <span class="meta-value">MD</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">인터뷰이</span>
+      <span class="meta-value">장하라 (리드)</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">형태</span>
+      <span class="meta-value">1:1 인터뷰</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">시각</span>
+      <span class="meta-value">오후 7:19</span>
+    </div>
+  </div>
+
+  <div class="doc-body">
+
+    <div class="section">
+      <div class="section-label">01 · 주요 업무</div>
+      <div class="section-title">담당 업무 현황</div>
+      <div class="item-list">
+        <div class="item">
+          <div class="item-icon">📦</div>
+          <div class="item-text">
+            <strong>OEM 사입</strong>
+            <span class="sub">IPX쪽 제품을 사입하는 방식</span>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-icon">🤝</div>
+          <div class="item-text">
+            <strong>라이센스 제품 사입</strong>
+            <span class="sub">타 업체에서 라이센싱으로 제작된 제품을 사입하는 작업</span>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-icon">🌐</div>
+          <div class="item-text">
+            <strong>멀티 IP 소싱</strong>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-icon">✏️</div>
+          <div class="item-text">
+            <strong>PB 제품 기획</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">02 · 시간 소요 업무</div>
+      <div class="section-title">가장 많은 시간이 걸리는 일</div>
+      <div class="quote">
+        가장 많은 시간이 걸리는 업무는 업체와의 미팅 및 운영 응대. 업체 영업 시간에 맞추고, 사람을 대하는 일이다 보니 필수적으로 시간이 많이 들어간다.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">03 · 반복 작업</div>
+      <div class="section-title">반복적으로 수행하는 업무</div>
+      <div class="quote">
+        사입 제품의 리오더 작업. 재고가 줄어들면 새로 발주를 하는데, 언제 어떻게 줄어드는지 직접 확인해야 한다.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">04 · 수작업 불편</div>
+      <div class="section-title">아날로그·수작업으로 인한 불편</div>
+      <div class="quote">
+        예전 회사에서 자동화 되고 있던 시스템이 엑셀 작업 등으로 진행되고 있는 것이 많다.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">05 · 데이터 수신</div>
+      <div class="section-title">데이터 관련 불편 사항</div>
+      <div class="quote">
+        재고 관리 엑셀 등이 무겁고 편집이 힘들다. 엑셀 파일들이 시각화가 안되어 있는 점도 불편하다.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">06 · 툴 불편</div>
+      <div class="section-title">현재 사용 툴의 불편 사항</div>
+      <div class="quote">
+        외부 미팅이 많은데 밖에 나가면 데이터 접근이 안되는 부분이 답답하다.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">07 · AI 툴 현황</div>
+      <div class="section-title">현재 사용 중인 AI 도구</div>
+      <div class="chips">
+        <span class="chip blue">Claude</span>
+        <span class="chip blue">ChatGPT</span>
+        <span class="chip orange">Gemini</span>
+        <span class="chip orange">Genspark</span>
+      </div>
+      <div class="quote" style="margin-top:4px;">
+        제미나이, 챗지피티, 젠스파크 등 다양하게 이용하고 있으며 최근에 클로드를 주로 공부하고 있다.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">08 · AI 불만 경험</div>
+      <div class="section-title">AI 사용 중 불편했던 점</div>
+      <div class="quote">
+        무료 플랜에서 사용량이 적어 불편하다.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">09 · 자동화 1순위</div>
+      <div class="section-title">가장 자동화하고 싶은 업무</div>
+      <div class="quote">
+        SAP 데이터 혹은 가공된 데이터를 쉽게 열람하거나 편집할 수 있는 일이 있었으면 좋겠다. 외부 업체 미팅이나 영업적인 측면에서는 필수적으로 시간이 들어가는 부분이 있다. 업체 시간에 맞춰 낮에는 미팅하고 밤에 SAP 시스템 업무 하면서 야근한다.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">10 · AI 수용도</div>
+      <div class="section-title">AI 도입에 대한 태도</div>
+      <div class="quote">
+        열린 마음으로 수용하고 있다. 팀원들에게도 적극적 장려 중이다.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
