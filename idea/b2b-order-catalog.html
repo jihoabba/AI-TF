@@ -54,9 +54,9 @@ html, body { height: 100%; background: var(--bg); font-family: -apple-system,"SF
 /* ── Product Item ── */
 .product-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--divider); border-radius: 12px; padding: 12px 14px; margin-bottom: 6px; transition: border-color .15s, box-shadow .15s; }
 .product-item.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.product-img { width: 52px; height: 52px; border-radius: 8px; background: var(--bg); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.product-img img { width: 100%; height: 100%; object-fit: cover; display: none; }
-.product-img img.loaded { display: block; }
+.product-img { width: 52px; height: 52px; border-radius: 8px; background: var(--bg); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+.product-img img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; opacity: 0; transition: opacity .2s; }
+.product-img img.loaded { opacity: 1; }
 .img-placeholder { font-size: 18px; }
 .product-info { flex: 1; min-width: 0; }
 .product-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
