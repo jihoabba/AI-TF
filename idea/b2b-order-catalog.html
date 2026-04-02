@@ -194,64 +194,25 @@ function processImgQueue() {
   }
 }
 
-function normalizeImgUrl(raw) {
-  if (!raw || typeof raw !== 'string') return null;
-  let src = raw.split('?')[0]; // strip version params
-  if (src.startsWith('//')) src = 'https:' + src;
-  return src.startsWith('http') ? src : null;
-}
 
-function extractImg(data) {
-  // search.json format
-  if (Array.isArray(data.results)) {
-    const p = data.results[0];
-    if (p) {
-      const img = p.featured_image || p.image;
-      return normalizeImgUrl(typeof img === 'string' ? img : (img?.url || img?.src));
-    }
-  }
-  // suggest.json format
-  const products = data?.resources?.results?.products;
-  if (Array.isArray(products) && products[0]) {
-    const img = products[0].image || products[0].featured_image;
-    return normalizeImgUrl(typeof img === 'string' ? img : (img?.url || img?.src));
-  }
-  return null;
-}
+const EDGE_FN = 'https://pflsamjncryfeyhmhxjh.supabase.co/functions/v1/get-product-image';
 
 async function fetchImage(code, imgEl) {
   if (imgCache[code] !== undefined) {
     if (imgCache[code]) setImg(imgEl, imgCache[code]);
     return;
   }
-  const q = encodeURIComponent(code);
-  const searchUrl = `https://linefriendssquare.com/search.json?type=product&q=${q}`;
 
-  const strategies = [
-    // allorigins /raw — 응답 본문 직접 반환 (JSON API에 가장 적합)
-    () => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(searchUrl)}`)
-            .then(r => { if (!r.ok) throw new Error(`allorigins/raw ${r.status}`); return r.json(); })
-            .then(extractImg),
-    // allorigins /get — {contents: "..."} 래핑 방식
-    () => fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`)
-            .then(r => r.json())
-            .then(w => { if (!w.contents) throw new Error('allorigins/get empty'); return extractImg(JSON.parse(w.contents)); }),
-    // corsproxy.io
-    () => fetch(`https://corsproxy.io/?url=${encodeURIComponent(searchUrl)}`)
-            .then(r => { if (!r.ok) throw new Error(`corsproxy ${r.status}`); return r.json(); })
-            .then(extractImg),
-  ];
-
-  for (let i = 0; i < strategies.length; i++) {
-    try {
-      const src = await strategies[i]();
-      if (src) { imgCache[code] = src; setImg(imgEl, src); return; }
-    } catch(e) {
-      console.warn(`[img] ${code} 전략${i+1} 실패:`, e.message);
-    }
+  try {
+    const res = await fetch(`${EDGE_FN}?code=${encodeURIComponent(code)}`);
+    if (!res.ok) throw new Error(`edge fn ${res.status}`);
+    const { imageUrl } = await res.json();
+    imgCache[code] = imageUrl || null;
+    if (imageUrl) setImg(imgEl, imageUrl);
+  } catch(e) {
+    imgCache[code] = null;
+    console.warn(`[img] ${code} 실패:`, e.message);
   }
-  imgCache[code] = null;
-  console.warn(`[img] ${code} — 이미지 없음 (모든 전략 실패)`);
 }
 
 function setImg(imgEl, src) {
