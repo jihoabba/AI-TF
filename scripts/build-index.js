@@ -38,9 +38,10 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 
 const FOLDERS = [
-  { dir: 'reports',       type: 'report'  },
-  { dir: 'idea',          type: 'idea'    },
-  { dir: 'meeting-notes', type: 'meeting' },
+  { dir: 'reports',       type: 'report'    },
+  { dir: 'idea',          type: 'idea'      },
+  { dir: 'meeting-notes', type: 'meeting'   },
+  { dir: 'interview',     type: 'interview' },
 ];
 
 const SKIP_FILES = ['placeholder.html'];
