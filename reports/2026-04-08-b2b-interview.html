@@ -38,7 +38,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 80px 100px;
+    padding: 64px 80px;
     background: #ffffff;
     color: #1d1d1f;
     overflow: hidden;
@@ -46,18 +46,45 @@
 
   .slide.active { display: flex; }
 
-  /* 슬라이드 번호 */
-  .slide-num {
-    position: absolute;
-    bottom: 36px;
-    right: 48px;
-    font-size: 13px;
-    color: rgba(0,0,0,0.25);
-    font-weight: 500;
-    letter-spacing: 0.04em;
+  /* ── Animation ── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* 섹션 레이블 */
+  .slide.active .animate {
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+  }
+
+  .slide.active .animate:nth-child(1) { animation-delay: 0.05s; }
+  .slide.active .animate:nth-child(2) { animation-delay: 0.15s; }
+  .slide.active .animate:nth-child(3) { animation-delay: 0.25s; }
+  .slide.active .animate:nth-child(4) { animation-delay: 0.35s; }
+  .slide.active .animate:nth-child(5) { animation-delay: 0.45s; }
+
+  .slide.active .card-grid .card:nth-child(1) { animation-delay: 0.2s; }
+  .slide.active .card-grid .card:nth-child(2) { animation-delay: 0.3s; }
+  .slide.active .card-grid .card:nth-child(3) { animation-delay: 0.4s; }
+
+  .slide.active .bar-card { animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+  .slide.active .bar-card:nth-child(1) { animation-delay: 0.2s; }
+  .slide.active .bar-card:nth-child(2) { animation-delay: 0.3s; }
+  .slide.active .bar-card:nth-child(3) { animation-delay: 0.4s; }
+
+  .slide.active .point-box { animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+  .slide.active .point-box:nth-child(1) { animation-delay: 0.2s; }
+  .slide.active .point-box:nth-child(2) { animation-delay: 0.3s; }
+  .slide.active .point-box:nth-child(3) { animation-delay: 0.4s; }
+
+  .slide.active .question-box { animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+  .slide.active .question-box:nth-child(1) { animation-delay: 0.2s; }
+  .slide.active .question-box:nth-child(2) { animation-delay: 0.3s; }
+  .slide.active .question-box:nth-child(3) { animation-delay: 0.4s; }
+
+  .slide.active .card { animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+
+  /* ── Section Label ── */
   .section-label {
     position: absolute;
     top: 40px;
@@ -66,88 +93,64 @@
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(0,0,0,0.3);
+    color: #0071e3;
   }
 
+  /* ── Typography ── */
   h1 {
-    font-size: 58px;
+    font-size: clamp(32px, 3.5vw, 48px);
     font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.08;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
     color: #1d1d1f;
     text-align: center;
     margin-bottom: 20px;
   }
 
-  h1.large { font-size: 64px; }
-  h1.medium { font-size: 48px; }
-  h1.small { font-size: 38px; }
+  h1.impact {
+    font-size: clamp(48px, 5vw, 72px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+  }
 
   p.sub {
-    font-size: 24px;
+    font-size: clamp(18px, 2vw, 24px);
     font-weight: 300;
-    color: rgba(0,0,0,0.5);
+    color: rgba(0,0,0,0.45);
     text-align: center;
     line-height: 1.4;
     max-width: 800px;
   }
 
-  p.sub.tight { font-size: 20px; }
+  p.sub.tight { font-size: 18px; }
 
   .stat {
-    font-size: 96px;
+    font-size: clamp(64px, 8vw, 96px);
     font-weight: 800;
     letter-spacing: -0.04em;
-    color: #0071e3;
+    color: #2997ff;
     line-height: 1;
     margin-bottom: 12px;
   }
 
-  .stat.dark { color: #1d1d1f; }
+  .accent { color: #0071e3; }
 
-  ul.points {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-top: 12px;
-    text-align: left;
-    max-width: 760px;
-    width: 100%;
+  /* ── Dark Slide ── */
+  .slide.dark {
+    background: #0a0a0f;
+    color: #ffffff;
   }
-
-  ul.points li {
-    font-size: 22px;
-    font-weight: 400;
-    color: rgba(0,0,0,0.6);
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    line-height: 1.4;
-  }
-
-  ul.points li::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #0071e3;
-    flex-shrink: 0;
-    margin-top: 9px;
-  }
-
-  /* 타이틀 슬라이드 */
-  .slide.title-slide { background: #1d1d1f; color: #fff; }
-  .slide.title-slide h1 { color: #fff; }
-  .slide.title-slide p.sub { color: rgba(255,255,255,0.5); }
-  .slide.title-slide .slide-num { color: rgba(255,255,255,0.2); }
+  .slide.dark h1 { color: #ffffff; }
+  .slide.dark p.sub { color: rgba(255,255,255,0.45); }
+  .slide.dark .section-label { color: #2997ff; }
 
   .title-eyebrow {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.16em;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.35);
     margin-bottom: 24px;
   }
 
@@ -155,15 +158,17 @@
     margin-top: 32px;
     font-size: 15px;
     font-weight: 400;
-    color: rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.25);
     letter-spacing: 0.04em;
   }
 
-  /* 구분선 슬라이드 */
-  .slide.divider-slide { background: #f5f5f7; }
+  /* ── Gray Slide ── */
+  .slide.gray {
+    background: #f5f5f7;
+  }
 
   .divider-label {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -171,30 +176,7 @@
     margin-bottom: 20px;
   }
 
-  /* 공란 슬라이드 */
-  .slide.blank-slide { background: #f5f5f7; }
-  .blank-placeholder {
-    width: 100%;
-    height: 480px;
-    border: 2px dashed rgba(0,0,0,0.12);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .blank-placeholder .placeholder-text {
-    font-size: 16px;
-    color: rgba(0,0,0,0.25);
-    font-weight: 500;
-  }
-  .blank-placeholder .placeholder-sub {
-    font-size: 13px;
-    color: rgba(0,0,0,0.18);
-  }
-
-  /* 카드 그리드 */
+  /* ── Card Grid ── */
   .card-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -205,8 +187,9 @@
 
   .card {
     background: #f5f5f7;
-    border-radius: 12px;
-    padding: 24px 22px;
+    border-radius: 14px;
+    padding: 26px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
 
   .card-num {
@@ -218,7 +201,7 @@
   }
 
   .card-title {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
     color: #1d1d1f;
     margin-bottom: 6px;
@@ -227,52 +210,12 @@
 
   .card-desc {
     font-size: 13px;
-    color: rgba(0,0,0,0.5);
-    line-height: 1.5;
+    color: rgba(0,0,0,0.45);
+    line-height: 1.55;
   }
 
-  /* 2열 레이아웃 */
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
-    width: 100%;
-    align-items: start;
-  }
-
-  .col-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: rgba(0,0,0,0.3);
-    margin-bottom: 16px;
-  }
-
-  .col-title {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #1d1d1f;
-    margin-bottom: 12px;
-    line-height: 1.2;
-  }
-
-  .col-body {
-    font-size: 17px;
-    font-weight: 300;
-    color: rgba(0,0,0,0.55);
-    line-height: 1.65;
-  }
-
-  .divider-line {
-    width: 1px;
-    background: rgba(0,0,0,0.08);
-    align-self: stretch;
-  }
-
-  /* 인사이트 리스트 */
-  .insight-list {
+  /* ── Bar Cards (Priority List) ── */
+  .bar-cards {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -280,53 +223,54 @@
     max-width: 960px;
   }
 
-  .insight-item {
+  .bar-card {
     display: flex;
     align-items: stretch;
     background: #f5f5f7;
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
 
-  .insight-bar { width: 4px; flex-shrink: 0; }
-  .insight-bar.red    { background: #ff3b30; }
-  .insight-bar.yellow { background: #ff9f0a; }
-  .insight-bar.green  { background: #30d158; }
+  .bar { width: 4px; flex-shrink: 0; }
+  .bar.red    { background: #ff3b30; }
+  .bar.yellow { background: #ff9f0a; }
+  .bar.green  { background: #30d158; }
 
-  .insight-inner {
+  .bar-inner {
     display: flex;
     align-items: center;
     gap: 18px;
-    padding: 18px 24px;
+    padding: 20px 24px;
     flex: 1;
   }
 
-  .insight-icon { font-size: 20px; flex-shrink: 0; }
-  .insight-text { flex: 1; }
+  .bar-icon { font-size: 20px; flex-shrink: 0; }
+  .bar-text { flex: 1; }
 
-  .insight-title {
+  .bar-title {
     font-size: 18px;
     font-weight: 600;
     color: #1d1d1f;
     margin-bottom: 3px;
     letter-spacing: -0.01em;
   }
-  .insight-desc {
+  .bar-desc {
     font-size: 14px;
     font-weight: 400;
-    color: rgba(0,0,0,0.5);
+    color: rgba(0,0,0,0.45);
     line-height: 1.5;
   }
 
-  .insight-rank {
+  .bar-rank {
     font-size: 36px;
     font-weight: 800;
-    color: rgba(0,0,0,0.07);
+    color: rgba(0,0,0,0.06);
     letter-spacing: -0.03em;
     flex-shrink: 0;
   }
 
-  /* 포인트 박스 */
+  /* ── Point Boxes ── */
   .point-boxes {
     display: flex;
     flex-direction: column;
@@ -337,15 +281,16 @@
 
   .point-box {
     background: #f5f5f7;
-    border-radius: 12px;
-    padding: 18px 24px;
+    border-radius: 14px;
+    padding: 20px 24px;
     display: flex;
     align-items: center;
     gap: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
 
-  .point-box-num {
-    width: 28px; height: 28px;
+  .point-num {
+    width: 30px; height: 30px;
     border-radius: 50%;
     background: #0071e3;
     color: #fff;
@@ -354,14 +299,14 @@
     flex-shrink: 0;
   }
 
-  .point-box-text {
+  .point-text {
     font-size: 18px;
     font-weight: 500;
     color: #1d1d1f;
     line-height: 1.4;
   }
 
-  /* 열린 질문 박스 */
+  /* ── Question Box ── */
   .question-boxes {
     display: flex;
     flex-direction: column;
@@ -372,30 +317,30 @@
 
   .question-box {
     border: 1.5px solid rgba(0,0,0,0.08);
-    border-radius: 12px;
-    padding: 18px 24px;
+    border-radius: 14px;
+    padding: 20px 24px;
     display: flex;
     align-items: flex-start;
     gap: 14px;
   }
 
-  .question-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .q-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
 
-  .question-text {
+  .q-text {
     font-size: 17px;
     font-weight: 500;
     color: #1d1d1f;
     line-height: 1.4;
   }
 
-  .question-sub {
+  .q-sub {
     font-size: 13px;
     font-weight: 400;
     color: rgba(0,0,0,0.4);
     margin-top: 3px;
   }
 
-  /* 2열 박스 */
+  /* ── Two Column Box ── */
   .two-col-box {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -406,8 +351,9 @@
 
   .col-box {
     background: #f5f5f7;
-    border-radius: 14px;
-    padding: 28px 28px;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
 
   .col-box.accent-box {
@@ -429,15 +375,33 @@
   }
 
   .col-box-body {
-    font-size: 15px; font-weight: 300;
-    color: rgba(0,0,0,0.5); line-height: 1.65;
+    font-size: 15px; font-weight: 400;
+    color: rgba(0,0,0,0.45); line-height: 1.65;
   }
 
-  /* 강조 텍스트 */
-  .accent { color: #0071e3; }
-  .soft { color: rgba(0,0,0,0.4); }
+  /* ── Blank Slide ── */
+  .blank-placeholder {
+    width: 100%;
+    height: 480px;
+    border: 2px dashed rgba(0,0,0,0.12);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .blank-placeholder .placeholder-text {
+    font-size: 16px;
+    color: rgba(0,0,0,0.25);
+    font-weight: 500;
+  }
+  .blank-placeholder .placeholder-sub {
+    font-size: 13px;
+    color: rgba(0,0,0,0.18);
+  }
 
-  /* 아카이브 링크 */
+  /* ── Archive Link ── */
   .archive-link {
     position: fixed;
     top: 20px;
@@ -452,7 +416,7 @@
   }
   .archive-link:hover { color: rgba(255,255,255,0.7); }
 
-  /* 네비게이션 */
+  /* ── Navigation ── */
   .nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -489,7 +453,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Scale for screen */
   @media screen {
     .deck-wrap {
       display: flex;
@@ -498,16 +461,14 @@
       width: 100vw;
       height: 100vh;
     }
-    .deck {
-      transform-origin: center center;
-    }
+    .deck { transform-origin: center center; }
   }
 
-  /* Print */
   @media print {
     body { background: #fff; }
     .nav, .archive-link { display: none; }
     .slide { position: relative; display: flex !important; page-break-after: always; }
+    .slide.active .animate, .slide.active .bar-card, .slide.active .point-box, .slide.active .question-box, .slide.active .card { opacity: 1; animation: none; }
     .deck { width: 100%; height: auto; }
   }
 </style>
@@ -519,28 +480,26 @@
 <div class="deck-wrap">
 <div class="deck" id="deck">
 
-  <!-- 01. 타이틀 -->
-  <section class="slide title-slide active">
-    <div class="title-eyebrow">LINE FRIENDS SQUARE · AI TF</div>
-    <h1 class="large">1차 인터뷰 보고</h1>
-    <p class="sub">B2B팀 · 페인포인트 발굴 및 자동화 후보 도출</p>
-    <div class="title-date">2026년 4월 · 염동혁</div>
-    <div class="slide-num">1</div>
+  <!-- 01. 타이틀 (Dark) -->
+  <section class="slide dark active">
+    <div class="title-eyebrow animate">LINE FRIENDS SQUARE · AI TF</div>
+    <h1 class="impact animate">1차 인터뷰 보고</h1>
+    <p class="sub animate">B2B팀 · 페인포인트 발굴 및 자동화 후보 도출</p>
+    <div class="title-date animate">2026년 4월 · 염동혁</div>
   </section>
 
-  <!-- 02. 섹션 구분 — 인터뷰 -->
-  <section class="slide divider-slide">
-    <div class="divider-label">Part 1</div>
-    <h1 class="medium">B2B팀 인터뷰</h1>
-    <p class="sub">염재훈 (실무) · 안영민 (리드)</p>
-    <div class="slide-num">2</div>
+  <!-- 02. 섹션 구분 (Gray) -->
+  <section class="slide gray">
+    <div class="divider-label animate">Part 1</div>
+    <h1 class="animate">B2B팀 인터뷰</h1>
+    <p class="sub animate">염재훈 (실무) · 안영민 (리드)</p>
   </section>
 
-  <!-- 03. 인터뷰 개요 -->
+  <!-- 03. 인터뷰 개요 (Light) -->
   <section class="slide">
     <div class="section-label">Interview Overview</div>
-    <h1 class="small" style="margin-bottom:32px;">B2B팀은 지금 어떻게 일하고 있나</h1>
-    <div class="card-grid">
+    <h1 class="animate" style="margin-bottom:32px;">B2B팀은 지금 어떻게 일하고 있나</h1>
+    <div class="card-grid animate">
       <div class="card">
         <div class="card-num">1인</div>
         <div class="card-title">영업·운영·정산 전담</div>
@@ -557,56 +516,54 @@
         <div class="card-desc">업체 맞춤 제품 솔팅 시간 소요. 완성물은 이미지 없는 엑셀 — 파트너사 입장에서 보기 어려움.</div>
       </div>
     </div>
-    <div class="slide-num">3</div>
   </section>
 
-  <!-- 04. 핵심 페인포인트 -->
+  <!-- 04. 핵심 페인포인트 (Light) -->
   <section class="slide">
     <div class="section-label">Pain Points</div>
-    <h1 class="small" style="margin-bottom:28px;">"이게 핵심입니다"<br>실무자가 직접 지목한 병목</h1>
-    <div class="insight-list">
-      <div class="insight-item">
-        <div class="insight-bar red"></div>
-        <div class="insight-inner">
-          <div class="insight-icon">📋</div>
-          <div class="insight-text">
-            <div class="insight-title">발주리스트 제품 선별 + 전달 자료 품질</div>
-            <div class="insight-desc">업체 특성에 맞는 제품 솔팅에 시간 소요. 완성된 발주리스트는 이미지 없는 엑셀이라 파트너사 입장에서 불친절하고 활용하기 어려움.</div>
+    <h1 class="animate" style="margin-bottom:28px;">"이게 핵심입니다"<br>실무자가 직접 지목한 병목</h1>
+    <div class="bar-cards animate">
+      <div class="bar-card">
+        <div class="bar red"></div>
+        <div class="bar-inner">
+          <div class="bar-icon">📋</div>
+          <div class="bar-text">
+            <div class="bar-title">발주리스트 제품 선별 + 전달 자료 품질</div>
+            <div class="bar-desc">업체 특성에 맞는 제품 솔팅에 시간 소요. 완성된 발주리스트는 이미지 없는 엑셀이라 파트너사 입장에서 불친절하고 활용하기 어려움.</div>
           </div>
-          <div class="insight-rank">01</div>
+          <div class="bar-rank">01</div>
         </div>
       </div>
-      <div class="insight-item">
-        <div class="insight-bar yellow"></div>
-        <div class="insight-inner">
-          <div class="insight-icon">📊</div>
-          <div class="insight-text">
-            <div class="insight-title">주간 판매량 리포트 수동 가공</div>
-            <div class="insight-desc">SAP raw 데이터 → 고정 양식 변환 → 리드 전달. 매주 1시간 이상 소요.</div>
+      <div class="bar-card">
+        <div class="bar yellow"></div>
+        <div class="bar-inner">
+          <div class="bar-icon">📊</div>
+          <div class="bar-text">
+            <div class="bar-title">주간 판매량 리포트 수동 가공</div>
+            <div class="bar-desc">SAP raw 데이터 → 고정 양식 변환 → 리드 전달. 매주 1시간 이상 소요.</div>
           </div>
-          <div class="insight-rank">02</div>
+          <div class="bar-rank">02</div>
         </div>
       </div>
-      <div class="insight-item">
-        <div class="insight-bar green"></div>
-        <div class="insight-inner">
-          <div class="insight-icon">✉️</div>
-          <div class="insight-text">
-            <div class="insight-title">계약서·이메일 초안 → 발송 자동화</div>
-            <div class="insight-desc">현재 ChatGPT/Gemini로 초안 작성 중. 발송까지 한 흐름으로 연결되길 원함.</div>
+      <div class="bar-card">
+        <div class="bar green"></div>
+        <div class="bar-inner">
+          <div class="bar-icon">✉️</div>
+          <div class="bar-text">
+            <div class="bar-title">계약서·이메일 초안 → 발송 자동화</div>
+            <div class="bar-desc">현재 ChatGPT/Gemini로 초안 작성 중. 발송까지 한 흐름으로 연결되길 원함.</div>
           </div>
-          <div class="insight-rank">03</div>
+          <div class="bar-rank">03</div>
         </div>
       </div>
     </div>
-    <div class="slide-num">4</div>
   </section>
 
-  <!-- 05. 리드 니즈 -->
+  <!-- 05. 리드 니즈 (Light) -->
   <section class="slide">
     <div class="section-label">Lead Needs</div>
-    <h1 class="small" style="margin-bottom:32px;">리드가 원하는 건 한 단계 위</h1>
-    <div class="card-grid">
+    <h1 class="animate" style="margin-bottom:32px;">리드가 원하는 건 한 단계 위</h1>
+    <div class="card-grid animate">
       <div class="card">
         <div class="card-title">시장·채널 분석 어시스턴트</div>
         <div class="card-desc">아박, 다이소 등 채널별 상권·타겟 분석. 신규 거래처 발굴 리서치 공수 절감.</div>
@@ -620,60 +577,54 @@
         <div class="card-desc">신규 오픈 예정 직영 매장 매출·재고·트래픽 시각화. 빠른 의사결정 인프라.</div>
       </div>
     </div>
-    <p class="sub tight" style="margin-top:24px;">실무 자동화 1순위 → 리드 니즈는 검증 후 순차 적용</p>
-    <div class="slide-num">5</div>
+    <p class="sub tight animate" style="margin-top:24px;">실무 자동화 1순위 → 리드 니즈는 검증 후 순차 적용</p>
   </section>
 
-  <!-- 06. 섹션 구분 — 적용 내용 -->
-  <section class="slide divider-slide">
-    <div class="divider-label">Part 2</div>
-    <h1 class="medium">적용 내용</h1>
-    <p class="sub">실제 제작된 자동화 결과물</p>
-    <div class="slide-num">6</div>
+  <!-- 06. 섹션 구분 (Dark) -->
+  <section class="slide dark">
+    <div class="divider-label animate" style="color:#2997ff;">Part 2</div>
+    <h1 class="impact animate">적용 내용</h1>
+    <p class="sub animate">실제 제작된 자동화 결과물</p>
   </section>
 
-  <!-- 07. 공란 1 -->
-  <section class="slide blank-slide">
+  <!-- 07. 공란 1 (Gray) -->
+  <section class="slide gray">
     <div class="section-label">Deliverable 1</div>
-    <div class="blank-placeholder">
+    <div class="blank-placeholder animate">
       <div class="placeholder-text">제작 결과물 삽입 예정</div>
       <div class="placeholder-sub">스크린샷 또는 실제 구현 화면</div>
     </div>
-    <div class="slide-num">7</div>
   </section>
 
-  <!-- 08. 공란 2 -->
-  <section class="slide blank-slide">
+  <!-- 08. 공란 2 (Gray) -->
+  <section class="slide gray">
     <div class="section-label">Deliverable 2</div>
-    <div class="blank-placeholder">
+    <div class="blank-placeholder animate">
       <div class="placeholder-text">제작 결과물 삽입 예정</div>
       <div class="placeholder-sub">스크린샷 또는 실제 구현 화면</div>
     </div>
-    <div class="slide-num">8</div>
   </section>
 
-  <!-- 09. 공란 3 -->
-  <section class="slide blank-slide">
+  <!-- 09. 공란 3 (Gray) -->
+  <section class="slide gray">
     <div class="section-label">Deliverable 3</div>
-    <div class="blank-placeholder">
+    <div class="blank-placeholder animate">
       <div class="placeholder-text">제작 결과물 삽입 예정</div>
       <div class="placeholder-sub">스크린샷 또는 실제 구현 화면</div>
     </div>
-    <div class="slide-num">9</div>
   </section>
 
-  <!-- 10. 섹션 구분 — 인사이트 -->
-  <section class="slide divider-slide">
-    <div class="divider-label">Part 3</div>
-    <h1 class="medium">1차 인터뷰 이후<br>방향 고민</h1>
-    <div class="slide-num">10</div>
+  <!-- 10. 섹션 구분 (Dark) -->
+  <section class="slide dark">
+    <div class="divider-label animate" style="color:#2997ff;">Part 3</div>
+    <h1 class="impact animate">1차 인터뷰 이후<br>방향 고민</h1>
   </section>
 
-  <!-- 11. 인사이트 1 — AI 활용 수준 -->
+  <!-- 11. AI 활용 수준 (Light) -->
   <section class="slide">
     <div class="section-label">Insight 01</div>
-    <h1 class="small" style="margin-bottom:28px;">AI 활용 수준이 생각보다 낮다</h1>
-    <div class="two-col-box">
+    <h1 class="animate" style="margin-bottom:28px;">AI 활용 수준이 생각보다 낮다</h1>
+    <div class="two-col-box animate">
       <div class="col-box">
         <div class="col-box-eyebrow">현실</div>
         <div class="col-box-title">툴 이름은 알지만<br>실무 적용은 제한적</div>
@@ -685,88 +636,84 @@
         <div class="col-box-body">말로 설명하는 것보다 실제로 만들어서 보여주는 것이 설득과 확산 모두에 효과적. 데모가 곧 교육.</div>
       </div>
     </div>
-    <div class="slide-num">11</div>
   </section>
 
-  <!-- 12. 인사이트 2 — 타겟 전략 -->
+  <!-- 12. 타겟 전략 (Light) -->
   <section class="slide">
     <div class="section-label">Insight 02</div>
-    <h1 class="small" style="margin-bottom:8px;">타겟 전략을 바꾼다</h1>
-    <p class="sub tight" style="margin-bottom:28px;">많은 팀에 얕게 → 일욕심 있는 한 명을 깊게</p>
-    <div class="point-boxes">
+    <h1 class="animate" style="margin-bottom:8px;">타겟 전략을 바꾼다</h1>
+    <p class="sub tight animate" style="margin-bottom:28px;">많은 팀에 얕게 → 일욕심 있는 한 명을 깊게</p>
+    <div class="point-boxes animate">
       <div class="point-box">
-        <div class="point-box-num">1</div>
-        <div class="point-box-text">리드가 <span style="color:#0071e3;font-weight:600;">"얘 좀 빼줘"</span> 하는 사람이 진짜 타겟</div>
+        <div class="point-num">1</div>
+        <div class="point-text">리드가 <span class="accent" style="font-weight:600;">"얘 좀 빼줘"</span> 하는 사람이 진짜 타겟</div>
       </div>
       <div class="point-box">
-        <div class="point-box-num">2</div>
-        <div class="point-box-text">그 한 명이 바뀌면 나머지가 알아서 따라온다</div>
+        <div class="point-num">2</div>
+        <div class="point-text">그 한 명이 바뀌면 나머지가 알아서 따라온다</div>
       </div>
       <div class="point-box">
-        <div class="point-box-num">3</div>
-        <div class="point-box-text">B2B는 1인팀 — 변수 적고 측정 깔끔. <span style="color:rgba(0,0,0,0.35);font-weight:400;">첫 케이스스터디로 최적.</span></div>
+        <div class="point-num">3</div>
+        <div class="point-text">B2B는 1인팀 — 변수 적고 측정 깔끔. <span style="color:rgba(0,0,0,0.35);font-weight:400;">첫 케이스스터디로 최적.</span></div>
       </div>
     </div>
-    <div class="slide-num">12</div>
   </section>
 
-  <!-- 13. 인사이트 3 — TF 역할 범위 -->
+  <!-- 13. TF 역할 범위 (Light) -->
   <section class="slide">
     <div class="section-label">Insight 03</div>
-    <h1 class="small" style="margin-bottom:8px;">TF의 역할, 어디까지인가</h1>
-    <p class="sub tight" style="margin-bottom:28px;">아낀 시간으로 무엇을 할지 — 누가 결정해야 하는가</p>
-    <div class="point-boxes">
+    <h1 class="animate" style="margin-bottom:8px;">TF의 역할, 어디까지인가</h1>
+    <p class="sub tight animate" style="margin-bottom:28px;">아낀 시간으로 무엇을 할지 — 누가 결정해야 하는가</p>
+    <div class="point-boxes animate">
       <div class="point-box">
-        <div class="point-box-num">✓</div>
-        <div class="point-box-text"><span style="color:#0071e3;font-weight:600;">도구를 만들어주는 것</span>까지가 TF 역할</div>
+        <div class="point-num">✓</div>
+        <div class="point-text"><span class="accent" style="font-weight:600;">도구를 만들어주는 것</span>까지가 TF 역할</div>
       </div>
       <div class="point-box">
-        <div class="point-box-num">✓</div>
-        <div class="point-box-text">그 시간을 어떻게 쓸지는 <span style="color:#0071e3;font-weight:600;">본인과 리드의 몫</span></div>
+        <div class="point-num">✓</div>
+        <div class="point-text">그 시간을 어떻게 쓸지는 <span class="accent" style="font-weight:600;">본인과 리드의 몫</span></div>
       </div>
       <div class="point-box">
-        <div class="point-box-num">!</div>
-        <div class="point-box-text">단, <span style="color:#ff9f0a;font-weight:600;">3개월 후 측정 기준</span>은 지금 합의해둬야 함</div>
+        <div class="point-num">!</div>
+        <div class="point-text">단, <span style="color:#ff9f0a;font-weight:600;">3개월 후 측정 기준</span>은 지금 합의해둬야 함</div>
       </div>
     </div>
-    <div class="slide-num">13</div>
   </section>
 
-  <!-- 14. 열린 질문 -->
+  <!-- 14. 열린 질문 (Light) -->
   <section class="slide">
     <div class="section-label">Open Question</div>
-    <h1 class="small" style="margin-bottom:28px;">임원진과 함께 고민해야 할 것</h1>
-    <div class="question-boxes">
+    <h1 class="animate" style="margin-bottom:28px;">임원진과 함께 고민해야 할 것</h1>
+    <div class="question-boxes animate">
       <div class="question-box">
-        <div class="question-icon">⏱</div>
+        <div class="q-icon">⏱</div>
         <div>
-          <div class="question-text">아낀 시간의 활용 방향 — 누가 어떻게 관리하나</div>
-          <div class="question-sub">시간을 절감해도 어디에 쓸지 합의 없으면 그냥 여유시간이 된다</div>
+          <div class="q-text">아낀 시간의 활용 방향 — 누가 어떻게 관리하나</div>
+          <div class="q-sub">시간을 절감해도 어디에 쓸지 합의 없으면 그냥 여유시간이 된다</div>
         </div>
       </div>
       <div class="question-box">
-        <div class="question-icon">📈</div>
+        <div class="q-icon">📈</div>
         <div>
-          <div class="question-text">AI 활용 역량 격차 — TF가 메울 수 있는 범위는</div>
-          <div class="question-sub">툴을 만들어줘도 쓸 줄 모르면 확산이 안 된다</div>
+          <div class="q-text">AI 활용 역량 격차 — TF가 메울 수 있는 범위는</div>
+          <div class="q-sub">툴을 만들어줘도 쓸 줄 모르면 확산이 안 된다</div>
         </div>
       </div>
       <div class="question-box">
-        <div class="question-icon">🎯</div>
+        <div class="q-icon">🎯</div>
         <div>
-          <div class="question-text">성과 측정 기준 — 시간 절감 이상의 지표가 필요한가</div>
-          <div class="question-sub">3개월 후 무엇이 달라졌는지를 어떻게 보여줄 것인가</div>
+          <div class="q-text">성과 측정 기준 — 시간 절감 이상의 지표가 필요한가</div>
+          <div class="q-sub">3개월 후 무엇이 달라졌는지를 어떻게 보여줄 것인가</div>
         </div>
       </div>
     </div>
-    <div class="slide-num">14</div>
   </section>
 
-  <!-- 15. 향후 플랜 -->
+  <!-- 15. 향후 플랜 (Light) -->
   <section class="slide">
     <div class="section-label">Next Steps</div>
-    <h1 class="small" style="margin-bottom:32px;">B2B 이후 진행 방향</h1>
-    <div class="card-grid">
+    <h1 class="animate" style="margin-bottom:32px;">B2B 이후 진행 방향</h1>
+    <div class="card-grid animate">
       <div class="card">
         <div class="card-num">4월</div>
         <div class="card-title">B2B 자동화 구현 완료</div>
@@ -783,20 +730,17 @@
         <div class="card-desc">실질적 시간 절감 측정. 첫 번째 케이스스터디 완성.</div>
       </div>
     </div>
-    <div class="slide-num">15</div>
   </section>
 
-  <!-- 16. 마무리 -->
-  <section class="slide title-slide">
-    <h1>감사합니다</h1>
-    <p class="sub">질문 및 의견 환영합니다</p>
-    <div class="slide-num">16</div>
+  <!-- 16. 마무리 (Dark) -->
+  <section class="slide dark">
+    <h1 class="impact animate">감사합니다</h1>
+    <p class="sub animate">질문 및 의견 환영합니다</p>
   </section>
 
 </div>
 </div>
 
-<!-- 네비게이션 -->
 <div class="nav">
   <button onclick="prev()">←</button>
   <span class="progress" id="progress">1 / 16</span>
@@ -811,7 +755,15 @@
   function show(n) {
     slides[current].classList.remove('active');
     current = (n + total) % total;
-    slides[current].classList.add('active');
+    const s = slides[current];
+    s.classList.add('active');
+
+    s.querySelectorAll('.animate, .bar-card, .point-box, .question-box, .card').forEach(el => {
+      el.style.animation = 'none';
+      el.offsetHeight;
+      el.style.animation = '';
+    });
+
     document.getElementById('progress').textContent = (current + 1) + ' / ' + total;
   }
 
@@ -823,21 +775,18 @@
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prev();
   });
 
-  // 스와이프
   let tx = 0;
   document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
-  document.addEventListener('touchend',   e => {
+  document.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - tx;
     if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
   });
 
-  // 화면 맞춤 스케일
   function scale() {
     const deck = document.getElementById('deck');
-    const sw = window.innerWidth;
-    const sh = window.innerHeight - 80;
-    const s = Math.min(sw / 1280, sh / 720);
+    const s = Math.min(window.innerWidth / 1280, (window.innerHeight - 60) / 720);
     deck.style.transform = `scale(${s})`;
+    deck.style.transformOrigin = 'center center';
   }
   scale();
   window.addEventListener('resize', scale);
