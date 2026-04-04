@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>커머스 세일즈 대시보드</title>
+<meta name="tf-type"   content="idea">
+<meta name="tf-title"  content="커머스 세일즈 대시보드">
+<meta name="tf-desc"   content="SAP 엑셀 업로드 → 채널별 매출·IP별 트렌드·상품 랭킹 자동 집계.">
+<meta name="tf-date"   content="2026-04-02">
+<meta name="tf-tags"   content="idea,commerce,dashboard,report">
+<meta name="tf-status" content="Draft">
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f5f7; --surface: #fff; --text: #1d1d1f;
+  --muted: rgba(0,0,0,0.45); --accent: #0071e3;
+  --green: #1a7f4b; --red: #c0392b; --orange: #b95000;
+  --divider: rgba(0,0,0,0.08); --shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+html { background: var(--bg); font-family: -apple-system,"SF Pro Text","Helvetica Neue",sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; font-size: 14px; }
+
+/* nav */
+.topnav { height: 52px; background: rgba(245,245,247,.9); backdrop-filter: blur(20px); border-bottom: 1px solid var(--divider); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; padding: 0 40px; gap: 12px; }
+.nav-back { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; }
+.nav-back:hover { opacity: .75; }
+.nav-sep { width: 1px; height: 14px; background: var(--divider); }
+.nav-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+.page { max-width: 1100px; margin: 0 auto; padding: 48px 24px 96px; }
+
+/* upload */
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+.subtitle { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+.upload-card { background: var(--surface); border: 1px solid var(--divider); border-radius: 18px; padding: 32px; box-shadow: var(--shadow); max-width: 560px; }
+.dropzone { border: 2px dashed var(--divider); border-radius: 14px; padding: 36px 24px; text-align: center; cursor: pointer; transition: all .2s; background: var(--bg); }
+.dropzone:hover, .dropzone.drag-over { border-color: var(--accent); background: rgba(0,113,227,.04); }
+.dropzone.uploaded { border-style: solid; border-color: var(--green); background: rgba(26,127,75,.04); }
+.drop-icon { font-size: 36px; margin-bottom: 12px; }
+.drop-text { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.drop-hint { font-size: 12px; color: var(--muted); }
+.file-info { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--green); background: rgba(26,127,75,.08); border: 1px solid rgba(26,127,75,.15); border-radius: 10px; padding: 12px 16px; margin-top: 16px; }
+
+/* controls */
+.controls { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+.month-select { height: 42px; border: 1.5px solid var(--divider); border-radius: 10px; padding: 0 14px; font-size: 14px; color: var(--text); background: var(--surface); outline: none; cursor: pointer; transition: border-color .15s; }
+.month-select:focus { border-color: var(--accent); }
+.btn-primary { height: 42px; padding: 0 22px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
+.btn-primary:hover { opacity: .85; }
+.btn-primary:disabled { background: var(--divider); color: var(--muted); cursor: not-allowed; }
+.btn-secondary { height: 42px; padding: 0 18px; background: transparent; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.btn-secondary:hover { background: rgba(0,113,227,.06); }
+
+/* report */
+#report { display: none; }
+.report-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+.report-title { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+.report-meta { font-size: 13px; color: var(--muted); }
+
+/* stat row */
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 32px; }
+.stat-card { background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
+.stat-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 800; letter-spacing: -.02em; color: var(--text); }
+.stat-value .unit { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* section */
+.section { margin-bottom: 36px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.section-title { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* data table */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { text-align: right; padding: 8px 12px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--divider); white-space: nowrap; }
+thead th.left { text-align: left; }
+tbody tr { border-bottom: 1px solid var(--divider); transition: background .1s; }
+tbody tr:hover { background: var(--bg); }
+tbody tr.total-row { border-top: 1.5px solid var(--divider); background: var(--bg); font-weight: 700; }
+tbody td { padding: 9px 12px; text-align: right; white-space: nowrap; }
+tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.neg { color: var(--red); }
+
+/* YTD matrix */
+.matrix-wrap { overflow-x: auto; }
+.matrix-table { font-size: 12px; }
+.matrix-table th, .matrix-table td { padding: 7px 10px; }
+.matrix-table td.month-val { color: var(--muted); }
+.matrix-table td.month-val.has-val { color: var(--text); font-weight: 500; }
+.matrix-table td.total-val { font-weight: 700; color: var(--accent); }
+.matrix-table .ytd-col { background: rgba(0,113,227,.04); }
+
+/* tabs */
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+.tab { padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--muted); transition: all .15s; }
+.tab.active { background: var(--accent); color: #fff; }
+.tab:hover:not(.active) { background: var(--bg); color: var(--text); }
+
+/* filter */
+.filter-select { height: 36px; border: 1.5px solid var(--divider); border-radius: 8px; padding: 0 12px; font-size: 13px; color: var(--text); background: var(--surface); outline: none; cursor: pointer; }
+.filter-select:focus { border-color: var(--accent); }
+
+.share-bar { display: inline-block; height: 6px; background: rgba(0,113,227,.2); border-radius: 3px; vertical-align: middle; margin-right: 6px; }
+.share-bar.filled { background: var(--accent); }
+
+@media (max-width: 640px) {
+  .topnav { padding: 0 20px; }
+  .page { padding: 28px 16px 72px; }
+  .stat-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div style="position:fixed;top:0;left:0;right:0;height:52px;-webkit-app-region:drag;z-index:300;pointer-events:none;"></div>
+<nav class="topnav" style="padding-left:90px;">
+  <a class="nav-back" href="#" onclick="event.preventDefault();window.desk&&window.desk.navigate('index.html')">← AI DESK</a>
+  <div class="nav-sep"></div>
+  <span class="nav-title">커머스 세일즈 대시보드</span>
+</nav>
+
+<div class="page">
+  <div id="upload-section">
+    <div class="eyebrow">Internal · Commerce팀 전용</div>
+    <h1>커머스 세일즈 대시보드</h1>
+    <p class="subtitle">SAP 매출 로우 데이터를 업로드하면 채널별 매출·IP별 트렌드·상품 랭킹을 자동으로 집계합니다.</p>
+
+    <div class="upload-card">
+      <div class="dropzone" id="dropzone">
+        <div class="drop-icon">📊</div>
+        <div class="drop-text" id="drop-text">SAP 매출 로우 데이터 업로드</div>
+        <div class="drop-hint">매출 로우 데이터 (*.xlsx)</div>
+        <input type="file" id="file-input" accept=".xlsx,.xls" hidden>
+      </div>
+      <div id="file-info" class="file-info" style="display:none;"></div>
+      <div class="controls">
+        <select class="month-select" id="month-select" disabled>
+          <option>월 선택...</option>
+        </select>
+        <button class="btn-primary" id="gen-btn" disabled onclick="generateReport()">대시보드 생성</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report -->
+  <div id="report">
+    <div class="report-header">
+      <div>
+        <div class="report-title" id="report-title"></div>
+        <div class="report-meta" id="report-meta"></div>
+      </div>
+      <button class="btn-secondary" onclick="resetUpload()">↑ 파일 변경</button>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">당월 총 매출</div>
+        <div class="stat-value" id="kpi-sales">—<span class="unit">mil</span></div>
+        <div class="stat-sub" id="kpi-sales-sub"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">총 판매 수량</div>
+        <div class="stat-value" id="kpi-qty">—<span class="unit">건</span></div>
+        <div class="stat-sub" id="kpi-qty-sub"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">거래처 수</div>
+        <div class="stat-value" id="kpi-partners">—<span class="unit">개</span></div>
+        <div class="stat-sub" id="kpi-partners-sub"></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="main-tabs">
+      <button class="tab active" onclick="switchTab(0)">채널별 매출</button>
+      <button class="tab" onclick="switchTab(1)">IP별 트렌드</button>
+      <button class="tab" onclick="switchTab(2)">상품 랭킹</button>
+    </div>
+
+    <!-- Tab 0: 채널별 매출 -->
+    <div class="tab-panel" id="panel-0">
+      <div class="section">
+        <div class="tbl-wrap">
+          <table id="tbl-channel">
+            <thead><tr>
+              <th class="left">채널명</th>
+              <th>매출 (mil)</th>
+              <th>수량</th>
+              <th>비중 (%)</th>
+              <th>거래처 수</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 1: IP별 트렌드 -->
+    <div class="tab-panel" id="panel-1" style="display:none;">
+      <div class="section">
+        <div class="matrix-wrap">
+          <table id="tbl-ip-trend" class="matrix-table">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: 상품 랭킹 -->
+    <div class="tab-panel" id="panel-2" style="display:none;">
+      <div class="section">
+        <div class="tbl-wrap">
+          <table id="tbl-product">
+            <thead><tr>
+              <th class="left">순위</th>
+              <th class="left">상품코드</th>
+              <th class="left">상품명</th>
+              <th class="left">IP</th>
+              <th>판매수량</th>
+              <th>매출 (mil)</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Dropzone ──
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+// ── State ──
+let allRows = [];
+let availableMonths = [];
+let selectedMonth = null;
+let currentTab = 0;
+
+const FISCAL_ORDER = [4,5,6,7,8,9,10,11,12,1,2,3];
+const MONTH_LABEL = m => m + '월';
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const rows = parseSheet(wb);
+      if (!rows || rows.length === 0) {
+        alert('시트 "YTD raw (4월~2월)"를 찾을 수 없거나 데이터가 없습니다.');
+        return;
+      }
+      allRows = rows;
+
+      const monthSet = new Set(rows.map(r => r.month).filter(m => m && m > 0));
+      availableMonths = FISCAL_ORDER.filter(m => monthSet.has(m));
+
+      const sel = document.getElementById('month-select');
+      sel.innerHTML = '<option value="all">전체</option>' + availableMonths.map(m => `<option value="${m}">${MONTH_LABEL(m)}</option>`).join('');
+      sel.disabled = false;
+      sel.value = availableMonths[availableMonths.length - 1];
+
+      document.getElementById('gen-btn').disabled = false;
+      document.getElementById('file-info').style.display = 'flex';
+      document.getElementById('file-info').textContent = '✅ ' + file.name + ' — ' + rows.length.toLocaleString() + '건 로드 완료';
+      dropzone.classList.add('uploaded');
+      document.getElementById('drop-text').textContent = file.name;
+    } catch(err) {
+      alert('파일 파싱 오류: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseSheet(wb) {
+  // Find sheet by name pattern
+  let targetSheet = null;
+  for (const name of wb.SheetNames) {
+    if (name.indexOf('YTD raw') >= 0 || name.indexOf('YTD Raw') >= 0) {
+      targetSheet = name;
+      break;
+    }
+  }
+  if (!targetSheet) return null;
+
+  const data = XLSX.utils.sheet_to_json(wb.Sheets[targetSheet], { header: 1, defval: null });
+  if (data.length < 2) return null;
+
+  // Column indices (0-based)
+  const COL_CHANNEL   = 4;  // 유통경로명
+  const COL_PARTNER   = 8;  // 판매처명
+  const COL_SHIP_DATE = 16; // 출고일
+  const COL_PROD_CODE = 22; // 상품코드
+  const COL_PROD_NAME = 23; // 상품명
+  const COL_ORDER_QTY = 24; // 오더수량
+  const COL_BILL_QTY  = 39; // 청구수량
+  const COL_AMOUNT    = 46; // 대금청구금액(KRW)
+  const COL_IP        = 57; // IP(대)
+  const COL_MONTH     = 68; // 월
+
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    if (!r) continue;
+
+    const amount = r[COL_AMOUNT];
+    if (typeof amount !== 'number') continue;
+
+    let month = r[COL_MONTH];
+    if (month instanceof Date) month = month.getMonth() + 1;
+    if (typeof month !== 'number' || month <= 0 || month > 12) month = null;
+
+    rows.push({
+      channel:  r[COL_CHANNEL]  ? String(r[COL_CHANNEL]).trim()  : 'ETC',
+      partner:  r[COL_PARTNER]  ? String(r[COL_PARTNER]).trim()  : '',
+      prodCode: r[COL_PROD_CODE]? String(r[COL_PROD_CODE]).trim(): '',
+      prodName: r[COL_PROD_NAME]? String(r[COL_PROD_NAME]).trim(): '',
+      orderQty: typeof r[COL_ORDER_QTY] === 'number' ? r[COL_ORDER_QTY] : 0,
+      billQty:  typeof r[COL_BILL_QTY]  === 'number' ? r[COL_BILL_QTY]  : 0,
+      amount:   amount,
+      ip:       r[COL_IP] ? String(r[COL_IP]).trim() : 'ETC',
+      month:    month,
+    });
+  }
+  return rows;
+}
+
+// ── Tabs ──
+function switchTab(idx) {
+  currentTab = idx;
+  document.querySelectorAll('#main-tabs .tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.style.display = i === idx ? '' : 'none');
+}
+
+// ── Report ──
+function generateReport() {
+  const selVal = document.getElementById('month-select').value;
+  selectedMonth = selVal === 'all' ? null : parseInt(selVal);
+
+  const filtered = selectedMonth
+    ? allRows.filter(r => r.month === selectedMonth)
+    : allRows;
+
+  const monthLabel = selectedMonth ? MONTH_LABEL(selectedMonth) : '전체';
+
+  // KPI
+  const totalAmount = filtered.reduce((s, r) => s + r.amount, 0);
+  const totalQty    = filtered.reduce((s, r) => s + r.billQty, 0);
+  const partnerSet  = new Set(filtered.map(r => r.partner).filter(Boolean));
+
+  document.getElementById('report-title').textContent = monthLabel + ' 커머스 세일즈 리포트';
+  document.getElementById('report-meta').textContent = '단위: mil (KRW) · ' + new Date().toLocaleDateString('ko-KR') + ' 기준';
+
+  document.getElementById('kpi-sales').innerHTML = commas((totalAmount / 1e6).toFixed(1)) + '<span class="unit">mil</span>';
+  document.getElementById('kpi-qty').innerHTML = totalQty.toLocaleString() + '<span class="unit">건</span>';
+  document.getElementById('kpi-partners').innerHTML = partnerSet.size + '<span class="unit">개</span>';
+
+  // Tab 0: 채널별 매출
+  renderChannelTable(filtered, totalAmount);
+
+  // Tab 1: IP별 트렌드
+  renderIPTrend();
+
+  // Tab 2: 상품 랭킹
+  renderProductRanking(filtered);
+
+  document.getElementById('upload-section').style.display = 'none';
+  document.getElementById('report').style.display = 'block';
+}
+
+function renderChannelTable(filtered, totalAmount) {
+  const channelMap = {};
+  for (const r of filtered) {
+    if (!channelMap[r.channel]) channelMap[r.channel] = { amount: 0, qty: 0, partners: new Set() };
+    channelMap[r.channel].amount += r.amount;
+    channelMap[r.channel].qty    += r.billQty;
+    if (r.partner) channelMap[r.channel].partners.add(r.partner);
+  }
+
+  const list = Object.entries(channelMap)
+    .map(([name, v]) => ({ name, amount: v.amount, qty: v.qty, partners: v.partners.size }))
+    .sort((a, b) => b.amount - a.amount);
+
+  const totalQty = list.reduce((s, r) => s + r.qty, 0);
+  const tbody = document.querySelector('#tbl-channel tbody');
+
+  tbody.innerHTML = list.map(item => {
+    const share = totalAmount > 0 ? (item.amount / totalAmount * 100) : 0;
+    return `<tr>
+      <td class="left" title="${item.name}">${item.name}</td>
+      <td>${commas((item.amount / 1e6).toFixed(1))}</td>
+      <td>${item.qty.toLocaleString()}</td>
+      <td>${share.toFixed(1)}%</td>
+      <td>${item.partners}</td>
+    </tr>`;
+  }).join('') + `<tr class="total-row">
+    <td class="left">합계</td>
+    <td>${commas((totalAmount / 1e6).toFixed(1))}</td>
+    <td>${totalQty.toLocaleString()}</td>
+    <td>100%</td>
+    <td>${new Set(filtered.map(r => r.partner).filter(Boolean)).size}</td>
+  </tr>`;
+}
+
+function renderIPTrend() {
+  const ytdMonths = availableMonths;
+  const ipMonthMap = {}; // { ip: { month: amount } }
+
+  for (const r of allRows) {
+    if (!r.month || !ytdMonths.includes(r.month)) continue;
+    if (!ipMonthMap[r.ip]) ipMonthMap[r.ip] = {};
+    ipMonthMap[r.ip][r.month] = (ipMonthMap[r.ip][r.month] || 0) + r.amount;
+  }
+
+  const rows = Object.entries(ipMonthMap).map(([name, monthData]) => {
+    const total = ytdMonths.reduce((s, m) => s + (monthData[m] || 0), 0);
+    return { name, monthData, total };
+  }).sort((a, b) => b.total - a.total);
+
+  const thead = document.querySelector('#tbl-ip-trend thead');
+  const tbody = document.querySelector('#tbl-ip-trend tbody');
+
+  thead.innerHTML = `<tr>
+    <th class="left">IP</th>
+    ${ytdMonths.map(m => `<th>${MONTH_LABEL(m)}</th>`).join('')}
+    <th class="ytd-col">YTD 합계</th>
+  </tr>`;
+
+  const monthTotals = {};
+  for (const m of ytdMonths) monthTotals[m] = rows.reduce((s, r) => s + (r.monthData[m] || 0), 0);
+  const grandTotal = rows.reduce((s, r) => s + r.total, 0);
+
+  const fmt = v => v === 0 ? '' : commas((v / 1e6).toFixed(1));
+
+  tbody.innerHTML = rows.map(row => `<tr>
+    <td class="left" title="${row.name}">${row.name}</td>
+    ${ytdMonths.map(m => {
+      const v = row.monthData[m] || 0;
+      return `<td class="month-val${v !== 0 ? ' has-val' : ''}">${fmt(v)}</td>`;
+    }).join('')}
+    <td class="total-val ytd-col">${commas((row.total / 1e6).toFixed(1))}</td>
+  </tr>`).join('') + `<tr class="total-row">
+    <td class="left">합계</td>
+    ${ytdMonths.map(m => `<td class="ytd-col">${commas((monthTotals[m] / 1e6).toFixed(1))}</td>`).join('')}
+    <td class="total-val ytd-col">${commas((grandTotal / 1e6).toFixed(1))}</td>
+  </tr>`;
+}
+
+function renderProductRanking(filtered) {
+  const prodMap = {};
+  for (const r of filtered) {
+    const key = r.prodCode + '||' + r.prodName;
+    if (!prodMap[key]) prodMap[key] = { code: r.prodCode, name: r.prodName, ip: r.ip, qty: 0, amount: 0 };
+    prodMap[key].qty    += r.billQty;
+    prodMap[key].amount += r.amount;
+  }
+
+  const list = Object.values(prodMap)
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 50);
+
+  const tbody = document.querySelector('#tbl-product tbody');
+  tbody.innerHTML = list.map((item, i) => `<tr>
+    <td class="left">${i + 1}</td>
+    <td class="left">${item.code}</td>
+    <td class="left" title="${item.name}">${item.name}</td>
+    <td class="left">${item.ip}</td>
+    <td>${item.qty.toLocaleString()}</td>
+    <td>${commas((item.amount / 1e6).toFixed(1))}</td>
+  </tr>`).join('');
+}
+
+// ── Utils ──
+function commas(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v;
+  return n.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+function resetUpload() {
+  document.getElementById('report').style.display = 'none';
+  document.getElementById('upload-section').style.display = 'block';
+}
+</script>
+</body>
+</html>
