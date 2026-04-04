@@ -95,6 +95,17 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
 .discount-30 { background: rgba(185,80,0,.08); color: var(--orange); }
 .discount-50 { background: rgba(192,57,43,.08); color: var(--red); }
 
+/* chart styles */
+.chart-section { margin: 32px 0; }
+.chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.chart-wrap { background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); }
+.chart-wrap svg { display: block; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; }
+.chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); }
+.chart-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.chart-flex { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+.chart-flex > * { flex: 1; min-width: 280px; }
+
 @media (max-width: 640px) {
   .topnav { padding: 0 20px; }
   .page { padding: 28px 16px 72px; }
@@ -171,6 +182,11 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
     <!-- Tab 0: 매장 재고 -->
     <div class="tab-panel" id="panel-0">
       <div class="section">
+        <!-- IP inventory donut + Warehouse vs Store stacked bar -->
+        <div class="chart-flex" style="margin-bottom:24px;">
+          <div class="chart-wrap" id="ip-inventory-donut" style="max-width:380px;"></div>
+          <div class="chart-wrap" id="wh-store-bar" style="flex:1;"></div>
+        </div>
         <div class="filter-row">
           <select class="filter-select" id="ip-filter" onchange="renderInventoryTable()">
             <option value="all">전체 IP</option>
@@ -202,6 +218,10 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
             <option value="all">전체</option>
           </select>
         </div>
+        <div class="chart-section" style="margin-top:0;" id="daily-chart-section">
+          <div class="chart-title">일별 매출 추이</div>
+          <div class="chart-wrap" id="daily-sales-chart"></div>
+        </div>
         <div class="tbl-wrap">
           <table id="tbl-daily">
             <thead><tr>
@@ -219,6 +239,10 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
     <!-- Tab 2: 에이징 할인 제안 -->
     <div class="tab-panel" id="panel-2" style="display:none;">
       <div class="section">
+        <div class="chart-section" style="margin-top:0;">
+          <div class="chart-title">에이징 구간별 재고 분포</div>
+          <div class="chart-wrap" id="aging-dist-chart"></div>
+        </div>
         <div class="tbl-wrap">
           <table id="tbl-aging">
             <thead><tr>
@@ -241,6 +265,259 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
 </div>
 
 <script>
+// ── Chart Color Palette ──
+const CHART_COLORS = ['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30', '#5ac8fa', '#ff6482', '#30b0c7'];
+
+// ── SVG Chart Utilities ──
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v);
+  return el;
+}
+
+function truncText(str, maxLen) {
+  if (!str) return '';
+  return str.length > maxLen ? str.slice(0, maxLen) + '..' : str;
+}
+
+function fmtMil(v) {
+  const n = v / 1e6;
+  if (Math.abs(n) >= 1000) return (n / 1000).toFixed(1) + 'B';
+  return n.toFixed(1) + 'M';
+}
+
+// ── Donut Chart ──
+function drawDonut(container, data, opts) {
+  opts = opts || {};
+  const size = opts.size || 260;
+  const cx = size / 2, cy = size / 2;
+  const outerR = (size / 2) - 10;
+  const innerR = outerR * 0.58;
+  const total = data.reduce((s, d) => s + d.value, 0);
+  if (total === 0) { container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;">데이터 없음</div>'; return; }
+
+  const svg = svgEl('svg', { width: size, height: size, viewBox: `0 0 ${size} ${size}` });
+  let cumAngle = -Math.PI / 2;
+
+  data.forEach((d) => {
+    const sliceAngle = (d.value / total) * Math.PI * 2;
+    const startAngle = cumAngle;
+    const endAngle = cumAngle + sliceAngle;
+    cumAngle = endAngle;
+
+    const x1 = cx + outerR * Math.cos(startAngle);
+    const y1 = cy + outerR * Math.sin(startAngle);
+    const x2 = cx + outerR * Math.cos(endAngle);
+    const y2 = cy + outerR * Math.sin(endAngle);
+    const ix1 = cx + innerR * Math.cos(endAngle);
+    const iy1 = cy + innerR * Math.sin(endAngle);
+    const ix2 = cx + innerR * Math.cos(startAngle);
+    const iy2 = cy + innerR * Math.sin(startAngle);
+    const large = sliceAngle > Math.PI ? 1 : 0;
+
+    const pathD = `M ${x1} ${y1} A ${outerR} ${outerR} 0 ${large} 1 ${x2} ${y2} L ${ix1} ${iy1} A ${innerR} ${innerR} 0 ${large} 0 ${ix2} ${iy2} Z`;
+    const path = svgEl('path', { d: pathD, fill: d.color, opacity: '0.88' });
+    path.style.transition = 'opacity 0.15s';
+    path.addEventListener('mouseenter', () => path.setAttribute('opacity', '1'));
+    path.addEventListener('mouseleave', () => path.setAttribute('opacity', '0.88'));
+    svg.appendChild(path);
+  });
+
+  // Center text
+  const centerLabel = opts.centerLabel || '합계';
+  const centerValue = opts.centerValue || total.toLocaleString('ko-KR');
+  const ct1 = svgEl('text', { x: cx, y: cy - 6, 'text-anchor': 'middle', 'font-size': '12', fill: 'rgba(0,0,0,0.45)', 'font-weight': '600' });
+  ct1.textContent = centerLabel;
+  svg.appendChild(ct1);
+  const ct2 = svgEl('text', { x: cx, y: cy + 14, 'text-anchor': 'middle', 'font-size': '15', fill: '#1d1d1f', 'font-weight': '800' });
+  ct2.textContent = centerValue;
+  svg.appendChild(ct2);
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+
+  const legend = document.createElement('div');
+  legend.className = 'chart-legend';
+  data.forEach(d => {
+    const pct = (d.value / total * 100).toFixed(1);
+    legend.innerHTML += `<div class="chart-legend-item"><span class="chart-legend-dot" style="background:${d.color}"></span>${truncText(d.label, 12)} ${pct}%</div>`;
+  });
+  container.appendChild(legend);
+}
+
+// ── Area/Line Chart ──
+function drawAreaChart(container, labels, values, opts) {
+  opts = opts || {};
+  const W = opts.width || Math.min(container.clientWidth - 48, 1040) || 900;
+  const H = opts.height || 280;
+  const padL = 70, padR = 24, padT = 20, padB = 60;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const maxVal = Math.max(...values, 1);
+  const n = labels.length;
+  const color = opts.color || CHART_COLORS[0];
+
+  const svg = svgEl('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}` });
+
+  // Grid
+  const gridCount = 5;
+  for (let i = 0; i <= gridCount; i++) {
+    const y = padT + chartH - (chartH / gridCount) * i;
+    const val = (maxVal / gridCount) * i;
+    svg.appendChild(svgEl('line', { x1: padL, y1: y, x2: W - padR, y2: y, stroke: 'rgba(0,0,0,0.06)', 'stroke-width': '1' }));
+    const label = svgEl('text', { x: padL - 8, y: y + 4, 'text-anchor': 'end', 'font-size': '11', fill: 'rgba(0,0,0,0.4)' });
+    label.textContent = fmtMil(val * 1e6);
+    svg.appendChild(label);
+  }
+
+  // Points
+  const points = values.map((v, i) => {
+    const x = n > 1 ? padL + (chartW / (n - 1)) * i : padL + chartW / 2;
+    const y = padT + chartH - (v / maxVal) * chartH;
+    return { x, y };
+  });
+
+  // Area fill
+  if (points.length > 1) {
+    let areaD = 'M ' + points[0].x + ' ' + points[0].y;
+    for (let i = 1; i < points.length; i++) areaD += ' L ' + points[i].x + ' ' + points[i].y;
+    areaD += ' L ' + points[points.length - 1].x + ' ' + (padT + chartH);
+    areaD += ' L ' + points[0].x + ' ' + (padT + chartH) + ' Z';
+    svg.appendChild(svgEl('path', { d: areaD, fill: color, opacity: '0.08' }));
+  }
+
+  // Line
+  if (points.length > 1) {
+    let lineD = points.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y).join(' ');
+    svg.appendChild(svgEl('path', { d: lineD, fill: 'none', stroke: color, 'stroke-width': '2.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+  }
+
+  // Dots
+  points.forEach((p, i) => {
+    if (values[i] > 0) {
+      svg.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: '3.5', fill: '#fff', stroke: color, 'stroke-width': '2' }));
+    }
+  });
+
+  // X labels (show subset if too many)
+  const step = n > 20 ? Math.ceil(n / 15) : 1;
+  labels.forEach((lbl, i) => {
+    if (i % step !== 0 && i !== n - 1) return;
+    const x = n > 1 ? padL + (chartW / (n - 1)) * i : padL + chartW / 2;
+    const xLabel = svgEl('text', { x, y: H - padB + 18, 'text-anchor': 'middle', 'font-size': '10', fill: 'rgba(0,0,0,0.5)' });
+    xLabel.textContent = lbl.slice(5); // show MM-DD
+    svg.appendChild(xLabel);
+  });
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+}
+
+// ── Vertical Bar Chart ──
+function drawBarChart(container, labels, values, colors, opts) {
+  opts = opts || {};
+  const W = opts.width || Math.min(container.clientWidth - 48, 1040) || 900;
+  const H = opts.height || 300;
+  const padL = opts.padL || 70, padR = 24, padT = 20, padB = 60;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const maxVal = Math.max(...values, 1);
+  const barW = Math.min(Math.max(chartW / labels.length - 8, 20), 64);
+  const gap = (chartW - barW * labels.length) / (labels.length + 1);
+
+  const svg = svgEl('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}` });
+
+  // Grid
+  const gridCount = 5;
+  for (let i = 0; i <= gridCount; i++) {
+    const y = padT + chartH - (chartH / gridCount) * i;
+    svg.appendChild(svgEl('line', { x1: padL, y1: y, x2: W - padR, y2: y, stroke: 'rgba(0,0,0,0.06)', 'stroke-width': '1' }));
+    const label = svgEl('text', { x: padL - 8, y: y + 4, 'text-anchor': 'end', 'font-size': '11', fill: 'rgba(0,0,0,0.4)' });
+    label.textContent = values[0] > 1e6 ? fmtMil((maxVal / gridCount) * i * 1e6) : Math.round((maxVal / gridCount) * i).toLocaleString('ko-KR');
+    svg.appendChild(label);
+  }
+
+  labels.forEach((lbl, i) => {
+    const x = padL + gap + i * (barW + gap);
+    const barH = (values[i] / maxVal) * chartH;
+    const y = padT + chartH - barH;
+    const color = Array.isArray(colors) ? colors[i % colors.length] : colors;
+
+    const rect = svgEl('rect', { x, y, width: barW, height: Math.max(barH, 1), rx: '3', fill: color, opacity: '0.82' });
+    rect.style.transition = 'opacity 0.15s';
+    rect.addEventListener('mouseenter', () => rect.setAttribute('opacity', '1'));
+    rect.addEventListener('mouseleave', () => rect.setAttribute('opacity', '0.82'));
+    svg.appendChild(rect);
+
+    // Value on top
+    if (barH > 20) {
+      const valText = svgEl('text', { x: x + barW / 2, y: y - 6, 'text-anchor': 'middle', 'font-size': '10', fill: 'rgba(0,0,0,0.55)', 'font-weight': '600' });
+      valText.textContent = values[i].toLocaleString('ko-KR');
+      svg.appendChild(valText);
+    }
+
+    // X label
+    const xLabel = svgEl('text', { x: x + barW / 2, y: H - padB + 18, 'text-anchor': 'middle', 'font-size': '11', fill: 'rgba(0,0,0,0.5)', 'font-weight': '500' });
+    xLabel.textContent = lbl;
+    svg.appendChild(xLabel);
+  });
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+}
+
+// ── Stacked Horizontal Bar Chart (Warehouse vs Store) ──
+function drawStackedHBar(container, data, opts) {
+  // data: [{label, val1, val2}]  val1=warehouse, val2=store
+  opts = opts || {};
+  const barH = 26, gap = 8;
+  const padL = opts.padL || 140, padR = 80, padT = 10, padB = 10;
+  const W = opts.width || Math.min(container.clientWidth - 48, 600) || 500;
+  const H = padT + padB + data.length * (barH + gap);
+  const chartW = W - padL - padR;
+  const maxVal = Math.max(...data.map(d => d.val1 + d.val2), 1);
+  const c1 = CHART_COLORS[0], c2 = CHART_COLORS[1];
+
+  const svg = svgEl('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}` });
+
+  data.forEach((d, i) => {
+    const y = padT + i * (barH + gap);
+    const w1 = (d.val1 / maxVal) * chartW;
+    const w2 = (d.val2 / maxVal) * chartW;
+
+    // Label
+    const label = svgEl('text', { x: padL - 10, y: y + barH / 2 + 4, 'text-anchor': 'end', 'font-size': '12', fill: '#1d1d1f' });
+    label.textContent = truncText(d.label, 14);
+    svg.appendChild(label);
+
+    // Bar 1 (warehouse)
+    svg.appendChild(svgEl('rect', { x: padL, y, width: Math.max(w1, 1), height: barH, rx: '3', fill: c1, opacity: '0.75' }));
+    // Bar 2 (store)
+    svg.appendChild(svgEl('rect', { x: padL + w1, y, width: Math.max(w2, 1), height: barH, rx: '0 3 3 0', fill: c2, opacity: '0.75' }));
+
+    // Total value
+    const total = d.val1 + d.val2;
+    const valText = svgEl('text', { x: padL + w1 + w2 + 8, y: y + barH / 2 + 4, 'text-anchor': 'start', 'font-size': '11', fill: 'rgba(0,0,0,0.55)', 'font-weight': '600' });
+    valText.textContent = total.toLocaleString('ko-KR');
+    svg.appendChild(valText);
+  });
+
+  container.innerHTML = '';
+
+  // Title
+  const title = document.createElement('div');
+  title.className = 'chart-title';
+  title.textContent = 'IP별 창고 vs 매장 재고';
+  container.appendChild(title);
+
+  container.appendChild(svg);
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.className = 'chart-legend';
+  legend.innerHTML = `<div class="chart-legend-item"><span class="chart-legend-dot" style="background:${c1}"></span>오프라인 창고</div><div class="chart-legend-item"><span class="chart-legend-dot" style="background:${c2}"></span>매장</div>`;
+  container.appendChild(legend);
+}
+
+
 // ── Dropzone ──
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('file-input');
@@ -260,6 +537,11 @@ const TODAY = new Date();
 
 function excelDateToJS(serial) {
   if (serial instanceof Date) return serial;
+  if (typeof serial === 'string') {
+    const d = new Date(serial);
+    if (!isNaN(d)) return d;
+    return null;
+  }
   if (typeof serial !== 'number' || serial < 1) return null;
   return new Date((serial - 25569) * 86400000);
 }
@@ -283,9 +565,7 @@ function handleFile(file) {
     try {
       const wb = XLSX.read(e.target.result, { type: 'array' });
 
-      // Parse inventory sheet
       const inv = parseInventorySheet(wb);
-      // Parse sales sheet
       const sales = parseSalesSheet(wb);
 
       if ((!inv || inv.length === 0) && (!sales || sales.length === 0)) {
@@ -296,7 +576,6 @@ function handleFile(file) {
       inventoryRows = inv || [];
       salesRows = sales || [];
 
-      // Available months from sales
       const monthSet = new Set(salesRows.map(r => r.month).filter(m => m && m > 0));
       availableMonths = FISCAL_ORDER.filter(m => monthSet.has(m));
 
@@ -328,18 +607,17 @@ function parseInventorySheet(wb) {
   const data = XLSX.utils.sheet_to_json(wb.Sheets[targetSheet], { header: 1, defval: null });
   if (data.length < 2) return null;
 
-  // Column indices (0-based)
-  const COL_CATEGORY    = 4;  // 카테고리(대)
-  const COL_MAT_CODE    = 7;  // 자재코드
-  const COL_MAT_NAME    = 8;  // 자재명
-  const COL_IP          = 11; // IP(대)
-  const COL_RELEASE     = 15; // 최초출시일
-  const COL_OFFLINE_WH  = 18; // 오프라인 창고
-  const COL_STORE_QTY   = 20; // 매장 수량
-  const COL_TOTAL_QTY   = 22; // Total 수량
-  const COL_TOTAL_AMT   = 23; // TOTAL 금액
-  const COL_TOTAL_PRICE = 24; // TOTAL 단가
-  const COL_SELL_PRICE  = 26; // 기준판매가
+  const COL_CATEGORY    = 4;
+  const COL_MAT_CODE    = 7;
+  const COL_MAT_NAME    = 8;
+  const COL_IP          = 11;
+  const COL_RELEASE     = 15;
+  const COL_OFFLINE_WH  = 18;
+  const COL_STORE_QTY   = 20;
+  const COL_TOTAL_QTY   = 22;
+  const COL_TOTAL_AMT   = 23;
+  const COL_TOTAL_PRICE = 24;
+  const COL_SELL_PRICE  = 26;
 
   const rows = [];
   for (let i = 1; i < data.length; i++) {
@@ -431,12 +709,10 @@ function switchTab(idx) {
 
 // ── Report ──
 function generateReport() {
-  // KPI calculations
   const offlineItems = inventoryRows.filter(r => r.offlineWh > 0 || r.storeQty > 0);
   const totalOfflineQty = inventoryRows.reduce((s, r) => s + r.offlineWh, 0);
   const totalStoreQty   = inventoryRows.reduce((s, r) => s + r.storeQty, 0);
 
-  // Aging 90+ items
   const aging90Items = inventoryRows.filter(r => {
     if (!r.releaseDate) return false;
     const days = daysBetween(r.releaseDate, TODAY);
@@ -461,11 +737,54 @@ function generateReport() {
   dailyMonth.innerHTML = '<option value="all">전체</option>' + availableMonths.map(m => `<option value="${m}">${m}월</option>`).join('');
 
   renderInventoryTable();
+  renderInventoryCharts();
   renderDailySales();
   renderAgingTable();
 
   document.getElementById('upload-section').style.display = 'none';
   document.getElementById('report').style.display = 'block';
+}
+
+function renderInventoryCharts() {
+  // IP inventory donut
+  const ipQtyMap = {};
+  for (const r of inventoryRows) {
+    if (r.offlineWh <= 0 && r.storeQty <= 0) continue;
+    const total = r.offlineWh + r.storeQty;
+    ipQtyMap[r.ip] = (ipQtyMap[r.ip] || 0) + total;
+  }
+
+  const ipList = Object.entries(ipQtyMap).map(([ip, qty]) => ({ ip, qty })).sort((a, b) => b.qty - a.qty);
+  const donutData = ipList.slice(0, 8).map((d, i) => ({ label: d.ip, value: d.qty, color: CHART_COLORS[i % CHART_COLORS.length] }));
+  if (ipList.length > 8) {
+    const restQty = ipList.slice(8).reduce((s, d) => s + d.qty, 0);
+    donutData.push({ label: '기타', value: restQty, color: '#ccc' });
+  }
+  const totalQty = ipList.reduce((s, d) => s + d.qty, 0);
+
+  setTimeout(() => {
+    const donutContainer = document.getElementById('ip-inventory-donut');
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'chart-title';
+    titleDiv.textContent = 'IP별 재고 수량 분포';
+    donutContainer.innerHTML = '';
+    donutContainer.appendChild(titleDiv);
+    const innerWrap = document.createElement('div');
+    donutContainer.appendChild(innerWrap);
+    drawDonut(innerWrap, donutData, { centerLabel: '총 재고', centerValue: totalQty.toLocaleString('ko-KR') });
+  }, 10);
+
+  // Warehouse vs Store stacked bar (top IPs)
+  const topIPs = ipList.slice(0, 10);
+  const stackData = topIPs.map(d => {
+    const whQty = inventoryRows.filter(r => r.ip === d.ip).reduce((s, r) => s + r.offlineWh, 0);
+    const stQty = inventoryRows.filter(r => r.ip === d.ip).reduce((s, r) => s + r.storeQty, 0);
+    return { label: d.ip, val1: whQty, val2: stQty };
+  });
+
+  setTimeout(() => {
+    drawStackedHBar(document.getElementById('wh-store-bar'), stackData);
+  }, 10);
 }
 
 function renderInventoryTable() {
@@ -508,14 +827,28 @@ function renderDailySales() {
     dateMap[key].amount += r.amount;
   }
 
-  const list = Object.values(dateMap).sort((a, b) => b.date.localeCompare(a.date));
+  const list = Object.values(dateMap).sort((a, b) => a.date.localeCompare(b.date));
 
   const totalCount  = list.reduce((s, r) => s + r.count, 0);
   const totalQty    = list.reduce((s, r) => s + r.qty, 0);
   const totalAmount = list.reduce((s, r) => s + r.amount, 0);
 
+  // Daily sales area chart
+  if (list.length > 0) {
+    const chartLabels = list.map(r => r.date);
+    const chartValues = list.map(r => r.amount / 1e6);
+    setTimeout(() => {
+      drawAreaChart(document.getElementById('daily-sales-chart'), chartLabels, chartValues, { color: CHART_COLORS[0] });
+    }, 10);
+    document.getElementById('daily-chart-section').style.display = '';
+  } else {
+    document.getElementById('daily-chart-section').style.display = 'none';
+  }
+
+  // Table (show in reverse chronological order)
+  const listDesc = [...list].reverse();
   const tbody = document.querySelector('#tbl-daily tbody');
-  tbody.innerHTML = list.map(r => `<tr>
+  tbody.innerHTML = listDesc.map(r => `<tr>
     <td class="left">${r.date}</td>
     <td>${r.count.toLocaleString()}</td>
     <td>${r.qty.toLocaleString()}</td>
@@ -548,6 +881,9 @@ function renderAgingTable() {
     return { ...r, days, stock, discountRate, discountClass, discountPrice };
   }).sort((a, b) => b.totalAmt - a.totalAmt);
 
+  // Aging distribution chart
+  renderAgingDistChart(items);
+
   const tbody = document.querySelector('#tbl-aging tbody');
   tbody.innerHTML = items.map(r => `<tr>
     <td class="left">${r.ip}</td>
@@ -562,6 +898,62 @@ function renderAgingTable() {
   </tr>`).join('');
 }
 
+function renderAgingDistChart(agingItems) {
+  // Buckets: 90-180, 181-365, 365+
+  // But we also want to show the full range including items below 90 for context
+  // Since agingItems are already filtered to 90+, let's bucket them
+  const buckets = [
+    { label: '90~180일', min: 90, max: 180, count: 0, qty: 0, amt: 0, color: CHART_COLORS[0] },
+    { label: '181~365일', min: 181, max: 365, count: 0, qty: 0, amt: 0, color: CHART_COLORS[2] },
+    { label: '365일+', min: 366, max: Infinity, count: 0, qty: 0, amt: 0, color: CHART_COLORS[4] },
+  ];
+
+  // Also compute from all inventory for full picture
+  const allBuckets = [
+    { label: '0~30일', min: 0, max: 30, count: 0, qty: 0, amt: 0, color: CHART_COLORS[1] },
+    { label: '31~60일', min: 31, max: 60, count: 0, qty: 0, amt: 0, color: CHART_COLORS[5] },
+    { label: '61~90일', min: 61, max: 90, count: 0, qty: 0, amt: 0, color: CHART_COLORS[0] },
+    { label: '91~180일', min: 91, max: 180, count: 0, qty: 0, amt: 0, color: CHART_COLORS[2] },
+    { label: '181일+', min: 181, max: Infinity, count: 0, qty: 0, amt: 0, color: CHART_COLORS[4] },
+  ];
+
+  for (const r of inventoryRows) {
+    if (!r.releaseDate) continue;
+    const stock = r.offlineWh + r.storeQty;
+    if (stock <= 0) continue;
+    const days = daysBetween(r.releaseDate, TODAY);
+    if (days < 0) continue;
+
+    for (const b of allBuckets) {
+      if (days >= b.min && days <= b.max) {
+        b.count++;
+        b.qty += stock;
+        b.amt += r.totalAmt;
+        break;
+      }
+    }
+  }
+
+  const labels = allBuckets.map(b => b.label);
+  const values = allBuckets.map(b => b.qty);
+  const colors = allBuckets.map(b => b.color);
+
+  setTimeout(() => {
+    const container = document.getElementById('aging-dist-chart');
+    drawBarChart(container, labels, values, colors, { height: 260 });
+
+    // Add summary below
+    const summary = document.createElement('div');
+    summary.style.cssText = 'margin-top:12px; display:flex; gap:16px; flex-wrap:wrap;';
+    allBuckets.forEach(b => {
+      if (b.qty > 0) {
+        summary.innerHTML += `<div style="font-size:12px;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${b.color};vertical-align:middle;margin-right:4px;"></span>${b.label}: <strong>${b.qty.toLocaleString('ko-KR')}개</strong> (${commas((b.amt / 1e6).toFixed(1))}M)</div>`;
+      }
+    });
+    container.appendChild(summary);
+  }, 10);
+}
+
 // ── Utils ──
 function commas(v) {
   const n = parseFloat(v);
@@ -573,6 +965,10 @@ function resetUpload() {
   document.getElementById('report').style.display = 'none';
   document.getElementById('upload-section').style.display = 'block';
 }
+</script>
+
+<script>
+
 </script>
 
 <script>

@@ -82,6 +82,13 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
 .rate.low  { color: var(--red); }
 .neg { color: var(--red); }
 
+/* chart */
+.chart-section { margin: 32px 0; }
+.chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.chart-wrap { background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } }
+
 /* progress bar in table */
 .prog-wrap { display: inline-flex; align-items: center; gap: 6px; }
 .prog-bar { width: 48px; height: 6px; background: var(--divider); border-radius: 3px; overflow: hidden; display: inline-block; }
@@ -154,6 +161,9 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
         <div class="stat-value" id="kpi-achieve">—<span class="unit">%</span></div>
       </div>
     </div>
+
+    <!-- Charts -->
+    <div id="charts-area"></div>
 
     <!-- 파트너별 -->
     <div class="section">
@@ -349,6 +359,153 @@ function parseActualSheet(ws) {
   return rows;
 }
 
+// ── Chart Helpers ──
+const CHART_COLORS = ['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30', '#5ac8fa', '#ff6482', '#30b0c7'];
+
+function fmtMil(v) { return (v / 1e6).toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+
+function renderTargetCharts(achieveRate, partnerList) {
+  const area = document.getElementById('charts-area');
+  area.innerHTML = '';
+
+  // 1. Gauge + gap analysis side by side
+  const gridSection = document.createElement('div');
+  gridSection.className = 'chart-section';
+  gridSection.innerHTML = '<div class="chart-grid"><div><div class="chart-title">종합 달성률</div><div class="chart-wrap"><div id="chart-gauge"></div></div></div><div><div class="chart-title">파트너별 달성 갭 분석</div><div class="chart-wrap"><div id="chart-gap"></div></div></div></div>';
+  area.appendChild(gridSection);
+  drawGauge('chart-gauge', achieveRate);
+  drawGapAnalysis('chart-gap', partnerList);
+
+  // 2. Partner target vs actual bar chart
+  const barSection = document.createElement('div');
+  barSection.className = 'chart-section';
+  barSection.innerHTML = '<div class="chart-title">파트너별 목표 vs 실적 비교</div><div class="chart-wrap"><div id="chart-partner-compare"></div></div>';
+  area.appendChild(barSection);
+  drawPartnerCompare('chart-partner-compare', partnerList);
+}
+
+function drawGauge(containerId, rate) {
+  const container = document.getElementById(containerId);
+  const cx = 140, cy = 140, r = 110;
+  const startAngle = Math.PI * 0.75;
+  const endAngle = Math.PI * 2.25;
+  const totalArc = endAngle - startAngle;
+
+  const clampedRate = Math.min(Math.max(rate, 0), 150);
+  const fillAngle = startAngle + (clampedRate / 150) * totalArc;
+
+  const bgX1 = cx + r * Math.cos(startAngle);
+  const bgY1 = cy + r * Math.sin(startAngle);
+  const bgX2 = cx + r * Math.cos(endAngle);
+  const bgY2 = cy + r * Math.sin(endAngle);
+
+  const fX2 = cx + r * Math.cos(fillAngle);
+  const fY2 = cy + r * Math.sin(fillAngle);
+  const fillLargeArc = (fillAngle - startAngle) > Math.PI ? 1 : 0;
+  const bgLargeArc = totalArc > Math.PI ? 1 : 0;
+
+  const color = rate >= 100 ? '#1a7f4b' : rate >= 80 ? '#b95000' : '#c0392b';
+
+  let svg = '';
+  // background arc
+  svg += `<path d="M${bgX1},${bgY1} A${r},${r} 0 ${bgLargeArc},1 ${bgX2},${bgY2}" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="18" stroke-linecap="round"/>`;
+  // fill arc
+  if (clampedRate > 0) {
+    svg += `<path d="M${bgX1},${bgY1} A${r},${r} 0 ${fillLargeArc},1 ${fX2},${fY2}" fill="none" stroke="${color}" stroke-width="18" stroke-linecap="round"/>`;
+  }
+  // 100% marker
+  const marker100Angle = startAngle + (100 / 150) * totalArc;
+  const mX = cx + (r + 16) * Math.cos(marker100Angle);
+  const mY = cy + (r + 16) * Math.sin(marker100Angle);
+  svg += `<text x="${mX}" y="${mY}" text-anchor="middle" font-size="9" fill="rgba(0,0,0,0.3)">100%</text>`;
+
+  // center text
+  svg += `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="13" fill="rgba(0,0,0,0.45)">달성률</text>`;
+  svg += `<text x="${cx}" y="${cy + 24}" text-anchor="middle" font-size="36" font-weight="800" fill="${color}">${rate.toFixed(1)}%</text>`;
+
+  // labels
+  svg += `<text x="${cx - r + 10}" y="${cy + r - 10}" font-size="10" fill="rgba(0,0,0,0.3)">0%</text>`;
+  svg += `<text x="${cx + r - 20}" y="${cy + r - 10}" font-size="10" fill="rgba(0,0,0,0.3)">150%</text>`;
+
+  container.innerHTML = `<svg width="100%" viewBox="0 0 280 ${cy + 40}" style="overflow:visible">${svg}</svg>`;
+}
+
+function drawPartnerCompare(containerId, partnerList) {
+  const container = document.getElementById(containerId);
+  const sorted = [...partnerList].sort((a, b) => b.targetSales - a.targetSales).slice(0, 12);
+  if (sorted.length === 0) return;
+
+  const maxVal = Math.max(...sorted.map(p => Math.max(p.targetSales, p.actualSales)));
+  const H = sorted.length * 48 + 10;
+  const maxBarW = 380;
+
+  let bars = '';
+  sorted.forEach((p, i) => {
+    const y = i * 48 + 5;
+    const tBarW = maxVal > 0 ? (p.targetSales / maxVal) * maxBarW : 0;
+    const aBarW = maxVal > 0 ? (p.actualSales / maxVal) * maxBarW : 0;
+    const name = p.name.length > 14 ? p.name.slice(0, 14) + '..' : p.name;
+    const rate = p.targetSales > 0 ? (p.actualSales / p.targetSales * 100) : 0;
+    const rateColor = rate >= 100 ? '#1a7f4b' : rate >= 80 ? '#b95000' : '#c0392b';
+
+    bars += `<text x="0" y="${y + 14}" font-size="11" fill="#1d1d1f" font-weight="500">${name}</text>`;
+    // target bar (light)
+    bars += `<rect x="0" y="${y + 20}" width="${tBarW}" height="10" rx="2" fill="rgba(0,113,227,0.15)"/>`;
+    // actual bar (dark overlay)
+    bars += `<rect x="0" y="${y + 20}" width="${aBarW}" height="10" rx="2" fill="#0071e3" opacity="0.8"/>`;
+    bars += `<text x="${Math.max(tBarW, aBarW) + 8}" y="${y + 30}" font-size="10" fill="${rateColor}" font-weight="600">${rate.toFixed(1)}%</text>`;
+    bars += `<text x="${Math.max(tBarW, aBarW) + 50}" y="${y + 30}" font-size="9" fill="rgba(0,0,0,0.35)">${fmtMil(p.actualSales)} / ${fmtMil(p.targetSales)}</text>`;
+  });
+
+  // legend
+  bars += `<rect x="0" y="${H + 4}" width="10" height="10" rx="2" fill="rgba(0,113,227,0.15)"/>`;
+  bars += `<text x="14" y="${H + 13}" font-size="10" fill="rgba(0,0,0,0.45)">목표</text>`;
+  bars += `<rect x="50" y="${H + 4}" width="10" height="10" rx="2" fill="#0071e3"/>`;
+  bars += `<text x="64" y="${H + 13}" font-size="10" fill="rgba(0,0,0,0.45)">실적</text>`;
+
+  container.innerHTML = `<svg width="100%" viewBox="0 0 600 ${H + 24}" style="overflow:visible">${bars}</svg>`;
+}
+
+function drawGapAnalysis(containerId, partnerList) {
+  const container = document.getElementById(containerId);
+  const sorted = [...partnerList]
+    .map(p => ({ ...p, rate: p.targetSales > 0 ? (p.actualSales / p.targetSales * 100) : 0 }))
+    .sort((a, b) => b.rate - a.rate)
+    .slice(0, 10);
+
+  if (sorted.length === 0) return;
+
+  const H = sorted.length * 28 + 30;
+  const centerX = 200;
+  const maxBarW = 140;
+  const maxGap = Math.max(...sorted.map(p => Math.abs(p.rate - 100)), 1);
+
+  let bars = '';
+  // center line (100% reference)
+  bars += `<line x1="${centerX}" y1="0" x2="${centerX}" y2="${H - 20}" stroke="rgba(0,0,0,0.12)" stroke-width="1" stroke-dasharray="3,3"/>`;
+  bars += `<text x="${centerX}" y="${H - 6}" text-anchor="middle" font-size="9" fill="rgba(0,0,0,0.3)">100%</text>`;
+
+  sorted.forEach((p, i) => {
+    const y = i * 28 + 5;
+    const gap = p.rate - 100;
+    const barW = (Math.abs(gap) / maxGap) * maxBarW;
+    const fill = gap >= 0 ? '#1a7f4b' : '#c0392b';
+    const name = p.name.length > 10 ? p.name.slice(0, 10) + '..' : p.name;
+
+    if (gap >= 0) {
+      bars += `<rect x="${centerX}" y="${y + 4}" width="${barW}" height="14" rx="3" fill="${fill}" opacity="0.7"/>`;
+    } else {
+      bars += `<rect x="${centerX - barW}" y="${y + 4}" width="${barW}" height="14" rx="3" fill="${fill}" opacity="0.7"/>`;
+    }
+    bars += `<text x="${centerX - maxBarW - 10}" y="${y + 16}" font-size="10" fill="#1d1d1f" text-anchor="end">${name}</text>`;
+    const labelX = gap >= 0 ? centerX + barW + 4 : centerX - barW - 4;
+    const anchor = gap >= 0 ? 'start' : 'end';
+    bars += `<text x="${labelX}" y="${y + 16}" font-size="10" fill="${fill}" font-weight="600" text-anchor="${anchor}">${gap >= 0 ? '+' : ''}${gap.toFixed(0)}%</text>`;
+  });
+
+  container.innerHTML = `<svg width="100%" viewBox="0 0 420 ${H}" style="overflow:visible">${bars}</svg>`;
+}
+
 // ── Report ──
 function generateReport() {
   const selectedMonth = parseInt(document.getElementById('month-select').value);
@@ -402,6 +559,9 @@ function generateReport() {
     targetProfit: fcstMonth.reduce((s, r) => s + r.profit, 0),
     actualProfit: actMonth.reduce((s, r) => s + r.profit, 0),
   };
+
+  // Charts
+  renderTargetCharts(achieveRate, partnerList);
 
   renderTable('tbl-partner', partnerList, totals);
   renderTable('tbl-ip', ipList, totals);
@@ -475,6 +635,10 @@ function resetUpload() {
   document.getElementById('report').style.display = 'none';
   document.getElementById('upload-section').style.display = 'block';
 }
+</script>
+
+<script>
+
 </script>
 
 <script>

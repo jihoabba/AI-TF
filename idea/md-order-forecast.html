@@ -90,10 +90,23 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
 .parse-status .ok { color: var(--green); font-weight: 600; }
 .parse-status .fail { color: var(--red); font-weight: 600; }
 
+/* chart sections */
+.chart-section { margin: 32px 0; }
+.chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.chart-wrap { background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); }
+.chart-wrap svg { display: block; }
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 32px 0; }
+
+/* matrix quadrant labels */
+.matrix-legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+.matrix-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); font-weight: 600; }
+.matrix-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
 @media (max-width: 640px) {
   .topnav { padding: 0 20px; }
   .page { padding: 28px 16px 72px; }
   .stat-row { grid-template-columns: 1fr; }
+  .chart-row { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -154,6 +167,30 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
       </div>
     </div>
 
+    <!-- Charts Row: Donut + Burn Rate -->
+    <div class="chart-row">
+      <div>
+        <div class="chart-title">추천 등급별 IP 분포</div>
+        <div class="chart-wrap" id="chart-rec-donut"></div>
+      </div>
+      <div>
+        <div class="chart-title">IP 우선순위 매트릭스</div>
+        <div class="chart-wrap" id="chart-priority-matrix"></div>
+      </div>
+    </div>
+
+    <!-- Burn Rate Chart -->
+    <div class="chart-section">
+      <div class="chart-title">소진 예상 개월 (Burn Rate)</div>
+      <div class="chart-wrap" id="chart-burn-rate"></div>
+    </div>
+
+    <!-- Inventory vs Sales Chart -->
+    <div class="chart-section">
+      <div class="chart-title">현재 재고 vs 월평균 판매량</div>
+      <div class="chart-wrap" id="chart-inv-vs-sales"></div>
+    </div>
+
     <!-- Filter + Table -->
     <div class="section">
       <div class="filter-row">
@@ -181,9 +218,184 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
 <script>
 /* ---- state ---- */
 let ipData = []; // aggregated per IP
+const COLORS = ['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30', '#5ac8fa', '#ff6482', '#30b0c7'];
 
 function num(v) { return typeof v === 'number' ? v : (parseFloat(v) || 0); }
 function fmtN(n) { return n.toLocaleString('ko-KR'); }
+function escSvg(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function truncLabel(s, max) { return s.length > max ? s.slice(0, max) + '..' : s; }
+
+/* ---- SVG Chart Utilities ---- */
+
+function svgHorizontalBar(container, data, { width = 1050, barHeight = 26, gap = 5, labelWidth = 130, valueWidth = 80 } = {}) {
+  if (!data.length) { container.innerHTML = '<p style="color:var(--muted);font-size:13px;">데이터 없음</p>'; return; }
+  const maxVal = Math.max(...data.map(d => d.value));
+  const barAreaW = width - labelWidth - valueWidth - 20;
+  const h = data.length * (barHeight + gap) + 10;
+  let svg = `<svg width="100%" viewBox="0 0 ${width} ${h}" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,sans-serif;">`;
+  data.forEach((d, i) => {
+    const y = i * (barHeight + gap) + 5;
+    const bw = maxVal > 0 ? (d.value / maxVal) * barAreaW : 0;
+    svg += `<text x="${labelWidth - 8}" y="${y + barHeight / 2 + 4}" text-anchor="end" font-size="11" fill="#1d1d1f" font-weight="500">${escSvg(truncLabel(d.label, 16))}</text>`;
+    svg += `<rect x="${labelWidth}" y="${y}" width="${bw}" height="${barHeight}" rx="4" fill="${d.color}" opacity="0.85"/>`;
+    svg += `<text x="${labelWidth + bw + 8}" y="${y + barHeight / 2 + 4}" font-size="11" fill="rgba(0,0,0,0.55)" font-weight="600">${d.display || d.value.toFixed(1)}</text>`;
+  });
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+function svgGroupedBar(container, data, { width = 1050, barHeight = 14, gap = 20, labelWidth = 130 } = {}) {
+  // data: [{label, values: [{value, color, name}]}]
+  if (!data.length) { container.innerHTML = '<p style="color:var(--muted);font-size:13px;">데이터 없음</p>'; return; }
+  const allVals = data.flatMap(d => d.values.map(v => v.value));
+  const maxVal = Math.max(...allVals);
+  const barAreaW = width - labelWidth - 100;
+  const groupH = data[0].values.length * (barHeight + 2);
+  const legendH = 30;
+  const h = data.length * (groupH + gap) + legendH + 20;
+  let svg = `<svg width="100%" viewBox="0 0 ${width} ${h}" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,sans-serif;">`;
+
+  // legend
+  let lx = labelWidth;
+  data[0].values.forEach((v, i) => {
+    svg += `<rect x="${lx}" y="4" width="12" height="12" rx="2" fill="${v.color}"/>`;
+    svg += `<text x="${lx + 16}" y="14" font-size="11" fill="rgba(0,0,0,0.55)" font-weight="600">${escSvg(v.name)}</text>`;
+    lx += v.name.length * 9 + 36;
+  });
+
+  data.forEach((d, i) => {
+    const groupY = i * (groupH + gap) + legendH + 5;
+    svg += `<text x="${labelWidth - 8}" y="${groupY + groupH / 2 + 4}" text-anchor="end" font-size="11" fill="#1d1d1f" font-weight="500">${escSvg(truncLabel(d.label, 16))}</text>`;
+    d.values.forEach((v, j) => {
+      const by = groupY + j * (barHeight + 2);
+      const bw = maxVal > 0 ? (v.value / maxVal) * barAreaW : 0;
+      svg += `<rect x="${labelWidth}" y="${by}" width="${bw}" height="${barHeight}" rx="3" fill="${v.color}" opacity="0.8"/>`;
+      svg += `<text x="${labelWidth + bw + 6}" y="${by + barHeight / 2 + 4}" font-size="10" fill="rgba(0,0,0,0.5)" font-weight="500">${fmtN(Math.round(v.value))}</text>`;
+    });
+  });
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+function svgDonut(container, data, { size = 240, thickness = 42 } = {}) {
+  if (!data.length) { container.innerHTML = '<p style="color:var(--muted);font-size:13px;">데이터 없음</p>'; return; }
+  const total = data.reduce((s, d) => s + d.value, 0);
+  if (total === 0) { container.innerHTML = '<p style="color:var(--muted);font-size:13px;">데이터 없음</p>'; return; }
+  const cx = size / 2, cy = size / 2, r = (size - thickness) / 2;
+  const legendW = 220;
+  const svgW = size + legendW + 20;
+  const svgH = Math.max(size, data.length * 28 + 20);
+  let svg = `<svg width="100%" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,sans-serif;">`;
+
+  let cumAngle = -Math.PI / 2;
+  data.forEach(d => {
+    const angle = (d.value / total) * Math.PI * 2;
+    if (angle === 0) { cumAngle += angle; return; }
+    const x1 = cx + r * Math.cos(cumAngle);
+    const y1 = cy + r * Math.sin(cumAngle);
+    const x2 = cx + r * Math.cos(cumAngle + angle);
+    const y2 = cy + r * Math.sin(cumAngle + angle);
+    const large = angle > Math.PI ? 1 : 0;
+    svg += `<path d="M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}" fill="none" stroke="${d.color}" stroke-width="${thickness}" opacity="0.85"/>`;
+    cumAngle += angle;
+  });
+
+  svg += `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="20" font-weight="800" fill="#1d1d1f">${fmtN(total)}</text>`;
+  svg += `<text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.45)">Total IP</text>`;
+
+  const legendX = size + 24;
+  data.forEach((d, i) => {
+    const ly = 20 + i * 28;
+    const pct = total > 0 ? ((d.value / total) * 100).toFixed(1) : '0.0';
+    svg += `<rect x="${legendX}" y="${ly}" width="12" height="12" rx="2" fill="${d.color}"/>`;
+    svg += `<text x="${legendX + 18}" y="${ly + 11}" font-size="12" fill="#1d1d1f" font-weight="600">${escSvg(d.label)}</text>`;
+    svg += `<text x="${legendX + 18}" y="${ly + 24}" font-size="10" fill="rgba(0,0,0,0.4)">${fmtN(d.value)}개 (${pct}%)</text>`;
+  });
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+function svgPriorityMatrix(container, data, { width = 480, height = 400 } = {}) {
+  // data: [{label, x (avgMonthly), y (burnMonths), cls}]
+  if (!data.length) { container.innerHTML = '<p style="color:var(--muted);font-size:13px;">데이터 없음</p>'; return; }
+  const pad = { top: 30, right: 30, bottom: 50, left: 60 };
+  const plotW = width - pad.left - pad.right;
+  const plotH = height - pad.top - pad.bottom;
+
+  // Filter out 999 burnMonths for display
+  const filtered = data.filter(d => d.y < 999);
+  if (!filtered.length) { container.innerHTML = '<p style="color:var(--muted);font-size:13px;">유효 데이터 없음</p>'; return; }
+
+  const maxX = Math.max(...filtered.map(d => d.x)) * 1.15 || 1;
+  const maxY = Math.min(Math.max(...filtered.map(d => d.y)) * 1.15, 12) || 1;
+
+  let svg = `<svg width="100%" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,sans-serif;">`;
+
+  // Quadrant backgrounds
+  const midX = pad.left + plotW / 2;
+  const midY = pad.top + plotH / 2;
+  // Top-left: high burn, low velocity (safe but slow)
+  svg += `<rect x="${pad.left}" y="${pad.top}" width="${plotW/2}" height="${plotH/2}" fill="rgba(26,127,75,0.04)"/>`;
+  // Top-right: high burn, high velocity (ideal)
+  svg += `<rect x="${midX}" y="${pad.top}" width="${plotW/2}" height="${plotH/2}" fill="rgba(0,113,227,0.04)"/>`;
+  // Bottom-left: low burn, low velocity (stagnant)
+  svg += `<rect x="${pad.left}" y="${midY}" width="${plotW/2}" height="${plotH/2}" fill="rgba(138,109,0,0.04)"/>`;
+  // Bottom-right: low burn, high velocity (URGENT)
+  svg += `<rect x="${midX}" y="${midY}" width="${plotW/2}" height="${plotH/2}" fill="rgba(192,57,43,0.06)"/>`;
+
+  // Quadrant labels
+  svg += `<text x="${pad.left + plotW/4}" y="${pad.top + 18}" text-anchor="middle" font-size="10" fill="rgba(26,127,75,0.6)" font-weight="700">안정 (저속)</text>`;
+  svg += `<text x="${midX + plotW/4}" y="${pad.top + 18}" text-anchor="middle" font-size="10" fill="rgba(0,113,227,0.6)" font-weight="700">적정</text>`;
+  svg += `<text x="${pad.left + plotW/4}" y="${midY + 18}" text-anchor="middle" font-size="10" fill="rgba(138,109,0,0.6)" font-weight="700">정체</text>`;
+  svg += `<text x="${midX + plotW/4}" y="${midY + 18}" text-anchor="middle" font-size="10" fill="rgba(192,57,43,0.7)" font-weight="700">긴급 발주</text>`;
+
+  // Axes
+  svg += `<line x1="${pad.left}" y1="${pad.top + plotH}" x2="${pad.left + plotW}" y2="${pad.top + plotH}" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>`;
+  svg += `<line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top + plotH}" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>`;
+  // Midlines
+  svg += `<line x1="${midX}" y1="${pad.top}" x2="${midX}" y2="${pad.top + plotH}" stroke="rgba(0,0,0,0.06)" stroke-width="1" stroke-dasharray="4,4"/>`;
+  svg += `<line x1="${pad.left}" y1="${midY}" x2="${pad.left + plotW}" y2="${midY}" stroke="rgba(0,0,0,0.06)" stroke-width="1" stroke-dasharray="4,4"/>`;
+
+  // Axis labels
+  svg += `<text x="${pad.left + plotW / 2}" y="${height - 8}" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.45)" font-weight="600">월평균 판매량 →</text>`;
+  svg += `<text x="14" y="${pad.top + plotH / 2}" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.45)" font-weight="600" transform="rotate(-90, 14, ${pad.top + plotH / 2})">소진 개월 →</text>`;
+
+  // X axis ticks
+  for (let i = 0; i <= 4; i++) {
+    const val = (maxX / 4) * i;
+    const tx = pad.left + (val / maxX) * plotW;
+    svg += `<text x="${tx}" y="${pad.top + plotH + 16}" text-anchor="middle" font-size="9" fill="rgba(0,0,0,0.35)">${fmtN(Math.round(val))}</text>`;
+  }
+  // Y axis ticks
+  for (let i = 0; i <= 4; i++) {
+    const val = (maxY / 4) * i;
+    const ty = pad.top + plotH - (val / maxY) * plotH;
+    svg += `<text x="${pad.left - 8}" y="${ty + 3}" text-anchor="end" font-size="9" fill="rgba(0,0,0,0.35)">${val.toFixed(1)}</text>`;
+  }
+
+  // Data points
+  const colorMap = { 'rec-urgent': '#c0392b', 'rec-order': '#b95000', 'rec-monitor': '#8a6d00', 'rec-ok': '#1a7f4b' };
+  filtered.forEach(d => {
+    const px = pad.left + (d.x / maxX) * plotW;
+    const py = pad.top + plotH - (Math.min(d.y, maxY) / maxY) * plotH;
+    const col = colorMap[d.cls] || '#0071e3';
+    svg += `<circle cx="${px}" cy="${py}" r="5" fill="${col}" opacity="0.75" stroke="#fff" stroke-width="1.5"/>`;
+    // Label
+    svg += `<text x="${px}" y="${py - 8}" text-anchor="middle" font-size="8" fill="${col}" font-weight="600">${escSvg(truncLabel(d.label, 8))}</text>`;
+  });
+
+  svg += '</svg>';
+
+  // Add legend below
+  container.innerHTML = svg + `
+    <div class="matrix-legend">
+      <div class="matrix-legend-item"><div class="matrix-legend-dot" style="background:#c0392b;"></div>긴급 발주 필요</div>
+      <div class="matrix-legend-item"><div class="matrix-legend-dot" style="background:#b95000;"></div>발주 권장</div>
+      <div class="matrix-legend-item"><div class="matrix-legend-dot" style="background:#8a6d00;"></div>모니터링</div>
+      <div class="matrix-legend-item"><div class="matrix-legend-dot" style="background:#1a7f4b;"></div>적정</div>
+    </div>`;
+}
 
 /* ---- dropzone ---- */
 const dz = document.getElementById('dropzone');
@@ -227,11 +439,8 @@ function analyze() {
     const wb = XLSX.read(e.target.result, { type: 'array' });
     const status = [];
 
-    // 1. YTD raw sheet
     const ytdSheet = wb.SheetNames.find(n => n.toLowerCase().includes('ytd'));
-    // 2. Fcst raw sheet
     const fcstSheet = wb.SheetNames.find(n => n.toLowerCase().includes('fcst'));
-    // 3. 단가(Aging) sheet
     const agingSheet = wb.SheetNames.find(n => n.includes('단가') || n.includes('Aging'));
 
     status.push(ytdSheet ? `<span class="ok">YTD raw: ${ytdSheet}</span>` : '<span class="fail">YTD raw: 시트 없음</span>');
@@ -246,11 +455,8 @@ function analyze() {
       return;
     }
 
-    // Parse YTD raw
     const ytdRaw = XLSX.utils.sheet_to_json(wb.Sheets[ytdSheet], { header: 1 });
-    // Parse Fcst raw (headers on row 2, index 1)
     const fcstRaw = fcstSheet ? XLSX.utils.sheet_to_json(wb.Sheets[fcstSheet], { header: 1 }) : [];
-    // Parse Aging
     const agingRaw = XLSX.utils.sheet_to_json(wb.Sheets[agingSheet], { header: 1 });
 
     processData(ytdRaw, fcstRaw, agingRaw);
@@ -260,9 +466,7 @@ function analyze() {
 }
 
 function processData(ytdRaw, fcstRaw, agingRaw) {
-  // --- YTD: monthly sales by IP(대) ---
-  // col 68: 월, col 57: IP(대), col 39: 청구수량, col 46: 대금청구금액
-  const ytdByIp = {}; // { ip: { months: Set, totalQty: n } }
+  const ytdByIp = {};
   for (let i = 1; i < ytdRaw.length; i++) {
     const r = ytdRaw[i];
     if (!r) continue;
@@ -275,11 +479,8 @@ function processData(ytdRaw, fcstRaw, agingRaw) {
     ytdByIp[ip].totalQty += qty;
   }
 
-  // --- Fcst: sum 수량 by IP ---
-  // Fcst headers on row 2 (index 1). Find column indices by header name.
   const fcstByIp = {};
   if (fcstRaw.length > 1) {
-    // Find header row (index 1)
     const hdr = fcstRaw[1] || fcstRaw[0];
     let colIP = -1, colQty = -1;
     for (let c = 0; c < (hdr ? hdr.length : 0); c++) {
@@ -298,8 +499,6 @@ function processData(ytdRaw, fcstRaw, agingRaw) {
     }
   }
 
-  // --- Aging: current inventory by IP ---
-  // col 7: 자재코드, col 8: 자재명, col 11: IP(대), col 22: Total 수량
   const invByIp = {};
   for (let i = 1; i < agingRaw.length; i++) {
     const r = agingRaw[i];
@@ -310,7 +509,6 @@ function processData(ytdRaw, fcstRaw, agingRaw) {
     invByIp[ip] = (invByIp[ip] || 0) + qty;
   }
 
-  // --- Merge into ipData ---
   const allIps = new Set([...Object.keys(ytdByIp), ...Object.keys(invByIp)]);
   ipData = [];
   allIps.forEach(ip => {
@@ -358,7 +556,58 @@ function buildReport() {
   const sel = document.getElementById('ip-filter');
   sel.innerHTML = '<option value="">전체 IP</option>' + ips.map(ip => `<option value="${ip}">${ip}</option>`).join('');
 
+  renderCharts();
   renderTable();
+}
+
+function renderCharts() {
+  // --- 1. Recommendation Donut ---
+  const recCounts = {};
+  const recColors = { '긴급 발주 필요': '#c0392b', '발주 권장': '#b95000', '모니터링': '#8a6d00', '적정': '#1a7f4b' };
+  ipData.forEach(d => {
+    recCounts[d.rec] = (recCounts[d.rec] || 0) + 1;
+  });
+  const donutData = ['긴급 발주 필요', '발주 권장', '모니터링', '적정']
+    .filter(k => recCounts[k])
+    .map(k => ({ label: k, value: recCounts[k], color: recColors[k] }));
+  svgDonut(document.getElementById('chart-rec-donut'), donutData);
+
+  // --- 2. Burn Rate Horizontal Bar ---
+  const burnData = ipData
+    .filter(d => d.burnMonths < 999)
+    .sort((a, b) => a.burnMonths - b.burnMonths)
+    .map(d => {
+      let color;
+      if (d.burnMonths < 1) color = '#c0392b';
+      else if (d.burnMonths < 2) color = '#b95000';
+      else if (d.burnMonths < 3) color = '#8a6d00';
+      else color = '#1a7f4b';
+      return { label: d.ip, value: d.burnMonths, color, display: d.burnMonths.toFixed(1) + '개월' };
+    });
+  svgHorizontalBar(document.getElementById('chart-burn-rate'), burnData);
+
+  // --- 3. Inventory vs Monthly Sales Grouped Bar ---
+  const invSalesData = ipData
+    .filter(d => d.avgMonthly > 0 || d.currentInv > 0)
+    .sort((a, b) => b.avgMonthly - a.avgMonthly)
+    .slice(0, 20)
+    .map(d => ({
+      label: d.ip,
+      values: [
+        { value: d.currentInv, color: '#0071e3', name: '현재 재고' },
+        { value: d.avgMonthly, color: '#ff9500', name: '월평균 판매' },
+      ]
+    }));
+  svgGroupedBar(document.getElementById('chart-inv-vs-sales'), invSalesData);
+
+  // --- 4. Priority Matrix ---
+  const matrixData = ipData.map(d => ({
+    label: d.ip,
+    x: d.avgMonthly,
+    y: d.burnMonths,
+    cls: d.cls,
+  }));
+  svgPriorityMatrix(document.getElementById('chart-priority-matrix'), matrixData);
 }
 
 function renderTable() {
@@ -378,6 +627,10 @@ function renderTable() {
     </tr>`;
   }).join('');
 }
+</script>
+
+<script>
+
 </script>
 
 <script>

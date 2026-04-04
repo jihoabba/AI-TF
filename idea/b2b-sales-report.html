@@ -86,6 +86,13 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
 .share-bar.filled { background: var(--accent); }
 .neg { color: var(--red); }
 
+/* chart */
+.chart-section { margin: 32px 0; }
+.chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.chart-wrap { background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } }
+
 /* YTD matrix */
 .matrix-wrap { overflow-x: auto; }
 .matrix-table { font-size: 12px; }
@@ -171,6 +178,9 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
         <div class="stat-sub" id="kpi-ytd-sub"></div>
       </div>
     </div>
+
+    <!-- Charts -->
+    <div id="charts-area"></div>
 
     <!-- 당월 by Partner -->
     <div class="section">
@@ -342,6 +352,130 @@ function parseSAP(wb) {
   return rows;
 }
 
+// ── Chart Helpers ──
+const CHART_COLORS = ['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30', '#5ac8fa', '#ff6482', '#30b0c7'];
+
+function fmtMil(v) { return (v / 1e6).toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+
+function renderCharts(data) {
+  const area = document.getElementById('charts-area');
+  area.innerHTML = '';
+
+  // 1. Monthly trend bar chart
+  const trendSection = document.createElement('div');
+  trendSection.className = 'chart-section';
+  trendSection.innerHTML = '<div class="chart-title">월별 매출 추이 (회계연도)</div><div class="chart-wrap"><div id="chart-monthly-trend"></div></div>';
+  area.appendChild(trendSection);
+  drawMonthlyTrend('chart-monthly-trend', data.selectedMonth);
+
+  // 2. Two-column: Top 5 partners + IP donut
+  const gridSection = document.createElement('div');
+  gridSection.className = 'chart-section';
+  gridSection.innerHTML = '<div class="chart-grid"><div><div class="chart-title">Top 5 파트너 매출</div><div class="chart-wrap"><div id="chart-top5"></div></div></div><div><div class="chart-title">IP별 매출 구성</div><div class="chart-wrap"><div id="chart-donut"></div></div></div></div>';
+  area.appendChild(gridSection);
+  drawTop5Partners('chart-top5', data.partnerList);
+  drawIPDonut('chart-donut', data.ipList);
+}
+
+function drawMonthlyTrend(containerId, selMonth) {
+  const container = document.getElementById(containerId);
+  const monthSales = {};
+  const fiscalMonths = FISCAL_ORDER.filter(m => {
+    const found = allRows.some(r => r.month === m);
+    return found;
+  });
+  for (const m of fiscalMonths) {
+    monthSales[m] = allRows.filter(r => r.month === m).reduce((s, r) => s + r.sales, 0);
+  }
+  if (fiscalMonths.length === 0) return;
+
+  const maxVal = Math.max(...Object.values(monthSales));
+  const W = container.parentElement.clientWidth - 48 || 700;
+  const barW = Math.min(40, (W - 60) / fiscalMonths.length - 8);
+  const H = 220;
+  const chartW = fiscalMonths.length * (barW + 8) + 60;
+
+  let bars = '';
+  fiscalMonths.forEach((m, i) => {
+    const val = monthSales[m] || 0;
+    const barH = maxVal > 0 ? (val / maxVal) * (H - 50) : 0;
+    const x = 50 + i * (barW + 8);
+    const y = H - 30 - barH;
+    const fill = m === selMonth ? '#0071e3' : 'rgba(0,113,227,0.2)';
+    bars += `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="${fill}"/>`;
+    bars += `<text x="${x + barW/2}" y="${H - 14}" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.45)">${m}월</text>`;
+    if (m === selMonth || barH > 30) {
+      bars += `<text x="${x + barW/2}" y="${y - 6}" text-anchor="middle" font-size="10" font-weight="600" fill="${m === selMonth ? '#0071e3' : 'rgba(0,0,0,0.45)'}">${fmtMil(val)}</text>`;
+    }
+  });
+
+  container.innerHTML = `<svg width="100%" viewBox="0 0 ${Math.max(chartW, W)} ${H}" style="overflow:visible">${bars}</svg>`;
+}
+
+function drawTop5Partners(containerId, partnerList) {
+  const container = document.getElementById(containerId);
+  const top5 = partnerList.slice(0, 5);
+  if (top5.length === 0) return;
+
+  const maxVal = top5[0].sales;
+  const H = top5.length * 44 + 10;
+
+  let bars = '';
+  top5.forEach((p, i) => {
+    const y = i * 44 + 5;
+    const barW = maxVal > 0 ? (p.sales / maxVal) * 350 : 0;
+    const name = p.name.length > 14 ? p.name.slice(0, 14) + '..' : p.name;
+    bars += `<text x="0" y="${y + 16}" font-size="12" fill="#1d1d1f" font-weight="500">${name}</text>`;
+    bars += `<rect x="0" y="${y + 22}" width="${barW}" height="14" rx="3" fill="${CHART_COLORS[i]}"/>`;
+    bars += `<text x="${barW + 6}" y="${y + 34}" font-size="11" fill="rgba(0,0,0,0.45)">${fmtMil(p.sales)} mil</text>`;
+  });
+
+  container.innerHTML = `<svg width="100%" viewBox="0 0 500 ${H}" style="overflow:visible">${bars}</svg>`;
+}
+
+function drawIPDonut(containerId, ipList) {
+  const container = document.getElementById(containerId);
+  const total = ipList.reduce((s, r) => s + r.sales, 0);
+  if (total <= 0) return;
+
+  const cx = 120, cy = 120, r = 90, innerR = 55;
+  let startAngle = -Math.PI / 2;
+  let paths = '';
+  let legends = '';
+
+  ipList.forEach((ip, i) => {
+    const share = ip.sales / total;
+    if (share < 0.001) return;
+    const endAngle = startAngle + share * 2 * Math.PI;
+    const largeArc = share > 0.5 ? 1 : 0;
+    const x1 = cx + r * Math.cos(startAngle);
+    const y1 = cy + r * Math.sin(startAngle);
+    const x2 = cx + r * Math.cos(endAngle);
+    const y2 = cy + r * Math.sin(endAngle);
+    const ix1 = cx + innerR * Math.cos(startAngle);
+    const iy1 = cy + innerR * Math.sin(startAngle);
+    const ix2 = cx + innerR * Math.cos(endAngle);
+    const iy2 = cy + innerR * Math.sin(endAngle);
+
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+    paths += `<path d="M${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2} L${ix2},${iy2} A${innerR},${innerR} 0 ${largeArc},0 ${ix1},${iy1} Z" fill="${color}"/>`;
+
+    const ly = 20 + i * 22;
+    const name = ip.name.length > 12 ? ip.name.slice(0, 12) + '..' : ip.name;
+    legends += `<rect x="260" y="${ly}" width="12" height="12" rx="2" fill="${color}"/>`;
+    legends += `<text x="278" y="${ly + 11}" font-size="11" fill="#1d1d1f">${name} (${(share * 100).toFixed(1)}%)</text>`;
+
+    startAngle = endAngle;
+  });
+
+  // center text
+  paths += `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.45)">총 매출</text>`;
+  paths += `<text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="14" font-weight="700" fill="#1d1d1f">${fmtMil(total)}</text>`;
+
+  const svgH = Math.max(240, ipList.length * 22 + 30);
+  container.innerHTML = `<svg width="100%" viewBox="0 0 460 ${svgH}" style="overflow:visible">${paths}${legends}</svg>`;
+}
+
 // ── Report Generation ──
 function generateReport() {
   selectedMonth = parseInt(document.getElementById('month-select').value);
@@ -427,6 +561,9 @@ function renderReport(d) {
 
   const ytdCount = ytdMonths.length;
   document.getElementById('kpi-ytd-sub').textContent = `${ytdMonths[0]}월~${ytdMonths[ytdCount-1]}월 누계`;
+
+  // Charts
+  renderCharts(d);
 
   // by Partner
   renderBreakdownTable('tbl-partner', partnerList, totalSales);
@@ -612,6 +749,10 @@ function resetUpload() {
   document.getElementById('report').style.display = 'none';
   document.getElementById('upload-section').style.display = 'block';
 }
+</script>
+
+<script>
+
 </script>
 
 <script>

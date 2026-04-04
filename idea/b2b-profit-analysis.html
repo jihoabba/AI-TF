@@ -82,6 +82,13 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
 .profit-pct.low  { color: var(--red); }
 .neg { color: var(--red); }
 
+/* chart */
+.chart-section { margin: 32px 0; }
+.chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.chart-wrap { background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } }
+
 @media (max-width: 640px) {
   .topnav { padding: 0 20px; }
   .page { padding: 28px 16px 72px; }
@@ -146,6 +153,9 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
         <div class="stat-value" id="kpi-rate">—<span class="unit">%</span></div>
       </div>
     </div>
+
+    <!-- Charts -->
+    <div id="charts-area"></div>
 
     <!-- 파트너별 -->
     <div class="section">
@@ -293,6 +303,115 @@ function parseSheet(ws) {
   return rows;
 }
 
+// ── Chart Helpers ──
+const CHART_COLORS = ['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30', '#5ac8fa', '#ff6482', '#30b0c7'];
+
+function fmtMil(v) { return (v / 1e6).toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+
+function renderProfitCharts(totals, partnerList, ipList) {
+  const area = document.getElementById('charts-area');
+  area.innerHTML = '';
+
+  // 1. Waterfall chart
+  const wfSection = document.createElement('div');
+  wfSection.className = 'chart-section';
+  wfSection.innerHTML = '<div class="chart-title">비용 구조 워터폴</div><div class="chart-wrap"><div id="chart-waterfall"></div></div>';
+  area.appendChild(wfSection);
+  drawWaterfall('chart-waterfall', totals);
+
+  // 2. Two-column: partner profit rate + IP profit rate
+  const gridSection = document.createElement('div');
+  gridSection.className = 'chart-section';
+  gridSection.innerHTML = '<div class="chart-grid"><div><div class="chart-title">파트너별 이익률</div><div class="chart-wrap"><div id="chart-partner-rate"></div></div></div><div><div class="chart-title">IP별 이익률</div><div class="chart-wrap"><div id="chart-ip-rate"></div></div></div></div>';
+  area.appendChild(gridSection);
+  drawProfitRateBar('chart-partner-rate', partnerList);
+  drawProfitRateBar('chart-ip-rate', ipList);
+}
+
+function drawWaterfall(containerId, t) {
+  const container = document.getElementById(containerId);
+  const items = [
+    { label: '매출', value: t.totalSales, type: 'total' },
+    { label: '원가', value: -t.totalCost, type: 'cost' },
+    { label: '로열티', value: -t.totalRoyalty, type: 'cost' },
+    { label: '배송비', value: -t.totalShip, type: 'cost' },
+    { label: '공헌이익', value: t.totalProfit, type: 'profit' },
+  ];
+
+  const maxVal = t.totalSales;
+  const W = 600, H = 260, barW = 70, gap = 30;
+  const chartH = H - 60;
+  const startX = 60;
+
+  let svg = '';
+  // baseline
+  svg += `<line x1="${startX}" y1="${chartH + 10}" x2="${startX + items.length * (barW + gap)}" y2="${chartH + 10}" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>`;
+
+  let runningTop = 0; // top position of running total
+  items.forEach((item, i) => {
+    const x = startX + i * (barW + gap);
+    let barH, y;
+
+    if (item.type === 'total') {
+      barH = maxVal > 0 ? (Math.abs(item.value) / maxVal) * chartH : 0;
+      y = chartH + 10 - barH;
+      runningTop = y;
+    } else if (item.type === 'cost') {
+      barH = maxVal > 0 ? (Math.abs(item.value) / maxVal) * chartH : 0;
+      y = runningTop;
+      runningTop = y + barH;
+    } else { // profit
+      barH = maxVal > 0 ? (Math.abs(item.value) / maxVal) * chartH : 0;
+      y = chartH + 10 - barH;
+    }
+
+    const fill = item.type === 'total' ? '#0071e3' : item.type === 'cost' ? '#c0392b' : '#1a7f4b';
+    svg += `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(barH, 1)}" rx="3" fill="${fill}" opacity="0.85"/>`;
+    svg += `<text x="${x + barW/2}" y="${y - 6}" text-anchor="middle" font-size="11" font-weight="600" fill="${fill}">${fmtMil(Math.abs(item.value))}</text>`;
+    svg += `<text x="${x + barW/2}" y="${chartH + 28}" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.45)">${item.label}</text>`;
+
+    // connector line
+    if (item.type === 'cost' && i < items.length - 1) {
+      const nextX = startX + (i + 1) * (barW + gap);
+      svg += `<line x1="${x + barW}" y1="${runningTop}" x2="${nextX}" y2="${runningTop}" stroke="rgba(0,0,0,0.12)" stroke-width="1" stroke-dasharray="3,3"/>`;
+    }
+    if (item.type === 'total') {
+      const nextX = startX + (i + 1) * (barW + gap);
+      svg += `<line x1="${x + barW}" y1="${runningTop}" x2="${nextX}" y2="${runningTop}" stroke="rgba(0,0,0,0.12)" stroke-width="1" stroke-dasharray="3,3"/>`;
+    }
+  });
+
+  container.innerHTML = `<svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">${svg}</svg>`;
+}
+
+function drawProfitRateBar(containerId, list) {
+  const container = document.getElementById(containerId);
+  const sorted = [...list].sort((a, b) => {
+    const rA = a.sales > 0 ? (a.profit / a.sales * 100) : 0;
+    const rB = b.sales > 0 ? (b.profit / b.sales * 100) : 0;
+    return rB - rA;
+  }).slice(0, 10);
+
+  if (sorted.length === 0) return;
+
+  const maxRate = Math.max(...sorted.map(p => p.sales > 0 ? Math.abs(p.profit / p.sales * 100) : 0), 1);
+  const H = sorted.length * 36 + 10;
+
+  let bars = '';
+  sorted.forEach((p, i) => {
+    const rate = p.sales > 0 ? (p.profit / p.sales * 100) : 0;
+    const y = i * 36 + 5;
+    const barW = maxRate > 0 ? (Math.abs(rate) / maxRate) * 280 : 0;
+    const fill = rate >= 40 ? '#1a7f4b' : rate >= 20 ? '#b95000' : '#c0392b';
+    const name = p.name.length > 12 ? p.name.slice(0, 12) + '..' : p.name;
+    bars += `<text x="0" y="${y + 14}" font-size="11" fill="#1d1d1f" font-weight="500">${name}</text>`;
+    bars += `<rect x="0" y="${y + 19}" width="${barW}" height="12" rx="3" fill="${fill}" opacity="0.8"/>`;
+    bars += `<text x="${barW + 6}" y="${y + 30}" font-size="10" fill="${fill}" font-weight="600">${rate.toFixed(1)}%</text>`;
+  });
+
+  container.innerHTML = `<svg width="100%" viewBox="0 0 420 ${H}" style="overflow:visible">${bars}</svg>`;
+}
+
 // ── Report ──
 function generateReport() {
   const selectedMonth = parseInt(document.getElementById('month-select').value);
@@ -337,6 +456,9 @@ function generateReport() {
   const ipList = Object.entries(ipMap)
     .map(([name, v]) => ({ name, ...v }))
     .sort((a, b) => b.sales - a.sales);
+
+  // Charts
+  renderProfitCharts({ totalSales, totalCost, totalRoyalty, totalShip, totalProfit }, partnerList, ipList);
 
   renderTable('tbl-partner', partnerList, { totalSales, totalCost, totalRoyalty, totalShip, totalProfit });
   renderTable('tbl-ip', ipList, { totalSales, totalCost, totalRoyalty, totalShip, totalProfit });
@@ -389,6 +511,10 @@ function resetUpload() {
   document.getElementById('report').style.display = 'none';
   document.getElementById('upload-section').style.display = 'block';
 }
+</script>
+
+<script>
+
 </script>
 
 <script>

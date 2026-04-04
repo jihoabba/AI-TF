@@ -100,6 +100,18 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
 .share-bar { display: inline-block; height: 6px; background: rgba(0,113,227,.2); border-radius: 3px; vertical-align: middle; margin-right: 6px; }
 .share-bar.filled { background: var(--accent); }
 
+/* chart styles */
+.chart-section { margin: 32px 0; }
+.chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.chart-wrap { background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); }
+.chart-wrap svg { display: block; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; }
+.chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); }
+.chart-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.chart-flex { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+.chart-flex > .chart-wrap { flex: 1; min-width: 280px; }
+.chart-flex > .tbl-wrap { flex: 1; min-width: 320px; }
+
 @media (max-width: 640px) {
   .topnav { padding: 0 20px; }
   .page { padding: 28px 16px 72px; }
@@ -168,6 +180,12 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
       </div>
     </div>
 
+    <!-- Monthly Sales Trend Bar Chart -->
+    <div class="chart-section" id="monthly-trend-section" style="display:none;">
+      <div class="chart-title">월별 매출 추이 (회계연도 4월~3월)</div>
+      <div class="chart-wrap" id="monthly-trend-chart"></div>
+    </div>
+
     <!-- Tabs -->
     <div class="tabs" id="main-tabs">
       <button class="tab active" onclick="switchTab(0)">채널별 매출</button>
@@ -178,17 +196,20 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
     <!-- Tab 0: 채널별 매출 -->
     <div class="tab-panel" id="panel-0">
       <div class="section">
-        <div class="tbl-wrap">
-          <table id="tbl-channel">
-            <thead><tr>
-              <th class="left">채널명</th>
-              <th>매출 (mil)</th>
-              <th>수량</th>
-              <th>비중 (%)</th>
-              <th>거래처 수</th>
-            </tr></thead>
-            <tbody></tbody>
-          </table>
+        <div class="chart-flex">
+          <div class="chart-wrap" id="channel-donut-chart" style="max-width:380px;"></div>
+          <div class="tbl-wrap" style="flex:1;">
+            <table id="tbl-channel">
+              <thead><tr>
+                <th class="left">채널명</th>
+                <th>매출 (mil)</th>
+                <th>수량</th>
+                <th>비중 (%)</th>
+                <th>거래처 수</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -196,6 +217,10 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
     <!-- Tab 1: IP별 트렌드 -->
     <div class="tab-panel" id="panel-1" style="display:none;">
       <div class="section">
+        <div class="chart-section" style="margin-top:0;">
+          <div class="chart-title">IP별 월간 매출 트렌드 (Top 7)</div>
+          <div class="chart-wrap" id="ip-trend-chart"></div>
+        </div>
         <div class="matrix-wrap">
           <table id="tbl-ip-trend" class="matrix-table">
             <thead></thead>
@@ -208,6 +233,10 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
     <!-- Tab 2: 상품 랭킹 -->
     <div class="tab-panel" id="panel-2" style="display:none;">
       <div class="section">
+        <div class="chart-section" style="margin-top:0;">
+          <div class="chart-title">상품 매출 Top 20</div>
+          <div class="chart-wrap" id="product-bar-chart"></div>
+        </div>
         <div class="tbl-wrap">
           <table id="tbl-product">
             <thead><tr>
@@ -227,6 +256,256 @@ tbody td.left { text-align: left; max-width: 200px; overflow: hidden; text-overf
 </div>
 
 <script>
+// ── Chart Color Palette ──
+const CHART_COLORS = ['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30', '#5ac8fa', '#ff6482', '#30b0c7'];
+
+// ── SVG Chart Utilities ──
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v);
+  return el;
+}
+
+function krNumber(n) {
+  if (Math.abs(n) >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, '') + '억';
+  if (Math.abs(n) >= 1e4) return (n / 1e4).toFixed(0) + '만';
+  return n.toLocaleString('ko-KR');
+}
+
+function fmtMil(v) {
+  const n = v / 1e6;
+  if (Math.abs(n) >= 1000) return (n / 1000).toFixed(1) + 'B';
+  return n.toFixed(1) + 'M';
+}
+
+function truncText(str, maxLen) {
+  if (!str) return '';
+  return str.length > maxLen ? str.slice(0, maxLen) + '..' : str;
+}
+
+// ── Donut Chart ──
+function drawDonut(container, data, opts) {
+  // data: [{label, value, color}]
+  opts = opts || {};
+  const size = opts.size || 260;
+  const cx = size / 2, cy = size / 2;
+  const outerR = (size / 2) - 10;
+  const innerR = outerR * 0.58;
+  const total = data.reduce((s, d) => s + d.value, 0);
+  if (total === 0) { container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;">데이터 없음</div>'; return; }
+
+  const svg = svgEl('svg', { width: size, height: size, viewBox: `0 0 ${size} ${size}` });
+  let cumAngle = -Math.PI / 2;
+
+  data.forEach((d, i) => {
+    const sliceAngle = (d.value / total) * Math.PI * 2;
+    const startAngle = cumAngle;
+    const endAngle = cumAngle + sliceAngle;
+    cumAngle = endAngle;
+
+    const x1 = cx + outerR * Math.cos(startAngle);
+    const y1 = cy + outerR * Math.sin(startAngle);
+    const x2 = cx + outerR * Math.cos(endAngle);
+    const y2 = cy + outerR * Math.sin(endAngle);
+    const ix1 = cx + innerR * Math.cos(endAngle);
+    const iy1 = cy + innerR * Math.sin(endAngle);
+    const ix2 = cx + innerR * Math.cos(startAngle);
+    const iy2 = cy + innerR * Math.sin(startAngle);
+    const large = sliceAngle > Math.PI ? 1 : 0;
+
+    const pathD = `M ${x1} ${y1} A ${outerR} ${outerR} 0 ${large} 1 ${x2} ${y2} L ${ix1} ${iy1} A ${innerR} ${innerR} 0 ${large} 0 ${ix2} ${iy2} Z`;
+    const path = svgEl('path', { d: pathD, fill: d.color, opacity: '0.88' });
+    path.style.transition = 'opacity 0.15s';
+    path.addEventListener('mouseenter', () => path.setAttribute('opacity', '1'));
+    path.addEventListener('mouseleave', () => path.setAttribute('opacity', '0.88'));
+    svg.appendChild(path);
+  });
+
+  // Center text
+  const centerText = svgEl('text', { x: cx, y: cy - 6, 'text-anchor': 'middle', 'font-size': '12', fill: 'rgba(0,0,0,0.45)', 'font-weight': '600' });
+  centerText.textContent = '합계';
+  svg.appendChild(centerText);
+  const centerVal = svgEl('text', { x: cx, y: cy + 14, 'text-anchor': 'middle', 'font-size': '16', fill: '#1d1d1f', 'font-weight': '800' });
+  centerVal.textContent = commas((total / 1e6).toFixed(1)) + 'M';
+  svg.appendChild(centerVal);
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.className = 'chart-legend';
+  data.forEach(d => {
+    const pct = (d.value / total * 100).toFixed(1);
+    legend.innerHTML += `<div class="chart-legend-item"><span class="chart-legend-dot" style="background:${d.color}"></span>${truncText(d.label, 12)} ${pct}%</div>`;
+  });
+  container.appendChild(legend);
+}
+
+// ── Bar Chart (vertical) ──
+function drawBarChart(container, labels, values, opts) {
+  opts = opts || {};
+  const W = opts.width || Math.min(container.clientWidth - 48, 1040) || 900;
+  const H = opts.height || 300;
+  const padL = opts.padL || 70, padR = 24, padT = 20, padB = 60;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const maxVal = Math.max(...values, 1);
+  const barW = Math.min(Math.max(chartW / labels.length - 8, 12), 48);
+  const gap = (chartW - barW * labels.length) / (labels.length + 1);
+  const color = opts.color || CHART_COLORS[0];
+
+  const svg = svgEl('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}` });
+
+  // Grid lines
+  const gridCount = 5;
+  for (let i = 0; i <= gridCount; i++) {
+    const y = padT + chartH - (chartH / gridCount) * i;
+    const val = (maxVal / gridCount) * i;
+    svg.appendChild(svgEl('line', { x1: padL, y1: y, x2: W - padR, y2: y, stroke: 'rgba(0,0,0,0.06)', 'stroke-width': '1' }));
+    const label = svgEl('text', { x: padL - 8, y: y + 4, 'text-anchor': 'end', 'font-size': '11', fill: 'rgba(0,0,0,0.4)' });
+    label.textContent = fmtMil(val * 1e6);
+    svg.appendChild(label);
+  }
+
+  // Bars
+  labels.forEach((lbl, i) => {
+    const x = padL + gap + i * (barW + gap);
+    const barH = (values[i] / maxVal) * chartH;
+    const y = padT + chartH - barH;
+
+    const rect = svgEl('rect', { x, y, width: barW, height: Math.max(barH, 1), rx: '3', fill: color, opacity: '0.82' });
+    rect.style.transition = 'opacity 0.15s';
+    rect.addEventListener('mouseenter', () => rect.setAttribute('opacity', '1'));
+    rect.addEventListener('mouseleave', () => rect.setAttribute('opacity', '0.82'));
+    svg.appendChild(rect);
+
+    // Value on top
+    if (barH > 20) {
+      const valText = svgEl('text', { x: x + barW / 2, y: y - 6, 'text-anchor': 'middle', 'font-size': '10', fill: 'rgba(0,0,0,0.55)', 'font-weight': '600' });
+      valText.textContent = commas((values[i] / 1e6).toFixed(1));
+      svg.appendChild(valText);
+    }
+
+    // X label
+    const xLabel = svgEl('text', { x: x + barW / 2, y: H - padB + 18, 'text-anchor': 'middle', 'font-size': '11', fill: 'rgba(0,0,0,0.5)', 'font-weight': '500' });
+    xLabel.textContent = lbl;
+    svg.appendChild(xLabel);
+  });
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+}
+
+// ── Horizontal Bar Chart ──
+function drawHBarChart(container, data, opts) {
+  // data: [{label, value, color?}]
+  opts = opts || {};
+  const maxItems = data.length;
+  const barH = opts.barHeight || 26;
+  const gap = opts.gap || 8;
+  const padL = opts.padL || 180, padR = 80, padT = 10, padB = 10;
+  const W = opts.width || Math.min(container.clientWidth - 48, 1040) || 900;
+  const H = padT + padB + maxItems * (barH + gap);
+  const chartW = W - padL - padR;
+  const maxVal = Math.max(...data.map(d => d.value), 1);
+
+  const svg = svgEl('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}` });
+
+  data.forEach((d, i) => {
+    const y = padT + i * (barH + gap);
+    const w = (d.value / maxVal) * chartW;
+    const color = d.color || CHART_COLORS[i % CHART_COLORS.length];
+
+    // Label
+    const label = svgEl('text', { x: padL - 10, y: y + barH / 2 + 4, 'text-anchor': 'end', 'font-size': '12', fill: '#1d1d1f' });
+    label.textContent = truncText(d.label, 20);
+    svg.appendChild(label);
+
+    // Bar
+    const rect = svgEl('rect', { x: padL, y, width: Math.max(w, 2), height: barH, rx: '4', fill: color, opacity: '0.78' });
+    rect.style.transition = 'opacity 0.15s';
+    rect.addEventListener('mouseenter', () => rect.setAttribute('opacity', '1'));
+    rect.addEventListener('mouseleave', () => rect.setAttribute('opacity', '0.78'));
+    svg.appendChild(rect);
+
+    // Value
+    const valText = svgEl('text', { x: padL + Math.max(w, 2) + 8, y: y + barH / 2 + 4, 'text-anchor': 'start', 'font-size': '11', fill: 'rgba(0,0,0,0.55)', 'font-weight': '600' });
+    valText.textContent = commas((d.value / 1e6).toFixed(1)) + 'M';
+    svg.appendChild(valText);
+  });
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+}
+
+// ── Multi-Line Chart ──
+function drawLineChart(container, seriesArr, xLabels, opts) {
+  // seriesArr: [{name, values:[], color}]
+  opts = opts || {};
+  const W = opts.width || Math.min(container.clientWidth - 48, 1040) || 900;
+  const H = opts.height || 320;
+  const padL = 70, padR = 24, padT = 20, padB = 50;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+
+  let maxVal = 0;
+  seriesArr.forEach(s => { s.values.forEach(v => { if (v > maxVal) maxVal = v; }); });
+  if (maxVal === 0) maxVal = 1;
+
+  const svg = svgEl('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}` });
+  const n = xLabels.length;
+
+  // Grid
+  const gridCount = 5;
+  for (let i = 0; i <= gridCount; i++) {
+    const y = padT + chartH - (chartH / gridCount) * i;
+    const val = (maxVal / gridCount) * i;
+    svg.appendChild(svgEl('line', { x1: padL, y1: y, x2: W - padR, y2: y, stroke: 'rgba(0,0,0,0.06)', 'stroke-width': '1' }));
+    const label = svgEl('text', { x: padL - 8, y: y + 4, 'text-anchor': 'end', 'font-size': '11', fill: 'rgba(0,0,0,0.4)' });
+    label.textContent = fmtMil(val * 1e6);
+    svg.appendChild(label);
+  }
+
+  // X labels
+  xLabels.forEach((lbl, i) => {
+    const x = padL + (chartW / (n - 1 || 1)) * i;
+    const xLabel = svgEl('text', { x, y: H - padB + 20, 'text-anchor': 'middle', 'font-size': '11', fill: 'rgba(0,0,0,0.5)' });
+    xLabel.textContent = lbl;
+    svg.appendChild(xLabel);
+  });
+
+  // Lines
+  seriesArr.forEach((series) => {
+    const points = series.values.map((v, i) => {
+      const x = padL + (chartW / (n - 1 || 1)) * i;
+      const y = padT + chartH - (v / maxVal) * chartH;
+      return { x, y };
+    });
+
+    // Line path
+    let d = points.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y).join(' ');
+    svg.appendChild(svgEl('path', { d, fill: 'none', stroke: series.color, 'stroke-width': '2.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+
+    // Dots
+    points.forEach((p, i) => {
+      if (series.values[i] > 0) {
+        svg.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: '4', fill: '#fff', stroke: series.color, 'stroke-width': '2' }));
+      }
+    });
+  });
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.className = 'chart-legend';
+  seriesArr.forEach(s => {
+    legend.innerHTML += `<div class="chart-legend-item"><span class="chart-legend-dot" style="background:${s.color}"></span>${s.name}</div>`;
+  });
+  container.appendChild(legend);
+}
+
+
 // ── Dropzone ──
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('file-input');
@@ -280,7 +559,6 @@ function handleFile(file) {
 }
 
 function parseSheet(wb) {
-  // Find sheet by name pattern
   let targetSheet = null;
   for (const name of wb.SheetNames) {
     if (name.indexOf('YTD raw') >= 0 || name.indexOf('YTD Raw') >= 0) {
@@ -293,17 +571,16 @@ function parseSheet(wb) {
   const data = XLSX.utils.sheet_to_json(wb.Sheets[targetSheet], { header: 1, defval: null });
   if (data.length < 2) return null;
 
-  // Column indices (0-based)
-  const COL_CHANNEL   = 4;  // 유통경로명
-  const COL_PARTNER   = 8;  // 판매처명
-  const COL_SHIP_DATE = 16; // 출고일
-  const COL_PROD_CODE = 22; // 상품코드
-  const COL_PROD_NAME = 23; // 상품명
-  const COL_ORDER_QTY = 24; // 오더수량
-  const COL_BILL_QTY  = 39; // 청구수량
-  const COL_AMOUNT    = 46; // 대금청구금액(KRW)
-  const COL_IP        = 57; // IP(대)
-  const COL_MONTH     = 68; // 월
+  const COL_CHANNEL   = 4;
+  const COL_PARTNER   = 8;
+  const COL_SHIP_DATE = 16;
+  const COL_PROD_CODE = 22;
+  const COL_PROD_NAME = 23;
+  const COL_ORDER_QTY = 24;
+  const COL_BILL_QTY  = 39;
+  const COL_AMOUNT    = 46;
+  const COL_IP        = 57;
+  const COL_MONTH     = 68;
 
   const rows = [];
   for (let i = 1; i < data.length; i++) {
@@ -362,6 +639,9 @@ function generateReport() {
   document.getElementById('kpi-qty').innerHTML = totalQty.toLocaleString() + '<span class="unit">건</span>';
   document.getElementById('kpi-partners').innerHTML = partnerSet.size + '<span class="unit">개</span>';
 
+  // Monthly Sales Trend Bar Chart (all months)
+  renderMonthlyTrend();
+
   // Tab 0: 채널별 매출
   renderChannelTable(filtered, totalAmount);
 
@@ -373,6 +653,26 @@ function generateReport() {
 
   document.getElementById('upload-section').style.display = 'none';
   document.getElementById('report').style.display = 'block';
+}
+
+function renderMonthlyTrend() {
+  const monthAmounts = {};
+  for (const r of allRows) {
+    if (!r.month || !availableMonths.includes(r.month)) continue;
+    monthAmounts[r.month] = (monthAmounts[r.month] || 0) + r.amount;
+  }
+
+  const labels = availableMonths.map(m => MONTH_LABEL(m));
+  const values = availableMonths.map(m => (monthAmounts[m] || 0) / 1e6);
+
+  const section = document.getElementById('monthly-trend-section');
+  section.style.display = '';
+  const chartContainer = document.getElementById('monthly-trend-chart');
+
+  // Use setTimeout to let container get its width
+  setTimeout(() => {
+    drawBarChart(chartContainer, labels, values.map(v => v * 1e6), { color: CHART_COLORS[0] });
+  }, 10);
 }
 
 function renderChannelTable(filtered, totalAmount) {
@@ -407,11 +707,26 @@ function renderChannelTable(filtered, totalAmount) {
     <td>100%</td>
     <td>${new Set(filtered.map(r => r.partner).filter(Boolean)).size}</td>
   </tr>`;
+
+  // Donut chart
+  const donutData = list.slice(0, 8).map((item, i) => ({
+    label: item.name,
+    value: item.amount,
+    color: CHART_COLORS[i % CHART_COLORS.length]
+  }));
+  // Group remaining as "기타"
+  if (list.length > 8) {
+    const restAmt = list.slice(8).reduce((s, r) => s + r.amount, 0);
+    donutData.push({ label: '기타', value: restAmt, color: '#ccc' });
+  }
+  setTimeout(() => {
+    drawDonut(document.getElementById('channel-donut-chart'), donutData);
+  }, 10);
 }
 
 function renderIPTrend() {
   const ytdMonths = availableMonths;
-  const ipMonthMap = {}; // { ip: { month: amount } }
+  const ipMonthMap = {};
 
   for (const r of allRows) {
     if (!r.month || !ytdMonths.includes(r.month)) continue;
@@ -451,6 +766,19 @@ function renderIPTrend() {
     ${ytdMonths.map(m => `<td class="ytd-col">${commas((monthTotals[m] / 1e6).toFixed(1))}</td>`).join('')}
     <td class="total-val ytd-col">${commas((grandTotal / 1e6).toFixed(1))}</td>
   </tr>`;
+
+  // IP Trend Line Chart (top 7)
+  const topIPs = rows.slice(0, 7);
+  const xLabels = ytdMonths.map(m => MONTH_LABEL(m));
+  const seriesArr = topIPs.map((ip, i) => ({
+    name: ip.name,
+    values: ytdMonths.map(m => (ip.monthData[m] || 0) / 1e6),
+    color: CHART_COLORS[i % CHART_COLORS.length]
+  }));
+
+  setTimeout(() => {
+    drawLineChart(document.getElementById('ip-trend-chart'), seriesArr, xLabels);
+  }, 10);
 }
 
 function renderProductRanking(filtered) {
@@ -475,6 +803,17 @@ function renderProductRanking(filtered) {
     <td>${item.qty.toLocaleString()}</td>
     <td>${commas((item.amount / 1e6).toFixed(1))}</td>
   </tr>`).join('');
+
+  // Horizontal bar chart for top 20
+  const top20 = list.slice(0, 20).map((item, i) => ({
+    label: (i + 1) + '. ' + truncText(item.name, 16),
+    value: item.amount,
+    color: CHART_COLORS[i % CHART_COLORS.length]
+  }));
+
+  setTimeout(() => {
+    drawHBarChart(document.getElementById('product-bar-chart'), top20);
+  }, 10);
 }
 
 // ── Utils ──
@@ -488,6 +827,10 @@ function resetUpload() {
   document.getElementById('report').style.display = 'none';
   document.getElementById('upload-section').style.display = 'block';
 }
+</script>
+
+<script>
+
 </script>
 
 <script>
