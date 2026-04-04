@@ -158,6 +158,16 @@
     padding: 2px 7px; border-radius: 100px; font-size: 10px; font-weight: 600;
     background: rgba(0,113,227,0.08); border: 1px solid rgba(0,113,227,0.15); color: #0071e3;
   }
+  .sp-svc-tag.live-tag {
+    background: rgba(52,199,89,0.12); border-color: rgba(52,199,89,0.3); color: #34c759;
+    animation: livePulse 2s ease-in-out infinite;
+  }
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  .sp-service.live { border-left: 2px solid #34c759; }
+  .sp-service.live:hover { background: rgba(52,199,89,0.04); }
 
   .sp-chat {
     padding: 14px 20px; border-top: 1px solid var(--divider);
@@ -610,33 +620,32 @@
     commerce: {
       character: 'commerce', name: '커머스', sub: '커머스팀 AI 에이전트 · 온라인',
       services: [
-        { icon: '🛍', name: '세일즈 대시보드', desc: '온/오프 채널별 매출·셀스루 실시간 현황', tags: ['셀스루','채널분석'] },
-        { icon: '📦', name: '상품 현황 조회', desc: 'IP별 판매 현황 및 재고 소진율 확인', tags: ['재고','OTB','소진율'] },
-        { icon: '🤖', name: '판매 예측', desc: '과거 데이터 기반 팝업 예상 매출 예측', tags: ['AI예측','팝업'] },
+        { icon: '🛍', name: '세일즈 대시보드', desc: '채널별 매출·IP 트렌드·상품 랭킹 통합 대시보드', tags: ['채널분석','IP트렌드','랭킹'], page: 'commerce-dashboard.html', live: true },
+        { icon: '🛒', name: '쇼핑 메모', desc: '고객 쇼핑 패턴 메모 및 추천 자동화', tags: ['쇼핑메모','추천'], page: 'shopping-memo.html', live: true },
       ]
     },
     offline: {
-      character: 'offline', name: '오프라인', sub: '오프라인 세일즈 AI 에이전트 · 바쁨',
+      character: 'offline', name: '오프라인', sub: '오프라인 세일즈 AI 에이전트 · 온라인',
       services: [
-        { icon: '🏬', name: '팝업 현황 관리', desc: '진행중·예정 팝업 일정, 목표 대비 현황', tags: ['팝업일정','매출목표'] },
-        { icon: '📋', name: '일일 판매 리포트', desc: '매장별 일별 판매 현황 자동 집계 및 공유', tags: ['자동리포트','일별'] },
-        { icon: '🎯', name: '프로모션 분석', desc: '프로모션별 효과 측정 및 다음 행사 제안', tags: ['프로모션','효과분석'] },
+        { icon: '🏬', name: '오프라인 대시보드', desc: '매장 재고·일별 판매·에이징 할인 제안 통합 대시보드', tags: ['매장재고','일별판매','할인제안'], page: 'offline-dashboard.html', live: true },
+        { icon: '📊', name: '팝업 대시보드', desc: '팝업 매장 현황 및 실적 관리', tags: ['팝업','현황'], page: 'popup_dashboard.html', live: true },
       ]
     },
     md: {
       character: 'md', name: 'MD', sub: 'MD팀 AI 에이전트 · 온라인',
       services: [
-        { icon: '📊', name: '발주량 예측', desc: 'IP·카테고리·특장점 입력 시 최적 발주량 산출', tags: ['AI예측','발주','OTB'] },
-        { icon: '📦', name: '재고 현황 분석', desc: 'SKU별 소진율, 이관 필요 품목 자동 감지', tags: ['재고','SKU','이관'] },
-        { icon: '📋', name: 'MD 업무 자동화', desc: '상품 등록, 상세페이지 초안 자동 생성', tags: ['상품등록','초안'] },
+        { icon: '📦', name: '재고 현황·에이징', desc: 'SKU별 재고 현황, 에이징 분석, 이관 필요 품목 자동 감지', tags: ['재고','에이징','이관'], page: 'md-inventory.html', live: true },
+        { icon: '📊', name: '발주 추천', desc: 'IP별 소진율 분석 → 발주 시점·수량 자동 추천', tags: ['발주','소진율','추천'], page: 'md-order-forecast.html', live: true },
+        { icon: '🤖', name: '판매 예측', desc: '과거 데이터 기반 예상 판매량 예측', tags: ['AI예측','판매'], page: 'order-prediction.html', live: true },
       ]
     },
     b2b: {
       character: 'b2b', name: 'B2B', sub: 'B2B팀 AI 에이전트 · 온라인',
       services: [
-        { icon: '📄', name: '제안서 자동화', desc: '거래처 정보 입력 시 맞춤 제안서 초안 생성', tags: ['제안서','자동화'] },
-        { icon: '🤝', name: '거래처 관리', desc: '계약 현황, 미팅 기록, 후속 알림 자동화', tags: ['CRM','계약','알림'] },
-        { icon: '📈', name: 'B2B 매출 현황', desc: '거래처별 월별 매출 현황 및 성장률 추적', tags: ['매출','트래킹'] },
+        { icon: '📈', name: '매출 리포트', desc: 'SAP 데이터 → 월별·파트너별·IP별 자동 집계', tags: ['매출','리포트','SAP'], page: 'b2b-sales-report.html', live: true },
+        { icon: '📄', name: '발주 카탈로그', desc: 'SAP 엑셀 → 이미지 포함 카탈로그 자동 생성·공유', tags: ['발주','카탈로그'], page: 'b2b-order-upload.html', live: true },
+        { icon: '💰', name: '공헌이익 분석', desc: '파트너×IP별 매출·원가·로열티·공헌이익 분석', tags: ['공헌이익','이익률'], page: 'b2b-profit-analysis.html', live: true },
+        { icon: '🎯', name: '목표 vs 실적', desc: 'Forecast 대비 실적 달성률 파트너·IP별 비교', tags: ['목표','달성률','Fcst'], page: 'b2b-target-actual.html', live: true },
       ]
     },
     cx: {
@@ -681,11 +690,14 @@
     document.getElementById('spChatInput').placeholder = `${d.name}에게 물어보세요...`;
 
     document.getElementById('spServices').innerHTML = d.services.map(s => `
-      <div class="sp-service">
+      <div class="sp-service${s.live ? ' live' : ''}" ${s.page ? `onclick="window.location.href='${s.page}'" style="cursor:pointer"` : ''}>
         <div class="sp-svc-icon">${s.icon}</div>
         <div class="sp-svc-name">${s.name}</div>
         <div class="sp-svc-desc">${s.desc}</div>
-        <div class="sp-svc-tags">${s.tags.map(t => `<span class="sp-svc-tag">${t}</span>`).join('')}</div>
+        <div class="sp-svc-tags">
+          ${s.live ? '<span class="sp-svc-tag live-tag">LIVE</span>' : ''}
+          ${s.tags.map(t => `<span class="sp-svc-tag">${t}</span>`).join('')}
+        </div>
       </div>
     `).join('');
 
