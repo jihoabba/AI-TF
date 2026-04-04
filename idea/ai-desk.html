@@ -683,7 +683,8 @@
     document.querySelectorAll('.char-wrap').forEach(c => c.classList.remove('active'));
     document.getElementById('char-' + team).classList.add('active');
 
-    const imgFile = d.character === 'logistics' ? 'logistic' : d.character;
+    const charToFile = { logistics: 'logistic', marketing: 'mkt' };
+    const imgFile = charToFile[d.character] || d.character;
     document.getElementById('spAvatar').innerHTML = `<img src="assets/characters/${imgFile}.png" data-character="${d.character}" style="width:36px;height:36px;object-fit:contain;mix-blend-mode:multiply;">`;
     document.getElementById('spName').textContent = d.name;
     document.getElementById('spSub').textContent = d.sub;
