@@ -390,7 +390,7 @@ function drawMonthlyTrend(containerId, selMonth) {
   if (fiscalMonths.length === 0) return;
 
   const maxVal = Math.max(...Object.values(monthSales));
-  const W = container.parentElement.clientWidth - 48 || 700;
+  const W = Math.max(container.parentElement.clientWidth - 48, 700);
   const barW = Math.min(40, (W - 60) / fiscalMonths.length - 8);
   const H = 220;
   const chartW = fiscalMonths.length * (barW + 8) + 60;
@@ -531,10 +531,10 @@ function generateReport() {
   reportData = { selectedMonth, totalSales, totalProfit, ytdSales, partnerList, ipList,
                  ytdIpMatrix, ytdPartnerMatrix, ytdMonths, prevSales };
 
-  renderReport(reportData);
   document.getElementById('upload-section').style.display = 'none';
   document.getElementById('report').style.display = 'block';
   document.getElementById('dl-btn').style.display = '';
+  renderReport(reportData);
 }
 
 function renderReport(d) {

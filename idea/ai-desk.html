@@ -169,29 +169,105 @@
   .sp-service.live { border-left: 2px solid #34c759; }
   .sp-service.live:hover { background: rgba(52,199,89,0.04); }
 
-  .sp-chat {
+  /* ── CEO Chatbot ── */
+  .ceo-chatbot {
+    position: fixed; inset: 0; z-index: 300;
+    display: none;
+    align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: fadeIn 0.2s ease;
+  }
+  .ceo-chatbot.show { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .chat-container {
+    width: 100%; max-width: 680px; height: 80vh; max-height: 700px;
+    background: #fff; border-radius: 20px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+
+  .chat-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--divider);
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(245,245,247,0.5);
+  }
+  .chat-header-avatar { width: 40px; height: 40px; }
+  .chat-header-avatar img { width: 40px; height: 40px; object-fit: contain; mix-blend-mode: multiply; }
+  .chat-header-info { flex: 1; }
+  .chat-header-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  .chat-header-sub { font-size: 11px; color: var(--text-2); }
+  .chat-header-close {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(0,0,0,0.05); border: 1px solid var(--divider);
+    color: var(--text-2); font-size: 12px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .chat-header-close:hover { background: rgba(0,0,0,0.1); color: var(--text); }
+
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 20px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .chat-msg { display: flex; gap: 10px; max-width: 90%; }
+  .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .chat-msg-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; overflow: hidden; }
+  .chat-msg-avatar img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+  .chat-msg.user .chat-msg-avatar { background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+
+  .chat-msg-body {
+    padding: 10px 14px; border-radius: 16px;
+    font-size: 13px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .chat-msg.assistant .chat-msg-body { background: var(--panel-surface); color: var(--text); border-bottom-left-radius: 4px; }
+  .chat-msg.user .chat-msg-body { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+
+  .chat-msg-body p { margin-bottom: 8px; }
+  .chat-msg-body p:last-child { margin-bottom: 0; }
+  .chat-msg-body strong { font-weight: 700; }
+
+  .chat-typing { display: flex; gap: 4px; padding: 4px 0; }
+  .chat-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); animation: typing 1.2s ease-in-out infinite; }
+  .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+
+  .chat-input-area {
     padding: 14px 20px; border-top: 1px solid var(--divider);
     display: flex; gap: 8px; align-items: center;
-    background: var(--panel-surface);
+    background: rgba(245,245,247,0.5);
   }
-  .sp-chat-input {
-    flex: 1; height: 36px; padding: 0 14px;
-    background: #ffffff;
-    border: 1px solid var(--divider);
+  .chat-input {
+    flex: 1; height: 40px; padding: 0 16px;
+    background: #fff; border: 1px solid var(--divider);
     border-radius: 100px;
-    color: var(--text); font-size: 12px; font-family: inherit; outline: none;
+    color: var(--text); font-size: 13px; font-family: inherit; outline: none;
     transition: border-color 0.15s;
   }
-  .sp-chat-input::placeholder { color: var(--text-3); }
-  .sp-chat-input:focus { border-color: rgba(0,113,227,0.5); }
-  .sp-chat-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: #0071e3; border: none; color: #fff;
-    font-size: 14px; cursor: pointer;
+  .chat-input::placeholder { color: var(--text-3); }
+  .chat-input:focus { border-color: rgba(0,113,227,0.5); }
+  .chat-send {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--accent); border: none; color: #fff;
+    font-size: 16px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; transition: opacity 0.15s;
   }
-  .sp-chat-btn:hover { opacity: 0.85; }
+  .chat-send:hover { opacity: 0.85; }
+  .chat-send:disabled { background: var(--divider); cursor: not-allowed; }
+
+  @media (max-width: 768px) {
+    .chat-container { height: 95vh; max-height: none; border-radius: 14px; margin: 8px; }
+  }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -479,9 +555,33 @@
         <button class="sp-close" onclick="closePanel()">✕</button>
       </div>
       <div class="sp-services" id="spServices"></div>
-      <div class="sp-chat">
-        <input class="sp-chat-input" type="text" id="spChatInput" placeholder="무엇이 궁금하세요?">
-        <button class="sp-chat-btn">↑</button>
+    </div>
+  </div>
+
+  <!-- CEO Chatbot -->
+  <div class="ceo-chatbot" id="ceoChatbot">
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="chat-header-avatar"><img src="assets/characters/ceo.png"></div>
+        <div class="chat-header-info">
+          <div class="chat-header-name">AI CEO</div>
+          <div class="chat-header-sub">LINE FRIENDS SQUARE 경영 AI 어시스턴트</div>
+        </div>
+        <button class="chat-header-close" onclick="closeChatbot()">✕</button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg assistant">
+          <div class="chat-msg-avatar"><img src="assets/characters/ceo.png"></div>
+          <div class="chat-msg-body">안녕하세요, LINE FRIENDS SQUARE AI CEO입니다.
+
+전사 매출 현황, 부서별 실적, IP별 트렌드, 재고 분석 등 AI DESK에 올라온 모든 데이터를 기반으로 경영 관점의 인사이트를 드릴 수 있습니다.
+
+무엇이 궁금하신가요?</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input class="chat-input" type="text" id="chatInput" placeholder="경영 관련 질문을 입력하세요..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}">
+        <button class="chat-send" id="chatSendBtn" onclick="sendMessage()">↑</button>
       </div>
     </div>
   </div>
@@ -602,13 +702,6 @@
 
 <script>
   const data = {
-    ceo: {
-      character: 'ceo', name: '대표', sub: 'CEO · 온라인',
-      services: [
-        { icon: '📋', name: '대표 지시사항', desc: 'TF 방향 및 이번 주 대표 지시사항 확인', tags: ['방향','우선순위','TF'] },
-        { icon: '📊', name: '주간 브리핑', desc: '전사 주요 KPI 및 이슈 자동 요약 리포트', tags: ['KPI','브리핑','주간'] },
-      ]
-    },
     marketing: {
       character: 'marketing', name: '마케팅', sub: '마케팅팀 AI 에이전트 · 온라인',
       services: [
@@ -677,9 +770,17 @@
   let current = null;
 
   function openPanel(team) {
+    // CEO는 챗봇으로
+    if (team === 'ceo') {
+      closePanel();
+      openChatbot();
+      return;
+    }
+
     const d = data[team];
     if (!d) return;
 
+    closeChatbot();
     document.querySelectorAll('.char-wrap').forEach(c => c.classList.remove('active'));
     document.getElementById('char-' + team).classList.add('active');
 
@@ -688,7 +789,6 @@
     document.getElementById('spAvatar').innerHTML = `<img src="assets/characters/${imgFile}.png" data-character="${d.character}" style="width:36px;height:36px;object-fit:contain;mix-blend-mode:multiply;">`;
     document.getElementById('spName').textContent = d.name;
     document.getElementById('spSub').textContent = d.sub;
-    document.getElementById('spChatInput').placeholder = `${d.name}에게 물어보세요...`;
 
     document.getElementById('spServices').innerHTML = d.services.map(s => `
       <div class="sp-service${s.live ? ' live' : ''}" ${s.page ? `onclick="window.location.href='${s.page}'" style="cursor:pointer"` : ''}>
@@ -712,6 +812,186 @@
     document.getElementById('servicePanel').classList.remove('show');
     document.querySelectorAll('.char-wrap').forEach(c => c.classList.remove('active'));
     current = null;
+  }
+
+  // ── CEO Chatbot ──
+  let chatHistory = [];
+  let dashboardData = null;
+  let isStreaming = false;
+
+  function openChatbot() {
+    document.querySelectorAll('.char-wrap').forEach(c => c.classList.remove('active'));
+    document.getElementById('char-ceo').classList.add('active');
+    document.getElementById('ceoChatbot').classList.add('show');
+    document.getElementById('chatInput').focus();
+
+    if (!dashboardData) loadDashboardData();
+  }
+
+  function closeChatbot() {
+    document.getElementById('ceoChatbot').classList.remove('show');
+    document.querySelectorAll('.char-wrap').forEach(c => c.classList.remove('active'));
+  }
+
+  async function loadDashboardData() {
+    const files = [
+      'b2b-sales-report', 'b2b-profit-analysis', 'b2b-target-actual',
+      'commerce-dashboard', 'offline-inventory', 'offline-sales',
+      'md-inventory', 'md-order-forecast'
+    ];
+    dashboardData = {};
+    for (const f of files) {
+      try {
+        const res = await fetch(`data/${f}.json`);
+        if (res.ok) {
+          const raw = await res.json();
+          dashboardData[f] = summarizeData(f, raw);
+        }
+      } catch(e) { /* skip */ }
+    }
+  }
+
+  function summarizeData(name, raw) {
+    // 데이터를 요약하여 토큰 절약
+    if (Array.isArray(raw)) {
+      const sample = raw.slice(0, 30);
+      return { totalRows: raw.length, sample, keys: raw[0] ? Object.keys(raw[0]) : [] };
+    }
+    if (raw && typeof raw === 'object') {
+      const summary = {};
+      for (const [k, v] of Object.entries(raw)) {
+        if (Array.isArray(v)) {
+          summary[k] = { totalRows: v.length, sample: v.slice(0, 20), keys: v[0] ? Object.keys(v[0]) : [] };
+        } else {
+          summary[k] = v;
+        }
+      }
+      return summary;
+    }
+    return raw;
+  }
+
+  function addMessage(role, text) {
+    const msgs = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = `chat-msg ${role}`;
+
+    if (role === 'assistant') {
+      div.innerHTML = `
+        <div class="chat-msg-avatar"><img src="assets/characters/ceo.png"></div>
+        <div class="chat-msg-body">${formatMsg(text)}</div>`;
+    } else {
+      div.innerHTML = `
+        <div class="chat-msg-avatar">U</div>
+        <div class="chat-msg-body">${escapeHtml(text)}</div>`;
+    }
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return div;
+  }
+
+  function addTypingIndicator() {
+    const msgs = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-msg assistant';
+    div.id = 'typingIndicator';
+    div.innerHTML = `
+      <div class="chat-msg-avatar"><img src="assets/characters/ceo.png"></div>
+      <div class="chat-msg-body"><div class="chat-typing"><span></span><span></span><span></span></div></div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function removeTypingIndicator() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  function escapeHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function formatMsg(text) {
+    return text
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  }
+
+  async function sendMessage() {
+    if (isStreaming) return;
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    addMessage('user', text);
+    chatHistory.push({ role: 'user', content: text });
+
+    addTypingIndicator();
+    isStreaming = true;
+    document.getElementById('chatSendBtn').disabled = true;
+
+    try {
+      const systemPrompt = buildSystemPrompt();
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system: systemPrompt,
+          messages: chatHistory.slice(-20)
+        })
+      });
+
+      removeTypingIndicator();
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const errMsg = err.error?.message || `API 오류 (${res.status})`;
+        addMessage('assistant', `오류가 발생했습니다: ${errMsg}`);
+        chatHistory.pop();
+        return;
+      }
+
+      const result = await res.json();
+      const reply = result.content?.[0]?.text || '응답을 받지 못했습니다.';
+      addMessage('assistant', reply);
+      chatHistory.push({ role: 'assistant', content: reply });
+
+    } catch (e) {
+      removeTypingIndicator();
+      addMessage('assistant', `네트워크 오류: ${e.message}`);
+      chatHistory.pop();
+    } finally {
+      isStreaming = false;
+      document.getElementById('chatSendBtn').disabled = false;
+    }
+  }
+
+  function buildSystemPrompt() {
+    let prompt = `당신은 LINE FRIENDS SQUARE의 AI CEO 어시스턴트입니다.
+경영진의 관점에서 전사 데이터를 종합 분석하여 인사이트를 제공합니다.
+
+당신의 역할:
+- 전사 매출, 수익성, 재고, 채널별 성과를 종합적으로 파악하고 경영 관점의 판단을 제시
+- 숫자 기반의 구체적인 분석과 함께 실행 가능한 제안을 제공
+- 부서 간 시너지, 리스크, 기회요인을 크로스 분석
+- 간결하고 핵심적인 답변 (불필요한 수식어 최소화)
+- 금액 단위는 mil (백만원) 사용
+
+답변 시 유의사항:
+- 데이터에 근거한 팩트 기반 답변
+- 경영진이 의사결정에 활용할 수 있는 수준의 인사이트
+- 필요시 표 형태로 정리
+- 한국어로 답변
+
+아래는 AI DESK에 연동된 실제 대시보드 데이터입니다:\n\n`;
+
+    if (dashboardData) {
+      for (const [name, summary] of Object.entries(dashboardData)) {
+        prompt += `\n=== ${name} ===\n${JSON.stringify(summary, null, 0).slice(0, 3000)}\n`;
+      }
+    }
+
+    return prompt;
   }
 </script>
 

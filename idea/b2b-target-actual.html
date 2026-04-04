@@ -560,14 +560,14 @@ function generateReport() {
     actualProfit: actMonth.reduce((s, r) => s + r.profit, 0),
   };
 
+  document.getElementById('upload-section').style.display = 'none';
+  document.getElementById('report').style.display = 'block';
+
   // Charts
   renderTargetCharts(achieveRate, partnerList);
 
   renderTable('tbl-partner', partnerList, totals);
   renderTable('tbl-ip', ipList, totals);
-
-  document.getElementById('upload-section').style.display = 'none';
-  document.getElementById('report').style.display = 'block';
 }
 
 function groupBy(rows, key) {
@@ -656,14 +656,19 @@ function resetUpload() {
   fetch('data/b2b-target-actual.json').then(r => r.json()).then(data => {
     fcstRows = data.fcst;
     actualRows = data.actual;
-    const monthSet = new Set();
-    fcstRows.forEach(r => { if (r.month > 0) monthSet.add(r.month); });
-    actualRows.forEach(r => { if (r.month > 0) monthSet.add(r.month); });
-    availableMonths = [1,2,3,4,5,6,7,8,9,10,11,12].filter(m => monthSet.has(m));
+    const fcstMonthSet = new Set();
+    const actualMonthSet = new Set();
+    fcstRows.forEach(r => { if (r.month > 0) fcstMonthSet.add(r.month); });
+    actualRows.forEach(r => { if (r.month > 0) actualMonthSet.add(r.month); });
+    const allMonthSet = new Set([...fcstMonthSet, ...actualMonthSet]);
+    availableMonths = [1,2,3,4,5,6,7,8,9,10,11,12].filter(m => allMonthSet.has(m));
+    // Default to latest month that has BOTH fcst and actual data
+    const bothMonths = availableMonths.filter(m => fcstMonthSet.has(m) && actualMonthSet.has(m));
+    const defaultMonth = bothMonths.length > 0 ? bothMonths[bothMonths.length - 1] : availableMonths[availableMonths.length - 1];
     const sel = document.getElementById('month-select');
     sel.innerHTML = availableMonths.map(m => '<option value="' + m + '">' + m + '월</option>').join('');
     sel.disabled = false;
-    sel.value = availableMonths[availableMonths.length - 1];
+    sel.value = defaultMonth;
     document.getElementById('gen-btn').disabled = false;
     document.querySelector('.upload-card').style.display = 'none';
     document.getElementById('file-info').style.display = 'flex';
