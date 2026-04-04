@@ -429,10 +429,18 @@
   }
 
   .char-wrap.ceo .char-body {
-    width: 100px; height: 100px;
+    width: 110px; height: 110px;
+    margin-bottom: -12px;
   }
   .char-wrap.ceo .char-body img {
-    width: 100px; height: 100px;
+    width: 110px; height: 110px;
+  }
+  .char-wrap.ceo .char-name {
+    bottom: -46px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    text-align: center;
   }
 
   .char-wrap:hover .char-body { filter: drop-shadow(0 8px 20px rgba(0,0,0,0.2)); }
@@ -509,7 +517,8 @@
     .characters-row { gap: 0; padding: 0 12px; }
     .char-body { width: 56px; height: 56px; }
     .char-body img { width: 56px; height: 56px; }
-    .char-wrap.ceo .char-body, .char-wrap.ceo .char-body img { width: 70px; height: 70px; }
+    .char-wrap.ceo .char-body { width: 77px; height: 77px; margin-bottom: -12px; }
+    .char-wrap.ceo .char-body img { width: 77px; height: 77px; }
     .char-laptop { width: 56px; }
     .sp-services { grid-template-columns: 1fr; }
     .sp-service { border-right: none; border-bottom: 1px solid var(--divider); }
@@ -638,13 +647,13 @@
         </div>
 
         <div class="char-wrap ceo" onclick="openPanel('ceo')" id="char-ceo">
-          <div class="char-bubble">대표</div>
+          <div class="char-bubble">CEO</div>
           <div class="char-body">
             <img src="assets/characters/ceo.png" data-character="ceo">
             <div class="char-status s-online"></div>
           </div>
 
-          <div class="char-name">대표</div>
+          <div class="char-name">CEO<br><span style="font-weight:400;letter-spacing:0.04em;font-size:9px;">(Chat Bot)</span></div>
         </div>
 
         <div class="char-wrap" onclick="openPanel('md')" id="char-md">
