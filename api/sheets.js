@@ -1,35 +1,62 @@
+import https from 'https';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   const { id, gid } = req.query;
   if (!id) return res.status(400).json({ error: 'Missing sheet id' });
 
-  const url = gid
-    ? `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`
-    : `https://docs.google.com/spreadsheets/d/${id}/export?format=csv`;
+  const url = `https://docs.google.com/spreadsheets/d/${id}/export?format=csv${gid ? '&gid=' + gid : ''}`;
 
   try {
-    const response = await fetch(url, {
-      redirect: 'follow',
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
-
-    if (!response.ok) {
-      return res.status(response.status).json({ error: 'Failed to fetch sheet' });
-    }
-
-    const csv = await response.text();
+    const csv = await fetchWithRedirect(url);
     const rows = parseCSV(csv);
-
-    res.setHeader('Cache-Control', 's-maxage=300'); // 5분 캐시
+    res.setHeader('Cache-Control', 's-maxage=300');
     return res.status(200).json({ rows });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 }
 
+function fetchWithRedirect(url, maxRedirects = 5) {
+  return new Promise((resolve, reject) => {
+    function doRequest(currentUrl, remaining) {
+      https.get(currentUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)',
+          'Accept': 'text/csv,text/plain,*/*'
+        }
+      }, (response) => {
+        const { statusCode, headers } = response;
+
+        if ([301, 302, 303, 307, 308].includes(statusCode)) {
+          if (remaining <= 0) return reject(new Error('Too many redirects'));
+          const location = headers['location'];
+          if (!location) return reject(new Error('Redirect with no location'));
+          response.resume();
+          return doRequest(location, remaining - 1);
+        }
+
+        if (statusCode !== 200) {
+          response.resume();
+          return reject(new Error(`HTTP ${statusCode}`));
+        }
+
+        const chunks = [];
+        response.on('data', chunk => chunks.push(chunk));
+        response.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+        response.on('error', reject);
+      }).on('error', reject);
+    }
+
+    doRequest(url, maxRedirects);
+  });
+}
+
 function parseCSV(text) {
-  const lines = text.split('\n').filter(l => l.trim());
+  // BOM 제거
+  const clean = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+  const lines = clean.split('\n').filter(l => l.trim());
   if (lines.length === 0) return [];
 
   const headers = splitCSVLine(lines[0]);
@@ -39,8 +66,8 @@ function parseCSV(text) {
     const values = splitCSVLine(lines[i]);
     const row = {};
     headers.forEach((h, j) => {
-      const key = h.trim();
-      if (key) row[key] = (values[j] || '').trim();
+      const key = h.trim().replace(/\r/g, '');
+      if (key) row[key] = (values[j] || '').trim().replace(/\r/g, '');
     });
     rows.push(row);
   }
@@ -55,10 +82,10 @@ function splitCSVLine(line) {
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
     if (ch === '"') {
-      inQuote = !inQuote;
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
     } else if (ch === ',' && !inQuote) {
-      result.push(cur);
-      cur = '';
+      result.push(cur); cur = '';
     } else {
       cur += ch;
     }
