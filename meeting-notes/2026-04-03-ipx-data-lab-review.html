@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- ── 문서 메타
+    type:       "meeting"
+    id:         "2026-04-03-ipx-data-lab-review"
+    title:      "IPX DATA LAB 제안서 검토 및 방향 의견"
+    desc:       "IPX DATA LAB 제안서(ML 파이프라인) 검토. 현실성 3가지 이유로 보류, 파싱+LLM 방식으로 독자 진행 결정."
+    file:       "meeting-notes/2026-04-03-ipx-data-lab-review.html"
+    date:       "2026-04-03"
+    tags:       ["meeting", "ipx", "direction"]
+    attendees:  ["구교철 Bryan", "염동혁"]
+    meetingNum: "004"
+  ── -->
+  <title>Meeting Notes #004 — IPX DATA LAB 검토</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f7; --surface: #ffffff; --text: #1d1d1f;
+      --muted: rgba(0,0,0,0.45); --accent: #0071e3;
+      --green: #1a7f4b; --orange: #b95000; --red: #c0392b;
+      --divider: rgba(0,0,0,0.08); --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    html { background: var(--bg); font-family: -apple-system,"SF Pro Text","Helvetica Neue",sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; font-size: 15px; line-height: 1.6; }
+    body { min-height: 100vh; }
+
+    .topnav { height: 52px; background: rgba(245,245,247,0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--divider); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; padding: 0 40px; gap: 12px; }
+    .nav-back { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; }
+    .nav-back:hover { opacity: 0.75; }
+    .nav-sep { width: 1px; height: 14px; background: var(--divider); }
+    .nav-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+    .container { max-width: 760px; margin: 0 auto; padding: 56px 40px 96px; }
+
+    .doc-type { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--green); background: rgba(26,127,75,0.08); padding: 4px 10px; border-radius: 100px; margin-bottom: 20px; }
+    .doc-title { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 20px; }
+    .doc-meta { display: flex; flex-wrap: wrap; gap: 20px; padding: 16px 0; border-top: 1px solid var(--divider); border-bottom: 1px solid var(--divider); margin-bottom: 48px; }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
+
+    .doc-body { display: flex; flex-direction: column; gap: 40px; }
+    .section { display: flex; flex-direction: column; gap: 12px; }
+    .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
+    .section-title { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+
+    .item-list { display: flex; flex-direction: column; gap: 8px; }
+    .item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--divider); border-radius: 10px; font-size: 14px; color: var(--text); line-height: 1.6; box-shadow: var(--shadow); }
+    .item-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .item-text { flex: 1; }
+    .item-text strong { font-weight: 700; }
+    .item-text .sub { color: var(--muted); display: block; margin-top: 2px; font-size: 13px; }
+
+    .quote { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; box-shadow: var(--shadow); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; border: 1px solid var(--divider); color: var(--muted); background: var(--bg); }
+    .chip.blue   { background: rgba(0,113,227,0.07);  color: var(--accent); border-color: rgba(0,113,227,0.15); }
+    .chip.orange { background: rgba(185,80,0,0.07);   color: var(--orange); border-color: rgba(185,80,0,0.15); }
+    .chip.red    { background: rgba(192,57,43,0.07);  color: var(--red);    border-color: rgba(192,57,43,0.15); }
+
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--surface); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+    .compare-table th { padding: 10px 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: var(--bg); color: var(--muted); text-align: left; border-bottom: 1px solid var(--divider); }
+    .compare-table th.col-ours { color: var(--accent); }
+    .compare-table td { padding: 11px 16px; border-bottom: 1px solid var(--divider); vertical-align: top; color: var(--text); line-height: 1.55; }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table td:first-child { font-weight: 600; width: 80px; color: var(--muted); font-size: 12px; }
+    .compare-table td.col-ours { color: var(--accent); font-weight: 500; }
+
+    @media (max-width: 640px) {
+      .container { padding: 40px 20px 80px; }
+      .topnav { padding: 0 20px; }
+      .doc-title { font-size: 26px; }
+      .doc-meta { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="topnav">
+    <a class="nav-back" href="../index.html">← 아카이브</a>
+    <div class="nav-sep"></div>
+    <span class="nav-title">Meeting Notes #004</span>
+  </nav>
+
+  <div class="container">
+    <div class="doc-type">📋 Meeting Notes</div>
+    <h1 class="doc-title">IPX DATA LAB 제안서 검토 및 방향 의견</h1>
+    <div class="doc-meta">
+      <div class="meta-item">
+        <span class="meta-label">날짜</span>
+        <span class="meta-value">2026년 4월 3일</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">참석</span>
+        <span class="meta-value">구교철 Bryan, 염동혁</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">형태</span>
+        <span class="meta-value">대표 자료 전달 → 검토 의견 회신 (비동기)</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">문서 번호</span>
+        <span class="meta-value">#004</span>
+      </div>
+    </div>
+
+    <div class="doc-body">
+
+      <div class="section">
+        <div class="section-label">01 · 자료 전달</div>
+        <div class="section-title">IPX DATA LAB 제안서 공유</div>
+        <div class="quote">
+          IPX에서 DATA LAB 제안서를 보내왔다. 방향성과 데이터베이스 활용이 겹치는 부분이 있으니 내용 보고 의견 달라.
+        </div>
+        <div class="chips">
+          <span class="chip orange">IPX DATA LAB</span>
+          <span class="chip blue">ML 파이프라인</span>
+          <span class="chip blue">LLMRec + XAI</span>
+          <span class="chip">IP 사업 데이터 통합</span>
+        </div>
+        <div class="item-list">
+          <div class="item">
+            <div class="item-icon">📄</div>
+            <div class="item-text">
+              <strong>IPX 제안 골자</strong>
+              <span class="sub">IP 사업 데이터 통합 → ML 모델(Apriori, XGBoost, Prophet 등) → LLMRec + XAI 구축. Phase 1 (3~6개월) 데이터 수집·ML·정기보고서, Phase 2 (1~2년) DW 구축·Insight Engine 완성. 내부 인원 2명 + 클라우드 인프라 연 ~200만원 추산.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">02 · 검토 의견</div>
+        <div class="section-title">현실성 없는 이유 3가지</div>
+        <div class="item-list">
+          <div class="item">
+            <div class="item-icon">❌</div>
+            <div class="item-text">
+              <strong>만들어도 못 쓴다</strong>
+              <span class="sub">구성원들이 AI·디지털 데이터에 익숙하지 않음. 인터뷰에서 직접 확인. 좋은 인사이트가 나와도 활용하는 사람이 없으면 의미 없음.</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">❌</div>
+            <div class="item-text">
+              <strong>잘못되면 고칠 수가 없다</strong>
+              <span class="sub">ML 파이프라인은 구축 후 유지보수·수정·검증할 내부 인력이 없음. 외부 의존도가 높아질수록 지속 운영이 불가능해짐.</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">❌</div>
+            <div class="item-text">
+              <strong>우리 비즈니스 구조에 안 맞는다</strong>
+              <span class="sub">ML은 반복되는 패턴이 있어야 작동함. 우리는 팬덤 비즈니스라 아티스트 컴백·팝업 일정·팬덤 규모에 따라 매출 패턴이 매번 달라짐. 일반 커머스처럼 크로스셀 패턴도 없음. ML이 학습할 전형적인 메커니즘 자체가 없는 구조.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">03 · 우리 방향</div>
+        <div class="section-title">독자 진행 결정</div>
+        <div class="item-list">
+          <div class="item">
+            <div class="item-icon">✅</div>
+            <div class="item-text">
+              <strong>실무진이 당장 필요한 기능부터</strong>
+              <span class="sub">인터뷰로 팀별 페인포인트를 파악하고, 즉시 쓸 수 있는 것부터 만든다.</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">✅</div>
+            <div class="item-text">
+              <strong>파싱 수준으로 시작한다</strong>
+              <span class="sub">로컬에서 코드로 데이터 집계 → 숫자만 LLM에 전달. 보안·재현성·자동화 모두 충족하면서 지금 당장 실행 가능. (파싱 = 엑셀 파일을 코드로 열어서 원하는 숫자를 추출하는 것)</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">✅</div>
+            <div class="item-text">
+              <strong>구성원 교육을 병행한다</strong>
+              <span class="sub">이게 AX TF의 핵심. 툴을 만드는 것만큼 쓸 줄 아는 사람을 만드는 것이 중요하다. 인프라보다 리터러시가 먼저.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">04 · 기술 방식 비교</div>
+        <div class="section-title">IPX 방식 vs 우리 방식</div>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>IPX — ML 파이프라인</th>
+              <th class="col-ours">우리 — 로컬 파싱 → 숫자만 LLM 전달</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>보안</td>
+              <td>사내 인프라에서 처리, 데이터 유출 없음</td>
+              <td class="col-ours">로컬 처리, 집계된 숫자만 LLM에 전송. 원본 데이터 외부 유출 없음</td>
+            </tr>
+            <tr>
+              <td>분석</td>
+              <td>알고리즘이 데이터에서 직접 학습. 사람이 모르는 패턴도 발견 가능</td>
+              <td class="col-ours">사람이 질문을 알고 있을 때 유효. 파서가 코드로 집계, 재현성 100%</td>
+            </tr>
+            <tr>
+              <td>자동화</td>
+              <td>Airflow/MLflow로 주기 자동 실행</td>
+              <td class="col-ours">파일 변경 감지로 자동 실행. 지금 당장 구현 가능</td>
+            </tr>
+            <tr>
+              <td>유지보수</td>
+              <td>모델 드리프트·피처 업데이트·검증 등 전담 인력 필요</td>
+              <td class="col-ours">코드 수정으로 대응. 내부에서 직접 관리 가능</td>
+            </tr>
+            <tr>
+              <td>LLM 역할</td>
+              <td>마지막 번역 레이어 (ML 결과 → 자연어)</td>
+              <td class="col-ours">마지막에 "사람이 읽기 좋게 요약"만 담당</td>
+            </tr>
+            <tr>
+              <td>착수 시점</td>
+              <td>데이터 인벤토리·피처 엔지니어링 포함 3~6개월</td>
+              <td class="col-ours">지금 바로 시작 가능</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
