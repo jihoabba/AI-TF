@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>인터뷰 — MD 장하라 · 2026.04.02+06</title>
+<title>MD팀 인터뷰 종합 · 2026.04</title>
 <meta name="tf-type"  content="interview">
-<meta name="tf-title" content="인터뷰 — MD 장하라">
-<meta name="tf-desc"  content="MD팀 리드 인터뷰 (4/2 단답 + 4/6 상세). 출시 DASH BOARD 구축이 명확한 1순위. SAP 데이터 접근성·수요예측 자동화·단순 시스템 반복업무 효율화가 핵심 과제.">
+<meta name="tf-title" content="MD팀 인터뷰 종합">
+<meta name="tf-desc"  content="MD팀 리드·실무자 3인 인터뷰 종합 (장하라·이공주·김도은). 출시 DASH BOARD·기획자료 초안 자동화·SAP 반복업무 효율화가 3대 핵심 과제. 팀 전체 AI 도입 수용도 높음.">
 <meta name="tf-date"  content="2026-04-02">
 <meta name="tf-tags"  content="interview,md">
 <style>
@@ -27,7 +27,7 @@
   .nav-sep { width: 1px; height: 14px; background: var(--divider); }
   .nav-title { font-size: 13px; font-weight: 500; color: var(--muted); }
 
-  .container { max-width: 760px; margin: 0 auto; padding: 56px 40px 96px; }
+  .container { max-width: 800px; margin: 0 auto; padding: 56px 40px 96px; }
 
   .doc-type { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--green); background: rgba(26,127,75,0.08); padding: 4px 10px; border-radius: 100px; margin-bottom: 20px; }
   .doc-title { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 20px; }
@@ -36,22 +36,49 @@
   .meta-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
   .meta-value { font-size: 14px; font-weight: 500; color: var(--text); }
 
-  /* 서머리 박스 */
-  .summary-box { background: linear-gradient(135deg, rgba(0,113,227,0.04) 0%, rgba(107,79,187,0.04) 100%); border: 1px solid rgba(0,113,227,0.15); border-radius: 16px; padding: 28px 28px 24px; margin-bottom: 48px; }
-  .summary-box h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
-  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .insight-card { background: #fff; border: 1px solid var(--divider); border-radius: 10px; padding: 14px 16px; }
-  .insight-card .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-  .insight-card .msg { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.5; }
-  .insight-card .detail { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
-  .insight-card.highlight { border-color: rgba(0,113,227,0.3); background: rgba(0,113,227,0.03); }
-  .insight-card.highlight .tag { color: var(--accent); }
+  /* 팀 진단 서머리 */
+  .diagnosis { background: #fff; border: 1px solid var(--divider); border-radius: 20px; padding: 32px; margin-bottom: 56px; box-shadow: var(--shadow); }
+  .diag-header { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .diag-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); background: rgba(0,113,227,0.07); border: 1px solid rgba(0,113,227,0.15); padding: 4px 10px; border-radius: 100px; }
+  .diag-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
 
-  .doc-body { display: flex; flex-direction: column; gap: 40px; }
-  .section { display: flex; flex-direction: column; gap: 12px; }
-  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  .pain-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .pain-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--divider); background: var(--bg); }
+  .pain-rank { font-size: 11px; font-weight: 800; color: var(--accent); background: rgba(0,113,227,0.1); border-radius: 6px; padding: 3px 7px; flex-shrink: 0; letter-spacing: 0.05em; }
+  .pain-content { flex: 1; }
+  .pain-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .pain-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .pain-item.top1 { border-color: rgba(0,113,227,0.25); background: rgba(0,113,227,0.03); }
+  .pain-item.top1 .pain-rank { background: var(--accent); color: #fff; }
+
+  .diag-divider { height: 1px; background: var(--divider); margin: 24px 0; }
+
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .action-card { background: var(--bg); border: 1px solid var(--divider); border-radius: 12px; padding: 14px 16px; }
+  .action-card .ac-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .action-card .ac-msg { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .action-card .ac-detail { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .action-card.blue { border-color: rgba(0,113,227,0.2); background: rgba(0,113,227,0.03); }
+  .action-card.blue .ac-label { color: var(--accent); }
+  .action-card.green { border-color: rgba(26,127,75,0.2); background: rgba(26,127,75,0.03); }
+  .action-card.green .ac-label { color: var(--green); }
+
+  /* 인터뷰 섹션 구분 */
+  .interviewee-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; box-shadow: var(--shadow); }
+  .ie-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #0071e3, #5ac8fa); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; color: #fff; font-weight: 700; }
+  .ie-info { flex: 1; }
+  .ie-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .ie-role { font-size: 13px; color: var(--muted); }
+  .ie-date { font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--divider); border-radius: 100px; padding: 3px 10px; }
+
+  .doc-body { display: flex; flex-direction: column; gap: 48px; }
+  .chapter { display: flex; flex-direction: column; gap: 32px; }
+  .chapter-title { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); padding-bottom: 12px; border-bottom: 2px solid var(--accent); margin-bottom: 4px; }
+
+  .section { display: flex; flex-direction: column; gap: 10px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; }
   .section-label::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
-  .section-title { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .section-title { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2px; }
 
   .item-list { display: flex; flex-direction: column; gap: 8px; }
   .item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--divider); border-radius: 10px; font-size: 14px; color: var(--text); line-height: 1.6; box-shadow: var(--shadow); }
@@ -63,34 +90,48 @@
   .item-text .sub-list li::before { content: '· '; }
 
   .quote { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; box-shadow: var(--shadow); }
+  .quote.orange { border-left-color: var(--orange); }
+  .quote.green  { border-left-color: var(--green); }
 
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; border: 1px solid var(--divider); color: var(--muted); background: var(--bg); }
   .chip.blue   { background: rgba(0,113,227,0.07);  color: var(--accent); border-color: rgba(0,113,227,0.15); }
   .chip.orange { background: rgba(185,80,0,0.07);   color: var(--orange); border-color: rgba(185,80,0,0.15); }
 
-  /* 태스크보드 */
+  /* 우선과제 태스크보드 */
   .task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .task-card { background: var(--surface); border: 1px solid var(--divider); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); }
   .task-card .tc-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .task-card .tc-icon { font-size: 18px; }
-  .task-card .tc-title { font-size: 14px; font-weight: 700; color: var(--text); }
-  .task-card .tc-scope { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: rgba(0,113,227,0.07); border: 1px solid rgba(0,113,227,0.15); padding: 2px 7px; border-radius: 100px; margin-left: auto; }
-  .task-card .tc-scope.green { color: var(--green); background: rgba(26,127,75,0.07); border-color: rgba(26,127,75,0.15); }
-  .task-card .tc-scope.purple { color: var(--purple); background: rgba(107,79,187,0.07); border-color: rgba(107,79,187,0.15); }
+  .task-card .tc-title { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
+  .task-card .tc-scope { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 100px; border: 1px solid; flex-shrink: 0; }
+  .tc-scope.blue   { color: var(--accent); background: rgba(0,113,227,0.07); border-color: rgba(0,113,227,0.15); }
+  .tc-scope.green  { color: var(--green);  background: rgba(26,127,75,0.07);  border-color: rgba(26,127,75,0.15); }
+  .tc-scope.purple { color: var(--purple); background: rgba(107,79,187,0.07); border-color: rgba(107,79,187,0.15); }
+  .tc-scope.orange { color: var(--orange); background: rgba(185,80,0,0.07);   border-color: rgba(185,80,0,0.15); }
   .task-card ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
   .task-card ul li { font-size: 13px; color: var(--muted); line-height: 1.5; }
   .task-card ul li::before { content: '→ '; font-weight: 700; color: var(--accent); }
   .task-card.priority { border-color: rgba(0,113,227,0.3); background: rgba(0,113,227,0.02); }
   .task-card.priority .tc-title { color: var(--accent); }
+  .task-card .tc-voices { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--divider); display: flex; gap: 4px; flex-wrap: wrap; }
+  .voice-tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 100px; background: var(--bg); border: 1px solid var(--divider); color: var(--muted); }
+
+  /* TF 제안 */
+  .tf-proposal { background: linear-gradient(135deg, rgba(107,79,187,0.05) 0%, rgba(0,113,227,0.05) 100%); border: 1px solid rgba(107,79,187,0.2); border-radius: 16px; padding: 24px; }
+  .tf-proposal h3 { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--purple); margin-bottom: 16px; }
+  .proposal-list { display: flex; flex-direction: column; gap: 10px; }
+  .proposal-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: #fff; border: 1px solid rgba(107,79,187,0.15); border-radius: 10px; }
+  .proposal-item .pi-icon { font-size: 16px; flex-shrink: 0; }
+  .proposal-item .pi-text strong { font-size: 14px; font-weight: 700; color: var(--text); display: block; }
+  .proposal-item .pi-text span { font-size: 13px; color: var(--muted); }
 
   @media (max-width: 640px) {
     .container { padding: 40px 20px 80px; }
     .topnav { padding: 0 20px; }
     .doc-title { font-size: 26px; }
     .doc-meta { gap: 16px; }
-    .summary-grid { grid-template-columns: 1fr; }
-    .task-grid { grid-template-columns: 1fr; }
+    .action-grid, .task-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -99,24 +140,24 @@
 <nav class="topnav">
   <a class="nav-back" href="../index.html">← 아카이브</a>
   <div class="nav-sep"></div>
-  <span class="nav-title">인터뷰 — MD · 장하라</span>
+  <span class="nav-title">MD팀 인터뷰 종합 — 장하라·이공주·김도은</span>
 </nav>
 
 <div class="container">
-  <div class="doc-type">🎤 Interview</div>
-  <h1 class="doc-title">인터뷰 — MD 장하라</h1>
+  <div class="doc-type">🎤 Interview · 팀 종합</div>
+  <h1 class="doc-title">MD팀 인터뷰 종합</h1>
   <div class="doc-meta">
     <div class="meta-item">
-      <span class="meta-label">날짜</span>
-      <span class="meta-value">2026년 4월 2일 + 4월 6일</span>
+      <span class="meta-label">인터뷰 기간</span>
+      <span class="meta-value">2026년 4월 2일 — 4월 6일</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">대상</span>
+      <span class="meta-value">장하라 (리드) · 이공주 · 김도은 (실무자)</span>
     </div>
     <div class="meta-item">
       <span class="meta-label">팀</span>
       <span class="meta-value">MD</span>
-    </div>
-    <div class="meta-item">
-      <span class="meta-label">인터뷰이</span>
-      <span class="meta-value">장하라 (리드)</span>
     </div>
     <div class="meta-item">
       <span class="meta-label">형태</span>
@@ -124,261 +165,348 @@
     </div>
   </div>
 
-  <!-- 서머리 -->
-  <div class="summary-box">
-    <h2>TF 전략 서머리</h2>
-    <div class="summary-grid">
-      <div class="insight-card highlight">
-        <div class="tag">🎯 1순위 과제</div>
-        <div class="msg">출시 DASH BOARD 구축</div>
-        <div class="detail">출시계획·입고현황·물량계획 실시간 가시화. 전사 관점(BM/ONLINE/OFFLINE/LOGIS/MKT/CX)으로 확장 가능한 고임팩트 과제.</div>
+  <!-- 팀 진단 서머리 -->
+  <div class="diagnosis">
+    <div class="diag-header">
+      <span class="diag-badge">Team Diagnosis</span>
+      <span class="diag-title">MD팀 AI TF 우선 진단</span>
+    </div>
+
+    <div class="pain-list">
+      <div class="pain-item top1">
+        <span class="pain-rank">#1</span>
+        <div class="pain-content">
+          <div class="pain-title">출시 DASH BOARD 구축 — 데이터 가시화가 없다</div>
+          <div class="pain-desc">실시간 판매현황·입고현황·물량계획을 통합으로 볼 수 없음. 런칭 당일에도 BM팀 데이터를 기다리는 구조. 리드·실무자 전원 동일 니즈.</div>
+        </div>
       </div>
-      <div class="insight-card">
-        <div class="tag">🔑 근본 문제</div>
-        <div class="msg">SAP 데이터 접근성</div>
-        <div class="detail">외부 미팅 중 데이터 접근 불가, 실적은 캡처 공유. Raw 데이터 파이프라인 구축이 선행 과제.</div>
+      <div class="pain-item">
+        <span class="pain-rank">#2</span>
+        <div class="pain-content">
+          <div class="pain-title">기획자료 초안 작성 — 개인기에 100% 의존</div>
+          <div class="pain-desc">예산 설득용 제안서·기획안이 고정 포맷 없이 매번 처음부터 작성. 팀 규칙·템플릿이 없고 시각화도 개인 역량 차이가 큼.</div>
+        </div>
       </div>
-      <div class="insight-card">
-        <div class="tag">⚙️ 자동화 기회</div>
-        <div class="msg">수요예측·리오더 알림</div>
-        <div class="detail">판매데이터 수기 취합 → AI 분석으로 대체. 소진 예상 재고 리오더 알림으로 명확한 ROI 창출 가능.</div>
+      <div class="pain-item">
+        <span class="pain-rank">#3</span>
+        <div class="pain-content">
+          <div class="pain-title">SAP 반복 시스템 입력 — 업체 자료가 제각각</div>
+          <div class="pain-desc">자재등록·정보고시 등 SAP 입력 규칙은 엄격한데 업체 자료 형식이 달라 복붙+검수 수작업 반복. SKU 많으면 수 시간 소요.</div>
+        </div>
       </div>
-      <div class="insight-card highlight">
-        <div class="tag">⭐ TF 협력 적합도</div>
-        <div class="msg">AI 수용도 최상 — 리드 직접 장려</div>
-        <div class="detail">AI 툴 4종(Gemini·ChatGPT·Claude·Genspark) 사용 중. 팀원에게도 적극 장려. MD팀이 AI TF 1호 협력팀으로 최적.</div>
+    </div>
+
+    <div class="diag-divider"></div>
+
+    <div class="action-grid">
+      <div class="action-card blue">
+        <div class="ac-label">AI 도입 적합도</div>
+        <div class="ac-msg">팀 전체 수용도 최상</div>
+        <div class="ac-detail">리드 직접 장려, 실무자도 도입 열린 편. MD팀이 1호 파일럿팀으로 적합.</div>
+      </div>
+      <div class="action-card blue">
+        <div class="ac-label">협업 포인트</div>
+        <div class="ac-msg">BM팀 정윤님과 데이터 중복</div>
+        <div class="ac-detail">기본 데이터 대시보드는 BM팀 업무와 겹침. 공동 과제로 연계 시 임팩트 배가.</div>
+      </div>
+      <div class="action-card green">
+        <div class="ac-label">기존 자산</div>
+        <div class="ac-msg">엑셀 로직 이미 구축됨</div>
+        <div class="ac-detail">재입고 알림봇 등 기존 엑셀 로직 존재. 새로 만드는 게 아니라 연결·UI 개선이 핵심.</div>
+      </div>
+      <div class="action-card green">
+        <div class="ac-label">감성 진단</div>
+        <div class="ac-msg">야근 구조 + 반복업무 번아웃</div>
+        <div class="ac-detail">외부 이슈로 지친 상태에서 반복업무까지 겹침. 자동화 체감 임팩트가 크게 나올 환경.</div>
       </div>
     </div>
   </div>
 
   <div class="doc-body">
 
-    <div class="section">
-      <div class="section-label">01 · 주요 업무</div>
-      <div class="section-title">담당 업무 현황</div>
-      <div class="item-list">
-        <div class="item">
-          <div class="item-icon">📦</div>
-          <div class="item-text">
-            <strong>OEM 사입 (IPX 법인간 거래)</strong>
-            <ul class="sub-list">
-              <li>수요예측</li>
-              <li>발주 / 입고 체크</li>
-              <li>채널별 물량 할당</li>
-              <li>해외 법인간 거래</li>
-            </ul>
+    <!-- ── 리드 인터뷰 ── -->
+    <div class="chapter">
+      <div class="chapter-title">리드 인터뷰 — 장하라</div>
+
+      <div class="interviewee-header">
+        <div class="ie-avatar">하</div>
+        <div class="ie-info">
+          <div class="ie-name">장하라</div>
+          <div class="ie-role">MD팀 리드</div>
+        </div>
+        <span class="ie-date">4/2 + 4/6</span>
+      </div>
+
+      <div class="section">
+        <div class="section-label">주요 업무</div>
+        <div class="item-list">
+          <div class="item">
+            <div class="item-icon">📦</div>
+            <div class="item-text">
+              <strong>OEM 사입 (IPX 법인간 거래)</strong>
+              <ul class="sub-list">
+                <li>수요예측 / 발주·입고 체크 / 채널별 물량 할당 / 해외 법인간 거래</li>
+              </ul>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">🤝</div>
+            <div class="item-text">
+              <strong>라이센스 제품 사입</strong>
+              <ul class="sub-list"><li>수요예측 / 발주·리오더 / 입고 체크</li></ul>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">🌐</div>
+            <div class="item-text">
+              <strong>멀티 IP & NewBiz (PB 등)</strong>
+              <ul class="sub-list"><li>시장조사, 소싱, 기획, 수요예측, 발주, 입고, 판매리뷰</li></ul>
+            </div>
           </div>
         </div>
-        <div class="item">
-          <div class="item-icon">🤝</div>
-          <div class="item-text">
-            <strong>라이센스 제품 사입</strong>
-            <ul class="sub-list">
-              <li>수요예측 / 발주·리오더 / 입고 체크</li>
-            </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label">핵심 Pain Points</div>
+        <div class="item-list">
+          <div class="item">
+            <div class="item-icon">🗃️</div>
+            <div class="item-text">
+              <strong>SAP / 데이터센터 반복 작업</strong>
+              <span class="sub">자재등록, 정보고시, 수요예측 판매데이터 수기 취합, 발주·입고 수기 취합</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">📂</div>
+            <div class="item-text">
+              <strong>외부 미팅 중 SAP 데이터 접근 불가</strong>
+              <span class="sub">낮에 미팅, 밤에 SAP 업무 — 야근 구조의 직접 원인</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">📸</div>
+            <div class="item-text">
+              <strong>실적 캡처 공유</strong>
+              <span class="sub">원하는 뷰로 볼 수 없고 raw 실시간 공유도 어려움</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">⚙️</div>
+            <div class="item-text">
+              <strong>SAP PQM 단순 승인 반복</strong>
+              <span class="sub">인증사항 업데이트 시 실제 반영 아닌 단순 승인 작업 반복</span>
+            </div>
           </div>
         </div>
-        <div class="item">
-          <div class="item-icon">🌐</div>
-          <div class="item-text">
-            <strong>멀티 IP & NewBiz (PB 등)</strong>
-            <ul class="sub-list">
-              <li>시장조사, 소싱, 기획, 수요예측, 발주, 입고, 판매리뷰</li>
-            </ul>
-          </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">자동화 1순위 · AI 수용도</div>
+        <div class="quote">
+          <strong>출시 DASH BOARD (실시간 업데이트)</strong> — SAP 데이터를 쉽게 열람·편집할 수 있는 환경이 최우선.<br>
+          <span style="color:var(--muted); font-size:13px; display:block; margin-top:6px;">AI 툴 4종(Gemini·ChatGPT·Claude·Genspark) 사용 중. 팀원들에게 적극 장려하고 있다. 기대됩니다!</span>
         </div>
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-label">02 · 시간 소요 업무</div>
-      <div class="section-title">가장 많은 리소스가 드는 일</div>
-      <div class="item-list">
-        <div class="item">
-          <div class="item-icon">📊</div>
-          <div class="item-text">
-            <strong>신규 비즈 기획 / 보고자료 제작</strong>
-            <span class="sub">시간 책정이 어렵지만 꾸준히 많은 리소스 소요</span>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-icon">🗃️</div>
-          <div class="item-text">
-            <strong>SAP / 데이터센터 관련 업무</strong>
-            <span class="sub">자재등록, 정보고시 등록 등 반복 시스템 작업</span>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-icon">🚚</div>
-          <div class="item-text">
-            <strong>입고 체크</strong>
-            <span class="sub">입고 당일 파트너사 소통 및 이슈 대응</span>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-icon">📋</div>
-          <div class="item-text">
-            <strong>발주자료 제작</strong>
-            <span class="sub">수요예측에 따른 기안에 필요한 자료 작성</span>
-          </div>
-        </div>
-      </div>
-      <div class="quote" style="margin-top:4px;">
-        업체 영업 시간에 맞추고, 사람을 대하는 일이다 보니 미팅·운영 응대에 필수적으로 시간이 많이 들어간다. 낮에는 미팅하고 밤에 SAP 시스템 업무 하면서 야근한다.
-      </div>
-    </div>
+    <!-- ── 실무자 인터뷰 ── -->
+    <div class="chapter">
+      <div class="chapter-title">실무자 인터뷰 — 이공주·김도은</div>
 
-    <div class="section">
-      <div class="section-label">03 · 반복 작업</div>
-      <div class="section-title">매번 반복적으로 수행하는 업무</div>
-      <div class="item-list">
-        <div class="item">
-          <div class="item-icon">📉</div>
-          <div class="item-text">
-            <strong>수요예측 시 판매 데이터 취합</strong>
-            <span class="sub">수기로 데이터를 모아 분석 준비 — 자동화 여지 높음</span>
-          </div>
+      <div class="interviewee-header">
+        <div class="ie-avatar" style="background: linear-gradient(135deg, #1a7f4b, #30d158);">실</div>
+        <div class="ie-info">
+          <div class="ie-name">이공주 · 김도은</div>
+          <div class="ie-role">MD팀 실무자</div>
         </div>
-        <div class="item">
-          <div class="item-icon">🔄</div>
-          <div class="item-text">
-            <strong>SAP 자재등록 / 데이터센터 등록</strong>
-            <span class="sub">사입 제품 리오더 시 재고 상황 수동 확인 후 발주</span>
+        <span class="ie-date">4월</span>
+      </div>
+
+      <div class="section">
+        <div class="section-label">가장 많은 시간이 드는 업무</div>
+        <div class="section-title">기획자료 제작 — 개인기에 의존하는 구조</div>
+        <div class="item-list">
+          <div class="item">
+            <div class="item-icon">📊</div>
+            <div class="item-text">
+              <strong>예산 설득용 기획안 / 제안서 작성</strong>
+              <span class="sub">왜 가져와야 하는지, 어떤 장점이 있는지 등 매번 처음부터 작성</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">⚠️</div>
+            <div class="item-text">
+              <strong>고정 포맷 없음 → 개인기 의존</strong>
+              <span class="sub">팀 내 공통 규칙·템플릿이 없어 시각화 품질이 사람마다 다름. 초안 작성까지만 속도를 내도 큰 도움.</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="section-label">04 · 수작업 불편</div>
-      <div class="section-title">아직도 수작업인 게 답답한 업무</div>
-      <div class="item-list">
-        <div class="item">
-          <div class="item-icon">📑</div>
-          <div class="item-text">
-            <strong>판매 데이터 수기 취합</strong>
-            <span class="sub">매번 손으로 모아야 하는 구조</span>
-          </div>
+      <div class="section">
+        <div class="section-label">루틴 반복 업무</div>
+        <div class="section-title">SAP 시스템 입력 — 업체 자료가 제각각</div>
+        <div class="quote orange">
+          SAP에 올려야 되는 규칙은 엄격한데, 업체 자료가 제각각이다 보니 복붙 및 검수 작업을 수작업으로 한다. SKU가 많을 때는 시간이 오래 걸린다.
         </div>
-        <div class="item">
-          <div class="item-icon">📦</div>
-          <div class="item-text">
-            <strong>발주 / 입고 수기 취합</strong>
-            <span class="sub">예전 회사 대비 자동화된 시스템이 없고, 엑셀 작업으로 진행되는 것이 많다</span>
+        <div class="item-list" style="margin-top:8px;">
+          <div class="item">
+            <div class="item-icon">🗃️</div>
+            <div class="item-text">
+              <strong>자재 등록 / 정보고시 등록</strong>
+              <span class="sub">시스템 규칙은 고정, 입력 소스(업체 자료)는 비정형 → 변환 자동화 여지 큼</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="section-label">05 · 데이터 수신</div>
-      <div class="section-title">데이터 공유·접근 관련 불편</div>
-      <div class="item-list">
-        <div class="item">
-          <div class="item-icon">📸</div>
-          <div class="item-text">
-            <strong>실적 캡처 공유</strong>
-            <span class="sub">캡처로 받다 보니 원하는 뷰로 볼 수 없고, raw 실시간 공유도 어려움</span>
+      <div class="section">
+        <div class="section-label">편의성 강화 니즈</div>
+        <div class="section-title">자동화보다 "연결과 가시화"가 원하는 것</div>
+        <div class="item-list">
+          <div class="item">
+            <div class="item-icon">🔔</div>
+            <div class="item-text">
+              <strong>재입고 알림봇</strong>
+              <span class="sub">기존에 로직은 충분히 구축돼 있음. 알림 트리거만 붙이면 즉시 활용 가능.</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">📋</div>
+            <div class="item-text">
+              <strong>재고 상태 대시보드</strong>
+              <span class="sub">"이거 발주 필요해요 / 재고 많아요 / 프로모션 필요해요" 상태가 한눈에 보이는 뷰</span>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon">📡</div>
+            <div class="item-text">
+              <strong>실시간 판매현황 조회</strong>
+              <span class="sub">지금은 BM팀(정윤님)이 보내주는 데이터를 기다리는 구조. 특히 테마·팝업 런칭 당일에 즉시 확인 필요.</span>
+            </div>
           </div>
         </div>
-        <div class="item">
-          <div class="item-icon">📂</div>
-          <div class="item-text">
-            <strong>외부 데이터 접근 불가</strong>
-            <span class="sub">외부 미팅 시 SAP 및 데이터 접근이 안 되어 답답함. 재고 관리 엑셀이 무겁고 시각화 부재</span>
-          </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">감성 진단</div>
+        <div class="quote green">
+          기본적으로 업무 욕심이 있기 때문에 야근을 하는 구조. 컨트롤 불가능한 외부 문제만으로도 정신 사나운데, 하루종일 털리고 반복업무를 할 때는 힘이 빠진다.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">AI 도입 수용도</div>
+        <div class="quote">
+          전반적으로 리드와 유사한 의견. AI와 툴 도입에 열려 있으며 업무 자동화 니즈도 강하다.
         </div>
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-label">06 · 툴 불편</div>
-      <div class="section-title">현재 사용 툴의 불편 사항</div>
-      <div class="quote">
-        SAP 인증사항 업데이트 시 실제 인증사항 반영이 아닌 PQM의 단순 승인 작업을 반복하는 것이 비효율적이다.
-      </div>
-    </div>
+    <!-- ── 통합 우선과제 태스크보드 ── -->
+    <div class="chapter">
+      <div class="chapter-title">통합 우선과제 태스크보드</div>
 
-    <div class="section">
-      <div class="section-label">07 · AI 툴 현황</div>
-      <div class="section-title">현재 사용 중인 AI 도구</div>
-      <div class="chips">
-        <span class="chip blue">Claude</span>
-        <span class="chip blue">ChatGPT</span>
-        <span class="chip orange">Gemini</span>
-        <span class="chip orange">Genspark</span>
-      </div>
-      <div class="quote" style="margin-top:8px;">
-        Gemini, ChatGPT, Genspark 등 다양하게 이용 중이며 최근에 Claude를 주로 공부하고 있다. 무료 플랜의 사용량 제한이 불편하다.
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-label">08 · 자동화 1순위</div>
-      <div class="section-title">딱 하나만 자동화할 수 있다면</div>
-      <div class="quote">
-        <strong>출시 DASH BOARD (실시간 업데이트)</strong> — SAP 데이터 혹은 가공된 데이터를 쉽게 열람하거나 편집할 수 있는 것이 최우선.
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-label">09 · AI 수용도</div>
-      <div class="section-title">AI 도입에 대한 태도</div>
-      <div class="quote">
-        열린 마음으로 수용하고 있으며 팀원들에게도 적극 장려 중이다. 기대됩니다!
-      </div>
-    </div>
-
-    <!-- 태스크보드 섹션 -->
-    <div class="section">
-      <div class="section-label">10 · 자동화 후보 태스크보드</div>
-      <div class="section-title">장하라 리드가 직접 정리한 자동화 희망 과제</div>
       <div class="task-grid">
         <div class="task-card priority">
           <div class="tc-head">
             <span class="tc-icon">📊</span>
-            <span class="tc-title">DASH Board 구축</span>
-            <span class="tc-scope">전사</span>
+            <span class="tc-title">출시 DASH BOARD</span>
+            <span class="tc-scope blue">전사</span>
           </div>
           <ul>
-            <li>출시계획 / Allocation 시트 / 입고현황 / 물량계획 가시화</li>
-            <li>주요 협업 요약 및 캘린더</li>
+            <li>출시계획 / 입고현황 / 물량계획 / Allocation 시트 가시화</li>
+            <li>실시간 판매현황 (런칭 당일 즉시 조회)</li>
             <li>Raw 데이터 직접 수정 및 엑셀 입·다운로드</li>
-            <li>BM / ONLINE / OFFLINE / ON-OFF / LOGIS / MKT / CX</li>
+            <li>BM/ONLINE/OFFLINE/LOGIS/MKT/CX 전사 관점</li>
           </ul>
+          <div class="tc-voices">
+            <span class="voice-tag">장하라</span><span class="voice-tag">이공주</span><span class="voice-tag">김도은</span>
+          </div>
+        </div>
+        <div class="task-card priority">
+          <div class="tc-head">
+            <span class="tc-icon">📝</span>
+            <span class="tc-title">기획자료 초안 자동화</span>
+            <span class="tc-scope orange">팀</span>
+          </div>
+          <ul>
+            <li>팀 공통 기획안 템플릿 / 포맷 정립</li>
+            <li>AI 초안 생성 → 시각화·설득 논리 구조화</li>
+            <li>작성 히스토리 공유 (GitHub 등)</li>
+          </ul>
+          <div class="tc-voices">
+            <span class="voice-tag">이공주</span><span class="voice-tag">김도은</span>
+          </div>
         </div>
         <div class="task-card">
           <div class="tc-head">
             <span class="tc-icon">📈</span>
-            <span class="tc-title">판매 데이터 기반 수요 예측</span>
-            <span class="tc-scope">전사</span>
+            <span class="tc-title">수요예측 · 리오더 알림</span>
+            <span class="tc-scope blue">전사</span>
           </div>
           <ul>
-            <li>판매 데이터 분석 편의성 향상 → 수요예측 활용</li>
-            <li>소진 예상 재고 리오더 자동 알림</li>
-            <li>BM / ON-OFF 관점</li>
+            <li>판매데이터 자동 취합 → 수요예측 활용</li>
+            <li>소진 예상 재고 리오더 알림봇 (기존 로직 연결)</li>
+            <li>"발주 필요 / 재고 과다 / 프로모션 필요" 상태 태깅</li>
           </ul>
+          <div class="tc-voices">
+            <span class="voice-tag">장하라</span><span class="voice-tag">이공주</span>
+          </div>
         </div>
         <div class="task-card">
           <div class="tc-head">
             <span class="tc-icon">⚙️</span>
-            <span class="tc-title">단순 시스템 업무 편의화</span>
+            <span class="tc-title">SAP 시스템 입력 효율화</span>
             <span class="tc-scope green">팀</span>
           </div>
           <ul>
-            <li>자재코드 등록 양식 효율화</li>
-            <li>정보고시(데이터센터) 등록 양식 효율화</li>
+            <li>업체 자료(비정형) → SAP 양식 자동 변환</li>
+            <li>자재코드 등록 / 정보고시 양식 표준화</li>
+            <li>PQM 단순 승인 반복 제거</li>
           </ul>
-        </div>
-        <div class="task-card">
-          <div class="tc-head">
-            <span class="tc-icon">💡</span>
-            <span class="tc-title">기획 / 영업 지원</span>
-            <span class="tc-scope purple">개인</span>
+          <div class="tc-voices">
+            <span class="voice-tag">장하라</span><span class="voice-tag">김도은</span>
           </div>
-          <ul>
-            <li>프로젝트 기획안 작성 (기획보고, 리오프 등)</li>
-          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TF 제안 액션 ── -->
+    <div class="chapter">
+      <div class="chapter-title">TF 제안 액션</div>
+
+      <div class="tf-proposal">
+        <h3>AI TF → MD팀 파일럿 제안</h3>
+        <div class="proposal-list">
+          <div class="proposal-item">
+            <span class="pi-icon">🤖</span>
+            <div class="pi-text">
+              <strong>팀 전체 Claude 단체 구독</strong>
+              <span>MD팀 전원이 동일한 AI 환경에서 업무. 개인 무료 플랜 한계 해소, 툴 통일로 히스토리·노하우 공유 가능.</span>
+            </div>
+          </div>
+          <div class="proposal-item">
+            <span class="pi-icon">📁</span>
+            <div class="pi-text">
+              <strong>GitHub 기반 업무 규칙·히스토리 공유</strong>
+              <span>시장조사, 기획안 작성, SAP 입력 등 반복 업무 프롬프트·규칙을 Git으로 관리. 팀원 간 노하우가 자산으로 누적.</span>
+            </div>
+          </div>
+          <div class="proposal-item">
+            <span class="pi-icon">🔗</span>
+            <div class="pi-text">
+              <strong>BM팀 정윤님과 데이터 파이프라인 공동 과제</strong>
+              <span>MD 실시간 판매현황 + BM 데이터 대시보드 업무가 겹침. 함께 설계하면 두 팀이 동시 수혜.</span>
+            </div>
+          </div>
+          <div class="proposal-item">
+            <span class="pi-icon">🚀</span>
+            <div class="pi-text">
+              <strong>1호 파일럿: 재입고 알림봇 + 간이 DASH BOARD</strong>
+              <span>기존 엑셀 로직 존재 → 빠른 배포 가능. 체감 임팩트를 가장 빠르게 줄 수 있는 시작점.</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
