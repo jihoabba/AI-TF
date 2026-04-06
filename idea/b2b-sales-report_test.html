@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B2B 매출 리포트 — 엑셀 업로드</title>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --text: #1d1d1f;
+  --muted: rgba(0,0,0,0.42);
+  --accent: #0071e3;
+  --green: #1a7f4b;
+  --red: #c0392b;
+  --orange: #b95000;
+  --yellow: #f59e0b;
+  --divider: rgba(0,0,0,0.08);
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+  --badge: #635BFF;
+}
+html { background: var(--bg); font-family: -apple-system,"SF Pro Text","Helvetica Neue",sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; font-size: 14px; }
+
+/* ── TOPNAV ── */
+.topnav {
+  height: 52px; background: rgba(245,245,247,.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--divider);
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; padding: 0 40px; gap: 12px;
+}
+.nav-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--badge); color: #fff; padding: 3px 8px; border-radius: 6px;
+}
+.nav-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+/* ── PAGE ── */
+.page { max-width: 1100px; margin: 0 auto; padding: 52px 24px 100px; }
+
+/* ── STEP INDICATOR ── */
+.steps {
+  display: flex; align-items: center; gap: 0; margin-bottom: 48px;
+}
+.step {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  padding: 8px 16px; border-radius: 10px; transition: all .2s;
+}
+.step.active { color: var(--accent); background: rgba(0,113,227,.07); }
+.step.done { color: var(--green); }
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+  transition: all .2s;
+}
+.step.done .step-num { background: var(--green); border-color: var(--green); color: #fff; font-size: 13px; }
+.step-arrow { color: var(--divider); font-size: 16px; margin: 0 4px; font-weight: 300; }
+
+/* ── EYEBROW / HEADING ── */
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+.subtitle { font-size: 14px; color: var(--muted); margin-bottom: 36px; line-height: 1.6; }
+
+/* ── UPLOAD CARD ── */
+.upload-card { background: var(--surface); border: 1px solid var(--divider); border-radius: 20px; padding: 36px; box-shadow: var(--shadow); max-width: 580px; }
+.dropzone {
+  border: 2px dashed rgba(0,0,0,0.14); border-radius: 16px;
+  padding: 44px 24px; text-align: center; cursor: pointer;
+  transition: all .2s; background: var(--bg);
+  position: relative;
+}
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--accent); background: rgba(0,113,227,.04);
+}
+.dropzone.uploaded { border-style: solid; border-color: var(--green); background: rgba(26,127,75,.04); }
+.drop-icon { font-size: 40px; margin-bottom: 14px; line-height: 1; }
+.drop-text { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.drop-hint { font-size: 12px; color: var(--muted); }
+.file-info {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--green);
+  background: rgba(26,127,75,.08); border: 1px solid rgba(26,127,75,.2);
+  border-radius: 10px; padding: 11px 16px; margin-top: 16px;
+}
+
+/* ── COLUMN MAPPING ── */
+#section-mapping { display: none; }
+.mapping-card { background: var(--surface); border: 1px solid var(--divider); border-radius: 20px; padding: 36px; box-shadow: var(--shadow); }
+.mapping-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.mapping-desc { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+.mapping-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+@media (max-width: 640px) { .mapping-grid { grid-template-columns: 1fr; } }
+.field-row { display: flex; flex-direction: column; gap: 6px; }
+.field-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: 6px;
+}
+.field-label .req { color: var(--red); }
+.field-label .opt { color: var(--muted); font-weight: 500; font-size: 10px; letter-spacing: 0; text-transform: none; }
+.field-select {
+  height: 40px; border: 1.5px solid var(--divider); border-radius: 10px;
+  padding: 0 12px; font-size: 13px; color: var(--text);
+  background: var(--surface); outline: none; cursor: pointer;
+  transition: border-color .15s; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  padding-right: 32px;
+}
+.field-select:focus { border-color: var(--accent); }
+.field-select.mapped { border-color: var(--green); background-color: rgba(26,127,75,.03); }
+
+.mapping-preview { margin-top: 24px; background: var(--bg); border-radius: 12px; padding: 16px; }
+.preview-title { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.preview-table { width: 100%; border-collapse: collapse; font-size: 12px; overflow: hidden; border-radius: 8px; }
+.preview-table th { text-align: left; padding: 6px 10px; background: rgba(0,0,0,.04); font-weight: 600; color: var(--muted); font-size: 11px; }
+.preview-table td { padding: 5px 10px; border-top: 1px solid var(--divider); font-family: "SF Mono", monospace; color: var(--text); }
+.preview-table tr:last-child td { border-bottom: none; }
+
+/* ── CONTROLS ── */
+.controls { display: flex; align-items: center; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+.month-select {
+  height: 42px; border: 1.5px solid var(--divider); border-radius: 10px;
+  padding: 0 14px; font-size: 14px; color: var(--text);
+  background: var(--surface); outline: none; cursor: pointer;
+  transition: border-color .15s;
+}
+.month-select:focus { border-color: var(--accent); }
+.btn-primary {
+  height: 42px; padding: 0 22px; background: var(--accent); color: #fff;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s; white-space: nowrap;
+}
+.btn-primary:hover { opacity: .85; }
+.btn-primary:disabled { background: var(--divider); color: var(--muted); cursor: not-allowed; opacity: 1; }
+.btn-secondary {
+  height: 42px; padding: 0 18px; background: transparent;
+  color: var(--accent); border: 1.5px solid var(--accent); border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.btn-secondary:hover { background: rgba(0,113,227,.06); }
+.btn-ghost {
+  height: 42px; padding: 0 18px; background: transparent;
+  color: var(--muted); border: 1.5px solid var(--divider); border-radius: 10px;
+  font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+
+/* ── REPORT ── */
+#section-report { display: none; }
+.report-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+.report-title { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+.report-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+/* ── KPI ── */
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+@media (max-width: 720px) { .stat-row { grid-template-columns: 1fr 1fr; } }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--divider);
+  border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow);
+}
+.stat-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.stat-value { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+.stat-value .unit { font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+.stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.stat-sub .up   { color: var(--green); font-weight: 600; }
+.stat-sub .down { color: var(--red); font-weight: 600; }
+
+/* ── SECTION ── */
+.section { margin-bottom: 36px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.section-title { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { text-align: right; padding: 10px 14px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--divider); white-space: nowrap; }
+thead th.left { text-align: left; }
+tbody tr { border-bottom: 1px solid var(--divider); transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg); }
+tbody tr.total-row { border-top: 2px solid var(--divider); background: var(--bg); font-weight: 700; }
+tbody td { padding: 10px 14px; text-align: right; white-space: nowrap; }
+tbody td.left { text-align: left; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.profit-pct { font-size: 12px; font-weight: 600; }
+.profit-pct.good { color: var(--green); }
+.profit-pct.mid  { color: var(--orange); }
+.profit-pct.low  { color: var(--red); }
+.neg { color: var(--red); }
+
+/* ── CHART ── */
+.chart-section { margin-bottom: 32px; }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card { background: var(--surface); border: 1px solid var(--divider); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow); }
+.chart-label { font-size: 13px; font-weight: 700; margin-bottom: 16px; }
+
+/* ── MATRIX ── */
+.tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+.tab { padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--muted); transition: all .15s; }
+.tab.active { background: var(--accent); color: #fff; }
+.tab:hover:not(.active) { background: var(--bg); color: var(--text); }
+.matrix-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--divider); border-radius: 14px; box-shadow: var(--shadow); }
+.matrix-table { font-size: 12px; }
+.matrix-table th, .matrix-table td { padding: 8px 12px; }
+.matrix-table thead th { text-align: right; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--divider); }
+.matrix-table thead th.left { text-align: left; }
+.matrix-table tbody td { text-align: right; border-bottom: 1px solid var(--divider); }
+.matrix-table tbody tr:last-child td { border-bottom: none; }
+.matrix-table tbody td.left { text-align: left; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.matrix-table td.month-val { color: var(--muted); }
+.matrix-table td.month-val.has-val { color: var(--text); font-weight: 500; }
+.matrix-table td.total-val { font-weight: 700; color: var(--accent); }
+.matrix-table .ytd-col { background: rgba(0,113,227,.04); }
+.matrix-table tbody tr.total-row { background: var(--bg); font-weight: 700; border-top: 2px solid var(--divider); }
+
+/* ── INFO ALERT ── */
+.info-box { background: rgba(0,113,227,.06); border: 1px solid rgba(0,113,227,.15); border-radius: 12px; padding: 14px 18px; font-size: 13px; color: var(--text); margin-bottom: 20px; line-height: 1.6; }
+.info-box strong { color: var(--accent); }
+
+@media (max-width: 640px) {
+  .topnav { padding: 0 20px; }
+  .page { padding: 28px 16px 72px; }
+  .steps { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <span class="nav-badge">TEST</span>
+  <span class="nav-title">B2B 매출 리포트 — 엑셀 업로드</span>
+</nav>
+
+<div class="page">
+
+  <!-- Step Indicator -->
+  <div class="steps" id="step-indicator">
+    <div class="step active" id="step1">
+      <div class="step-num">1</div>
+      <span>파일 업로드</span>
+    </div>
+    <div class="step-arrow">›</div>
+    <div class="step" id="step2">
+      <div class="step-num">2</div>
+      <span>컬럼 매핑</span>
+    </div>
+    <div class="step-arrow">›</div>
+    <div class="step" id="step3">
+      <div class="step-num">3</div>
+      <span>리포트 생성</span>
+    </div>
+  </div>
+
+  <!-- ─── STEP 1: UPLOAD ─── -->
+  <div id="section-upload">
+    <div class="eyebrow">B2B팀 · 테스트 버전</div>
+    <h1>매출 리포트 자동화</h1>
+    <p class="subtitle">
+      엑셀 파일을 업로드하면 컬럼을 직접 매핑해 대시보드를 생성합니다.<br>
+      SAP 로우 데이터뿐 아니라 어떤 엑셀 포맷도 사용할 수 있습니다.
+    </p>
+
+    <div class="upload-card">
+      <div class="dropzone" id="dropzone">
+        <div class="drop-icon">📊</div>
+        <div class="drop-text" id="drop-text">엑셀 파일을 여기에 드래그하거나 클릭</div>
+        <div class="drop-hint">*.xlsx, *.xls 지원</div>
+        <input type="file" id="file-input" accept=".xlsx,.xls" hidden>
+      </div>
+      <div id="file-info" class="file-info" style="display:none;"></div>
+
+      <div class="info-box" style="margin-top:20px; margin-bottom:0;">
+        <strong>어떤 엑셀이든 OK</strong> — 업로드 후 어느 컬럼이 파트너명, IP, 매출금액인지 직접 지정합니다. SAP 로우 데이터라면 컬럼이 자동 감지됩니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STEP 2: COLUMN MAPPING ─── -->
+  <div id="section-mapping">
+    <div class="mapping-card">
+      <div class="mapping-title">컬럼 매핑</div>
+      <div class="mapping-desc">
+        엑셀에서 읽어온 컬럼 목록입니다. 각 항목에 어떤 컬럼이 해당하는지 선택하세요.<br>
+        SAP 데이터는 자동으로 감지됩니다.
+      </div>
+
+      <div class="mapping-grid">
+        <div class="field-row">
+          <div class="field-label">파트너명 <span class="req">*</span></div>
+          <select class="field-select" id="col-partner">
+            <option value="">— 선택 —</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field-label">IP (대분류) <span class="opt">선택</span></div>
+          <select class="field-select" id="col-ip">
+            <option value="">(없음)</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field-label">매출금액 <span class="req">*</span></div>
+          <select class="field-select" id="col-sales">
+            <option value="">— 선택 —</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field-label">공헌이익 <span class="opt">선택</span></div>
+          <select class="field-select" id="col-profit">
+            <option value="">(없음)</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field-label">월 (숫자) <span class="opt">선택</span></div>
+          <select class="field-select" id="col-month">
+            <option value="">(없음 — 날짜 컬럼 사용)</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field-label">날짜 <span class="opt">선택</span></div>
+          <select class="field-select" id="col-date">
+            <option value="">(없음)</option>
+          </select>
+        </div>
+        <div class="field-row" style="grid-column: 1 / -1;">
+          <div class="field-label">VAT 포함 여부</div>
+          <select class="field-select" id="vat-mode">
+            <option value="incl">VAT 포함 (÷1.1 처리)</option>
+            <option value="excl">VAT 제외 (그대로 사용)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="mapping-preview">
+        <div class="preview-title">데이터 미리보기 (상위 3행)</div>
+        <div style="overflow-x:auto;">
+          <table class="preview-table" id="preview-table"></table>
+        </div>
+      </div>
+
+      <div class="controls" style="margin-top:28px;">
+        <button class="btn-ghost" onclick="resetUpload()">← 파일 변경</button>
+        <select class="month-select" id="month-select" disabled>
+          <option>월 선택...</option>
+        </select>
+        <button class="btn-primary" id="gen-btn" disabled onclick="generateReport()">리포트 생성</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STEP 3: REPORT ─── -->
+  <div id="section-report">
+    <div class="report-header">
+      <div>
+        <div class="report-title" id="report-title"></div>
+        <div class="report-meta" id="report-meta"></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-ghost" onclick="backToMapping()">← 설정 변경</button>
+        <button class="btn-secondary" onclick="downloadExcel()">엑셀 다운로드</button>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">당월 매출 (VAT-)</div>
+        <div class="stat-value" id="kpi-sales">—<span class="unit">mil</span></div>
+        <div class="stat-sub" id="kpi-sales-sub"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">공헌이익</div>
+        <div class="stat-value" id="kpi-profit">—<span class="unit">mil</span></div>
+        <div class="stat-sub" id="kpi-profit-sub"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">이익률</div>
+        <div class="stat-value" id="kpi-margin">—<span class="unit">%</span></div>
+        <div class="stat-sub" id="kpi-margin-sub"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">YTD 누적 매출</div>
+        <div class="stat-value" id="kpi-ytd">—<span class="unit">mil</span></div>
+        <div class="stat-sub" id="kpi-ytd-sub"></div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-section">
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-label">월별 매출 추이 (회계연도)</div>
+          <div id="chart-trend"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-label">IP별 매출 구성</div>
+          <div id="chart-donut"></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-section">
+      <div class="chart-card">
+        <div class="chart-label">Top 파트너 매출</div>
+        <div id="chart-top-partners"></div>
+      </div>
+    </div>
+
+    <!-- by Partner -->
+    <div class="section">
+      <div class="section-head"><span class="section-title">당월 by 파트너</span></div>
+      <div class="tbl-wrap">
+        <table id="tbl-partner">
+          <thead><tr>
+            <th class="left">파트너</th>
+            <th>매출 (mil)</th>
+            <th>공헌이익 (mil)</th>
+            <th>이익률</th>
+            <th>비중</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- by IP -->
+    <div class="section" id="section-by-ip" style="display:none;">
+      <div class="section-head"><span class="section-title">당월 by IP</span></div>
+      <div class="tbl-wrap">
+        <table id="tbl-ip">
+          <thead><tr>
+            <th class="left">IP</th>
+            <th>매출 (mil)</th>
+            <th>공헌이익 (mil)</th>
+            <th>이익률</th>
+            <th>비중</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- YTD Matrix -->
+    <div class="section">
+      <div class="section-head"><span class="section-title">YTD 월별 매출 추이</span></div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchMatrix('ip')" id="tab-ip">by IP</button>
+        <button class="tab" onclick="switchMatrix('partner')" id="tab-partner">by 파트너</button>
+      </div>
+      <div class="matrix-wrap">
+        <table id="tbl-matrix" class="matrix-table">
+          <thead></thead><tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ── CONSTANTS ──
+const FISCAL_ORDER = [4,5,6,7,8,9,10,11,12,1,2,3];
+const CHART_COLORS = ['#0071e3','#34c759','#ff9500','#af52de','#ff3b30','#5ac8fa','#ff6482','#30b0c7','#ffcc00','#8e8e93'];
+
+// ── STATE ──
+let allRows = [];
+let availableMonths = [];
+let selectedMonth = null;
+let matrixMode = 'ip';
+let reportData = null;
+let rawHeaders = [];
+let rawPreviewRows = [];
+let hasIP = false;
+let hasProfit = false;
+
+// ── DROPZONE ──
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+// ── COLUMN MAPPING SELECTS: auto-validate ──
+['col-partner','col-ip','col-sales','col-profit','col-month','col-date'].forEach(id => {
+  document.getElementById(id).addEventListener('change', onMappingChange);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+      // Find usable sheet
+      let targetSheet = null;
+      for (const name of wb.SheetNames) {
+        const ws = wb.Sheets[name];
+        if (!ws['!ref']) continue;
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        if (range.e.r < 1) continue; // need at least 2 rows
+        targetSheet = name;
+        break;
+      }
+      if (!targetSheet) { alert('데이터가 있는 시트를 찾을 수 없습니다.'); return; }
+
+      const data = XLSX.utils.sheet_to_json(wb.Sheets[targetSheet], { header: 1, defval: null });
+      if (data.length < 2) { alert('데이터 행이 부족합니다.'); return; }
+
+      rawHeaders = (data[0] || []).map((h,i) => h != null ? String(h).trim() : `컬럼${i+1}`);
+      rawPreviewRows = data.slice(1, 4);
+
+      document.getElementById('file-info').style.display = 'flex';
+      document.getElementById('file-info').textContent = `✅ ${file.name} — ${(data.length - 1).toLocaleString()}행 로드 완료 (시트: ${targetSheet})`;
+      dropzone.classList.add('uploaded');
+      document.getElementById('drop-text').textContent = file.name;
+
+      // Store all rows for later parsing
+      window.__rawData = data;
+      window.__targetSheet = targetSheet;
+      window.__wb = wb;
+      window.__fileName = file.name;
+
+      populateMappingUI();
+      autoDetectSAP();
+      goToStep(2);
+    } catch(err) {
+      alert('파일 파싱 오류: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function populateMappingUI() {
+  const selects = ['col-partner','col-ip','col-sales','col-profit','col-month','col-date'];
+  const defaultOpts = {
+    'col-partner': '— 선택 —',
+    'col-ip': '(없음)',
+    'col-sales': '— 선택 —',
+    'col-profit': '(없음)',
+    'col-month': '(없음 — 날짜 컬럼 사용)',
+    'col-date': '(없음)',
+  };
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = `<option value="">${defaultOpts[id]}</option>` +
+      rawHeaders.map((h,i) => `<option value="${i}">${h}</option>`).join('');
+    sel.className = 'field-select';
+  });
+
+  // Preview table
+  const tbl = document.getElementById('preview-table');
+  const shown = rawHeaders.slice(0, 10);
+  tbl.innerHTML = `<tr>${shown.map(h => `<th>${h}</th>`).join('')}${rawHeaders.length > 10 ? '<th style="color:var(--muted)">+' + (rawHeaders.length-10) + '개</th>' : ''}</tr>` +
+    rawPreviewRows.map(row =>
+      `<tr>${shown.map((_,i) => `<td>${row[i] != null ? String(row[i]).slice(0,20) : ''}</td>`).join('')}${rawHeaders.length > 10 ? '<td></td>' : ''}</tr>`
+    ).join('');
+}
+
+// SAP 자동 감지
+const SAP_MAP = {
+  '판매처명': 'col-partner',
+  'IP(대)': 'col-ip',
+  '대금청구금액(KRW)': 'col-sales',
+  '공헌이익금': 'col-profit',
+  '월': 'col-month',
+  '출고일': 'col-date',
+};
+function autoDetectSAP() {
+  let detected = 0;
+  rawHeaders.forEach((h, i) => {
+    const selId = SAP_MAP[h];
+    if (selId) {
+      const sel = document.getElementById(selId);
+      sel.value = String(i);
+      sel.classList.add('mapped');
+      detected++;
+    }
+  });
+  onMappingChange();
+}
+
+function onMappingChange() {
+  // Update visual state
+  ['col-partner','col-ip','col-sales','col-profit','col-month','col-date'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.classList.toggle('mapped', sel.value !== '');
+  });
+  // Enable generate button if required fields are set
+  const partnerOk = document.getElementById('col-partner').value !== '';
+  const salesOk = document.getElementById('col-sales').value !== '';
+  if (partnerOk && salesOk) {
+    buildRows();
+  } else {
+    document.getElementById('gen-btn').disabled = true;
+    document.getElementById('month-select').disabled = true;
+  }
+}
+
+function buildRows() {
+  const data = window.__rawData;
+  if (!data) return;
+
+  const cPartner = parseInt(document.getElementById('col-partner').value);
+  const cSales   = parseInt(document.getElementById('col-sales').value);
+  const cIP      = document.getElementById('col-ip').value !== '' ? parseInt(document.getElementById('col-ip').value) : -1;
+  const cProfit  = document.getElementById('col-profit').value !== '' ? parseInt(document.getElementById('col-profit').value) : -1;
+  const cMonth   = document.getElementById('col-month').value !== '' ? parseInt(document.getElementById('col-month').value) : -1;
+  const cDate    = document.getElementById('col-date').value !== '' ? parseInt(document.getElementById('col-date').value) : -1;
+  const vatIncl  = document.getElementById('vat-mode').value === 'incl';
+
+  hasIP = cIP >= 0;
+  hasProfit = cProfit >= 0;
+
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    const partner = r[cPartner];
+    const amount  = r[cSales];
+    if (!partner || typeof amount !== 'number') continue;
+
+    let month = null;
+    if (cMonth >= 0) {
+      let m = r[cMonth];
+      if (m instanceof Date) m = m.getMonth() + 1;
+      if (typeof m === 'number' && m >= 1 && m <= 12) month = m;
+    }
+    if (month === null && cDate >= 0) {
+      let d = r[cDate];
+      if (d instanceof Date) month = d.getMonth() + 1;
+      else if (typeof d === 'string') {
+        const parsed = new Date(d);
+        if (!isNaN(parsed)) month = parsed.getMonth() + 1;
+      } else if (typeof d === 'number') {
+        // Excel serial date
+        const parsed = XLSX.SSF.parse_date_code(d);
+        if (parsed) month = parsed.m;
+      }
+    }
+
+    rows.push({
+      month,
+      partner: String(partner).trim(),
+      ip: cIP >= 0 && r[cIP] ? String(r[cIP]).trim() : 'ETC',
+      sales: vatIncl ? amount / 1.1 : amount,
+      profit: cProfit >= 0 && typeof r[cProfit] === 'number' ? r[cProfit] : 0,
+    });
+  }
+
+  allRows = rows;
+
+  // Extract months
+  const monthSet = new Set(rows.map(r => r.month).filter(m => m && m > 0));
+  availableMonths = FISCAL_ORDER.filter(m => monthSet.has(m));
+
+  if (availableMonths.length === 0 && rows.length > 0) {
+    // No month info — treat as single block
+    availableMonths = [0];
+  }
+
+  const sel = document.getElementById('month-select');
+  if (availableMonths[0] === 0) {
+    sel.innerHTML = '<option value="0">전체</option>';
+  } else {
+    sel.innerHTML = availableMonths.map(m => `<option value="${m}">${m}월</option>`).join('');
+    sel.value = availableMonths[availableMonths.length - 1];
+  }
+  sel.disabled = false;
+  document.getElementById('gen-btn').disabled = false;
+}
+
+// ── GENERATE REPORT ──
+function generateReport() {
+  selectedMonth = parseInt(document.getElementById('month-select').value);
+
+  const isAllMonth = (selectedMonth === 0 || isNaN(selectedMonth));
+  const monthRows = isAllMonth ? allRows : allRows.filter(r => r.month === selectedMonth);
+  if (monthRows.length === 0) { alert('해당 월에 데이터가 없습니다.'); return; }
+
+  const ytdMonths = isAllMonth ? availableMonths :
+    FISCAL_ORDER.filter(m => availableMonths.includes(m) &&
+      FISCAL_ORDER.indexOf(m) <= FISCAL_ORDER.indexOf(selectedMonth));
+
+  // by partner
+  const partnerMap = {};
+  for (const r of monthRows) {
+    if (!partnerMap[r.partner]) partnerMap[r.partner] = { sales: 0, profit: 0 };
+    partnerMap[r.partner].sales  += r.sales;
+    partnerMap[r.partner].profit += r.profit;
+  }
+  const partnerList = Object.entries(partnerMap)
+    .map(([name, v]) => ({ name, ...v }))
+    .sort((a, b) => b.sales - a.sales);
+
+  // by IP
+  const ipMap = {};
+  for (const r of monthRows) {
+    if (!ipMap[r.ip]) ipMap[r.ip] = { sales: 0, profit: 0 };
+    ipMap[r.ip].sales  += r.sales;
+    ipMap[r.ip].profit += r.profit;
+  }
+  const ipList = Object.entries(ipMap)
+    .map(([name, v]) => ({ name, ...v }))
+    .sort((a, b) => b.sales - a.sales);
+
+  // YTD matrices
+  const ytdIpMatrix = {};
+  const ytdPartnerMatrix = {};
+  for (const r of allRows) {
+    if (!isAllMonth && !ytdMonths.includes(r.month)) continue;
+    const m = r.month || 0;
+    if (!ytdIpMatrix[r.ip]) ytdIpMatrix[r.ip] = {};
+    ytdIpMatrix[r.ip][m] = (ytdIpMatrix[r.ip][m] || 0) + r.sales;
+    if (!ytdPartnerMatrix[r.partner]) ytdPartnerMatrix[r.partner] = {};
+    ytdPartnerMatrix[r.partner][m] = (ytdPartnerMatrix[r.partner][m] || 0) + r.sales;
+  }
+
+  const totalSales  = monthRows.reduce((s, r) => s + r.sales, 0);
+  const totalProfit = monthRows.reduce((s, r) => s + r.profit, 0);
+  const ytdSales    = isAllMonth ? totalSales :
+    allRows.filter(r => ytdMonths.includes(r.month)).reduce((s, r) => s + r.sales, 0);
+
+  const prevMonthIdx = isAllMonth ? -1 : FISCAL_ORDER.indexOf(selectedMonth) - 1;
+  const prevMonth = prevMonthIdx >= 0 ? FISCAL_ORDER[prevMonthIdx] : null;
+  const prevSales = prevMonth ? allRows.filter(r => r.month === prevMonth).reduce((s, r) => s + r.sales, 0) : null;
+
+  reportData = { selectedMonth, isAllMonth, totalSales, totalProfit, ytdSales, partnerList, ipList,
+                 ytdIpMatrix, ytdPartnerMatrix, ytdMonths, prevSales };
+
+  goToStep(3);
+  renderReport(reportData);
+}
+
+function renderReport(d) {
+  const { selectedMonth, isAllMonth, totalSales, totalProfit, ytdSales, partnerList, ipList, ytdMonths, prevSales } = d;
+
+  const monthLabel = isAllMonth ? '전체' : selectedMonth + '월';
+  document.getElementById('report-title').textContent = `${monthLabel} B2B 매출 리포트`;
+  document.getElementById('report-meta').textContent =
+    `단위: mil (VAT-) · ${new Date().toLocaleDateString('ko-KR')} 기준 · ${window.__fileName || ''}`;
+
+  const mil = v => (v / 1e6).toFixed(1);
+  const fmtMil = v => commas((v / 1e6).toFixed(1));
+
+  document.getElementById('kpi-sales').innerHTML = `${fmtMil(totalSales)}<span class="unit">mil</span>`;
+  document.getElementById('kpi-ytd').innerHTML = `${fmtMil(ytdSales)}<span class="unit">mil</span>`;
+
+  if (hasProfit) {
+    document.getElementById('kpi-profit').innerHTML = `${fmtMil(totalProfit)}<span class="unit">mil</span>`;
+    const profitPct = totalSales > 0 ? (totalProfit / totalSales * 100).toFixed(1) : '—';
+    document.getElementById('kpi-margin').innerHTML = `${profitPct}<span class="unit">%</span>`;
+    document.getElementById('kpi-profit-sub').textContent = `공헌이익률 ${profitPct}%`;
+    document.getElementById('kpi-margin-sub').textContent = '당월 기준';
+  } else {
+    document.getElementById('kpi-profit').innerHTML = `<span style="color:var(--muted);font-size:14px">컬럼 없음</span>`;
+    document.getElementById('kpi-margin').innerHTML = `<span style="color:var(--muted);font-size:14px">—</span>`;
+  }
+
+  if (prevSales && prevSales > 0) {
+    const chg = ((totalSales - prevSales) / prevSales * 100).toFixed(1);
+    const dir = parseFloat(chg) >= 0 ? 'up' : 'down';
+    const sign = parseFloat(chg) >= 0 ? '+' : '';
+    document.getElementById('kpi-sales-sub').innerHTML = `전월 대비 <span class="${dir}">${sign}${chg}%</span>`;
+  }
+  if (!isAllMonth && ytdMonths.length > 0) {
+    document.getElementById('kpi-ytd-sub').textContent = `${ytdMonths[0]}월~${ytdMonths[ytdMonths.length-1]}월 누계`;
+  }
+
+  // Charts
+  drawTrendChart(d);
+  drawDonutChart(d);
+  drawTopPartnersChart(d);
+
+  // Tables
+  renderBreakdownTable('tbl-partner', partnerList, totalSales);
+  if (hasIP) {
+    document.getElementById('section-by-ip').style.display = '';
+    document.getElementById('tab-ip').style.display = '';
+    renderBreakdownTable('tbl-ip', ipList, totalSales);
+  } else {
+    document.getElementById('section-by-ip').style.display = 'none';
+    document.getElementById('tab-ip').style.display = 'none';
+    matrixMode = 'partner';
+  }
+  renderMatrix();
+}
+
+// ── CHARTS ──
+function drawTrendChart(d) {
+  const container = document.getElementById('chart-trend');
+  const months = availableMonths.filter(m => m > 0);
+  if (months.length === 0) { container.innerHTML = '<p style="color:var(--muted);font-size:13px">월 정보 없음</p>'; return; }
+
+  const monthSales = {};
+  months.forEach(m => {
+    monthSales[m] = allRows.filter(r => r.month === m).reduce((s, r) => s + r.sales, 0);
+  });
+  const maxVal = Math.max(...Object.values(monthSales), 1);
+  const H = 180, padL = 40, padB = 28, padT = 20;
+  const barW = Math.min(36, Math.floor((500 - padL) / months.length) - 6);
+
+  let bars = '';
+  months.forEach((m, i) => {
+    const val = monthSales[m] || 0;
+    const barH = (val / maxVal) * (H - padT - padB);
+    const x = padL + i * ((500 - padL) / months.length) + ((500 - padL) / months.length - barW) / 2;
+    const y = H - padB - barH;
+    const isSelected = m === d.selectedMonth;
+    const fill = isSelected ? '#0071e3' : 'rgba(0,113,227,0.18)';
+    bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW}" height="${Math.max(barH,1).toFixed(1)}" rx="4" fill="${fill}"/>`;
+    bars += `<text x="${(x+barW/2).toFixed(1)}" y="${(H-padB+14).toFixed(1)}" text-anchor="middle" font-size="10" fill="rgba(0,0,0,0.4)">${m}월</text>`;
+    if (isSelected || barH > 20) {
+      bars += `<text x="${(x+barW/2).toFixed(1)}" y="${(y-5).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="${isSelected?'#0071e3':'rgba(0,0,0,0.4)'}">${(val/1e6).toFixed(1)}</text>`;
+    }
+  });
+  container.innerHTML = `<svg width="100%" viewBox="0 0 500 ${H}" style="overflow:visible">${bars}</svg>`;
+}
+
+function drawDonutChart(d) {
+  const container = document.getElementById('chart-donut');
+  const list = d.ipList.filter(r => r.sales > 0);
+  if (list.length === 0 || !hasIP) {
+    container.innerHTML = '<p style="color:var(--muted);font-size:13px">IP 컬럼 없음</p>';
+    return;
+  }
+  const total = list.reduce((s, r) => s + r.sales, 0);
+  const cx = 90, cy = 90, R = 72, ri = 44;
+  let startAngle = -Math.PI / 2;
+  let paths = '', legends = '';
+
+  list.forEach((ip, i) => {
+    const share = ip.sales / total;
+    if (share < 0.005) return;
+    const end = startAngle + share * 2 * Math.PI;
+    const la = share > 0.5 ? 1 : 0;
+    const cos1 = Math.cos(startAngle), sin1 = Math.sin(startAngle);
+    const cos2 = Math.cos(end), sin2 = Math.sin(end);
+    const c = CHART_COLORS[i % CHART_COLORS.length];
+    paths += `<path d="M${(cx+R*cos1).toFixed(1)},${(cy+R*sin1).toFixed(1)} A${R},${R} 0 ${la},1 ${(cx+R*cos2).toFixed(1)},${(cy+R*sin2).toFixed(1)} L${(cx+ri*cos2).toFixed(1)},${(cy+ri*sin2).toFixed(1)} A${ri},${ri} 0 ${la},0 ${(cx+ri*cos1).toFixed(1)},${(cy+ri*sin1).toFixed(1)} Z" fill="${c}" opacity=".9"/>`;
+    const lx = 195, ly = 14 + i * 20;
+    const nm = ip.name.length > 13 ? ip.name.slice(0,13)+'..' : ip.name;
+    legends += `<rect x="${lx}" y="${ly}" width="10" height="10" rx="2" fill="${c}"/>`;
+    legends += `<text x="${lx+15}" y="${ly+9}" font-size="11" fill="#1d1d1f">${nm} <tspan fill="rgba(0,0,0,0.4)">(${(share*100).toFixed(1)}%)</tspan></text>`;
+    startAngle = end;
+  });
+  paths += `<text x="${cx}" y="${cy-5}" text-anchor="middle" font-size="10" fill="rgba(0,0,0,0.4)">총 매출</text>`;
+  paths += `<text x="${cx}" y="${cy+11}" text-anchor="middle" font-size="13" font-weight="700" fill="#1d1d1f">${(total/1e6).toFixed(0)}mil</text>`;
+  const svgH = Math.max(180, list.length * 20 + 30);
+  container.innerHTML = `<svg width="100%" viewBox="0 0 420 ${svgH}" style="overflow:visible">${paths}${legends}</svg>`;
+}
+
+function drawTopPartnersChart(d) {
+  const container = document.getElementById('chart-top-partners');
+  const top = d.partnerList.slice(0, 8);
+  if (top.length === 0) return;
+  const maxVal = top[0].sales;
+  const rowH = 38;
+  const H = top.length * rowH + 10;
+  let bars = '';
+  top.forEach((p, i) => {
+    const y = 5 + i * rowH;
+    const bw = maxVal > 0 ? (p.sales / maxVal) * 560 : 0;
+    const nm = p.name.length > 20 ? p.name.slice(0,20)+'..' : p.name;
+    const c = CHART_COLORS[i % CHART_COLORS.length];
+    bars += `<text x="0" y="${y+14}" font-size="12" fill="#1d1d1f" font-weight="500">${nm}</text>`;
+    bars += `<rect x="0" y="${y+18}" width="${bw.toFixed(1)}" height="12" rx="3" fill="${c}" opacity=".85"/>`;
+    bars += `<text x="${(bw+8).toFixed(1)}" y="${y+28}" font-size="11" fill="rgba(0,0,0,0.45)">${(p.sales/1e6).toFixed(1)} mil</text>`;
+  });
+  container.innerHTML = `<svg width="100%" viewBox="0 0 700 ${H}" style="overflow:visible">${bars}</svg>`;
+}
+
+// ── TABLE ──
+function renderBreakdownTable(tableId, list, totalSales) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  const mil = v => v / 1e6;
+  const totProfit = list.reduce((s, r) => s + r.profit, 0);
+  const rows = list.map(item => {
+    const pct = item.sales > 0 && hasProfit ? (item.profit / item.sales * 100) : null;
+    const share = totalSales > 0 ? (item.sales / totalSales * 100) : 0;
+    const pctStr = pct !== null ? pct.toFixed(1) + '%' : '—';
+    const pctClass = pct === null ? '' : pct >= 40 ? 'good' : pct >= 25 ? 'mid' : 'low';
+    return `<tr>
+      <td class="left" title="${item.name}">${item.name}</td>
+      <td class="${item.sales < 0 ? 'neg' : ''}">${commas(mil(item.sales).toFixed(1))}</td>
+      <td class="${item.profit < 0 ? 'neg' : ''}">${hasProfit ? commas(mil(item.profit).toFixed(1)) : '—'}</td>
+      <td><span class="profit-pct ${pctClass}">${pctStr}</span></td>
+      <td>${share.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+
+  const totPct = totalSales > 0 && hasProfit ? (totProfit / totalSales * 100).toFixed(1) + '%' : '—';
+  tbody.innerHTML = rows + `<tr class="total-row">
+    <td class="left">합계</td>
+    <td>${commas(mil(totalSales).toFixed(1))}</td>
+    <td>${hasProfit ? commas(mil(totProfit).toFixed(1)) : '—'}</td>
+    <td><span class="profit-pct">${totPct}</span></td>
+    <td>100%</td>
+  </tr>`;
+}
+
+// ── MATRIX ──
+function renderMatrix() {
+  if (!reportData) return;
+  const { ytdMonths, ytdIpMatrix, ytdPartnerMatrix, isAllMonth } = reportData;
+  const dataMap = matrixMode === 'ip' && hasIP ? ytdIpMatrix : ytdPartnerMatrix;
+  const displayMonths = ytdMonths.length > 0 ? ytdMonths : [0];
+  const mil = v => v / 1e6;
+  const fmt = v => v === 0 ? '' : commas(mil(v).toFixed(1));
+  const mLabel = m => m === 0 ? '전체' : m + '월';
+
+  const rows = Object.entries(dataMap).map(([name, monthData]) => {
+    const total = displayMonths.reduce((s, m) => s + (monthData[m] || 0), 0);
+    return { name, monthData, total };
+  }).sort((a, b) => b.total - a.total);
+
+  const monthTotals = {};
+  for (const m of displayMonths) monthTotals[m] = rows.reduce((s, r) => s + (r.monthData[m] || 0), 0);
+  const grandTotal = rows.reduce((s, r) => s + r.total, 0);
+
+  const profitMap = {};
+  if (hasProfit) {
+    const profKey = (matrixMode === 'ip' && hasIP) ? 'ip' : 'partner';
+    for (const r of allRows) {
+      const k = r[profKey];
+      profitMap[k] = (profitMap[k] || 0) + r.profit;
+    }
+  }
+
+  const thead = document.querySelector('#tbl-matrix thead');
+  const tbody = document.querySelector('#tbl-matrix tbody');
+  thead.innerHTML = `<tr>
+    <th class="left">${matrixMode === 'ip' && hasIP ? 'IP' : '파트너'}</th>
+    ${displayMonths.map(m => `<th>${mLabel(m)}</th>`).join('')}
+    <th class="ytd-col">YTD합계</th>
+    ${hasProfit ? '<th>이익률</th>' : ''}
+  </tr>`;
+
+  tbody.innerHTML = rows.map(row => {
+    const profit = hasProfit ? (profitMap[row.name] || 0) : 0;
+    const pct = hasProfit && row.total > 0 ? (profit / row.total * 100).toFixed(1) : '—';
+    const pctClass = isNaN(pct) ? '' : parseFloat(pct) >= 40 ? 'good' : parseFloat(pct) >= 25 ? 'mid' : 'low';
+    return `<tr>
+      <td class="left" title="${row.name}">${row.name}</td>
+      ${displayMonths.map(m => {
+        const v = row.monthData[m] || 0;
+        return `<td class="month-val${v !== 0 ? ' has-val' : ''}">${fmt(v)}</td>`;
+      }).join('')}
+      <td class="total-val ytd-col">${commas(mil(row.total).toFixed(1))}</td>
+      ${hasProfit ? `<td><span class="profit-pct ${pctClass}">${pct}%</span></td>` : ''}
+    </tr>`;
+  }).join('') + `<tr class="total-row">
+    <td class="left">합계</td>
+    ${displayMonths.map(m => `<td class="ytd-col">${commas(mil(monthTotals[m]).toFixed(1))}</td>`).join('')}
+    <td class="total-val ytd-col">${commas(mil(grandTotal).toFixed(1))}</td>
+    ${hasProfit ? `<td><span class="profit-pct">${grandTotal > 0 ? (Object.values(profitMap).reduce((s,v)=>s+v,0)/grandTotal*100).toFixed(1) : '—'}%</span></td>` : ''}
+  </tr>`;
+}
+
+function switchMatrix(mode) {
+  matrixMode = mode;
+  document.getElementById('tab-ip').classList.toggle('active', mode === 'ip');
+  document.getElementById('tab-partner').classList.toggle('active', mode === 'partner');
+  renderMatrix();
+}
+
+// ── EXCEL DOWNLOAD ──
+function downloadExcel() {
+  if (!reportData) return;
+  const { selectedMonth, isAllMonth, partnerList, ipList, totalSales, ytdMonths, ytdIpMatrix, ytdPartnerMatrix } = reportData;
+  const mil = v => Math.round(v / 1e6 * 10) / 10;
+  const wb = XLSX.utils.book_new();
+  const addSheet = (name, data) => XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), name);
+
+  const pHeader = ['파트너', '매출 (mil)', hasProfit ? '공헌이익 (mil)' : null, hasProfit ? '이익률 (%)' : null, '비중 (%)'].filter(Boolean);
+  const pRows = partnerList.map(r => {
+    const row = [r.name, mil(r.sales)];
+    if (hasProfit) { row.push(mil(r.profit)); row.push(totalSales > 0 ? Math.round(r.profit/r.sales*1000)/10 : 0); }
+    row.push(totalSales > 0 ? Math.round(r.sales/totalSales*1000)/10 : 0);
+    return row;
+  });
+  addSheet(`${isAllMonth?'전체':selectedMonth+'월'} by Partner`, [pHeader, ...pRows]);
+
+  if (hasIP) {
+    const iHeader = ['IP', '매출 (mil)', hasProfit ? '공헌이익 (mil)' : null, hasProfit ? '이익률 (%)' : null, '비중 (%)'].filter(Boolean);
+    const iTotal = ipList.reduce((s,r)=>s+r.sales,0);
+    const iRows = ipList.map(r => {
+      const row = [r.name, mil(r.sales)];
+      if (hasProfit) { row.push(mil(r.profit)); row.push(r.sales>0?Math.round(r.profit/r.sales*1000)/10:0); }
+      row.push(iTotal>0?Math.round(r.sales/iTotal*1000)/10:0);
+      return row;
+    });
+    addSheet(`${isAllMonth?'전체':selectedMonth+'월'} by IP`, [iHeader, ...iRows]);
+  }
+
+  const monthLabel = m => m === 0 ? '전체' : m + '월';
+  const displayMonths = ytdMonths.length > 0 ? ytdMonths : [0];
+  [['YTD by Partner', ytdPartnerMatrix], hasIP ? ['YTD by IP', ytdIpMatrix] : null].filter(Boolean).forEach(([name, mat]) => {
+    const rows = Object.entries(mat)
+      .map(([nm, md]) => ({ nm, total: displayMonths.reduce((s,m)=>s+(md[m]||0),0), md }))
+      .sort((a,b) => b.total - a.total);
+    const header = [name === 'YTD by Partner' ? '파트너' : 'IP', ...displayMonths.map(monthLabel), 'YTD합계'];
+    const data = rows.map(r => [r.nm, ...displayMonths.map(m => mil(r.md[m]||0)), mil(r.total)]);
+    addSheet(name, [header, ...data]);
+  });
+
+  XLSX.writeFile(wb, `B2B_리포트_${isAllMonth?'전체':selectedMonth+'월'}_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// ── NAVIGATION ──
+function goToStep(n) {
+  document.getElementById('section-upload').style.display  = n === 1 ? '' : 'none';
+  document.getElementById('section-mapping').style.display = n === 2 ? '' : 'none';
+  document.getElementById('section-report').style.display  = n === 3 ? '' : 'none';
+
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('step' + i);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done'), el.querySelector('.step-num').textContent = '✓';
+    else if (i === n) el.classList.add('active'), el.querySelector('.step-num').textContent = i;
+    else el.querySelector('.step-num').textContent = i;
+  });
+}
+
+function resetUpload() {
+  allRows = []; availableMonths = []; selectedMonth = null; reportData = null;
+  rawHeaders = []; rawPreviewRows = []; hasIP = false; hasProfit = false;
+  window.__rawData = null;
+  document.getElementById('file-info').style.display = 'none';
+  dropzone.classList.remove('uploaded');
+  document.getElementById('drop-text').textContent = '엑셀 파일을 여기에 드래그하거나 클릭';
+  fileInput.value = '';
+  document.getElementById('gen-btn').disabled = true;
+  document.getElementById('month-select').disabled = true;
+  document.getElementById('month-select').innerHTML = '<option>월 선택...</option>';
+  goToStep(1);
+}
+
+function backToMapping() {
+  goToStep(2);
+}
+
+// ── UTILS ──
+function commas(v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+// Init
+goToStep(1);
+</script>
+</body>
+</html>
