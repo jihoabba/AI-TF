@@ -764,8 +764,9 @@
 
 <div class="nav">
   <button onclick="prev()">←</button>
-  <span class="progress" id="progress">1 / 16</span>
+  <span class="progress" id="progress">1 / 17</span>
   <button onclick="next()">→</button>
+  <button onclick="toggleFullscreen()" id="fs-btn" title="전체화면">⛶</button>
 </div>
 
 <script>
@@ -794,6 +795,20 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next();
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prev();
+    if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+  });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      document.getElementById('fs-btn').textContent = '✕';
+    } else {
+      document.exitFullscreen();
+      document.getElementById('fs-btn').textContent = '⛶';
+    }
+  }
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) document.getElementById('fs-btn').textContent = '⛶';
   });
 
   let tx = 0;
